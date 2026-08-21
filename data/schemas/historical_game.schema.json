@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "HistoricalGame",
+  "type": "object",
+  "required": ["game_id", "source_stratum", "family", "cell", "config", "turns"],
+  "properties": {
+    "game_id": {"type": "string"},
+    "source_stratum": {"enum": ["human_vs_llm", "llm_vs_llm"]},
+    "family": {"const": "negotiation"},
+    "cell": {"type": "string"},
+    "config": {"type": "object"},
+    "turns": {"type": "array", "items": {"type": "object"}}
+  },
+  "additionalProperties": false
+}
