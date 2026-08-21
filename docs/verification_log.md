@@ -118,6 +118,36 @@ dependent implementation.
   `glee/supervisor.py`, which independently tracks terminal game IDs and does not rely on
   the SDK counter for bounded execution.
 
+## Second controlled rated canary — fixed router and supervisor
+
+- **item:** Exactly one post-fix negotiation canary validating ROBUST routing and bounded
+  automatic completion.
+- **source inspected:** Structured route/action/supervisor stream and terminal
+  `game_state()` for game `a52a6f07-d35a-4906-a2b4-d8317c1d1c57` on 2026-08-21.
+- **result:** `CONFIRMED`
+- **evidence:** Preflight returned `active_games=0` and no pending games. The single match
+  was negotiation, incomplete information, unknown/unlimited horizon, messages allowed;
+  our role was seller with visible reservation value 100 and opponent category `hidden`.
+  The exact cell had no eligibility record, BAYES artifact, or promoted policy, so the
+  structured route selected `NEGOTIATION_ROBUST` with
+  `BAYES_ELIGIBILITY_UNAVAILABLE`—never the former generic `theory_action`. On both of our
+  turns, ROBUST v1 could not construct its locked minimax-regret action because the live
+  payload exposed `product_price: number` but no finite legal price or opponent-valuation
+  grid. The recorded `PolicyInputsUnavailable` execution fallback therefore produced the
+  predefined legal actions: first an offer at 100; after the hidden buyer rejected and
+  counteroffered 45, `WalkAway`. The terminal result was `walked_away`, with player-1
+  payoff 0 and player-2 payoff 0. Policy-execution fallback count was 2; outer
+  `never_raise` fallback count was 0; every submission was valid.
+- **dependent components:** Live configuration routing, fail-closed ROBUST execution,
+  queue supervision, terminal accounting, and cleanup.
+- **action taken:** `run_bounded(max_games=1, concurrency=1, requeue=False)` made one queue
+  call, tracked and completed exactly this game, emitted `MAX_GAMES_COMPLETED`, ran queue
+  cleanup, and returned automatically after 8.64 seconds. Postflight returned
+  `active_games=0`, no pending games, and negotiation games played increased from 108 to
+  109. No second queue/run, randomized experiment, or persistent leaderboard process was
+  started. Live ROBUST *routing* is verified; ROBUST v1 action execution remains blocked
+  pending an authorized formulation compatible with an unbounded price domain.
+
 ## Generic policy routing audit
 
 - **item:** Configuration-specific incumbents and the underdetermined negotiation
@@ -138,6 +168,9 @@ dependent implementation.
   failed gate. EMPIRICAL requires an explicit promoted artifact. Bargaining retains its
   matching theory row and persuasion retains P0 absent a promotion. Unrecognized cells
   fail closed as `UNSUPPORTED_CELL`.
+  The second controlled canary exercised the incomplete-information, unknown-horizon row
+  live and confirmed selection of `NEGOTIATION_ROBUST` when BAYES metadata/artifacts were
+  unavailable.
 
 ## Bounded-run lifecycle supervision
 
@@ -154,6 +187,8 @@ dependent implementation.
   polls terminal game state, recognizes disappearance after tracking at active count zero,
   counts IDs once, prevents queue top-up when `requeue=False`, leaves queues during
   cleanup, and enforces a hard safety timeout.
+  The second controlled canary counted one own-action terminal result exactly once and
+  returned automatically with `MAX_GAMES_COMPLETED`; no manual interruption was needed.
 
 ## Historical negotiation data support
 
