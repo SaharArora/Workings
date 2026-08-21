@@ -63,6 +63,8 @@ def sanitize_action(action: Mapping[str, Any]) -> dict[str, Any]:
 
 def never_raise(
     strategy: Callable[[dict[str, Any]], Mapping[str, Any]],
+    *,
+    on_fallback: Callable[[dict[str, Any], str], None] | None = None,
 ) -> Callable[[dict[str, Any]], dict[str, Any]]:
     """Wrap the outermost move boundary with a deterministic legal fallback."""
     def wrapped(game: dict[str, Any]) -> dict[str, Any]:
@@ -71,8 +73,13 @@ def never_raise(
             if not isinstance(action, Mapping):
                 raise TypeError("strategy action must be a mapping")
             return sanitize_action(action)
-        except Exception:
+        except Exception as exc:
             logger.exception("Strategy failed; using valid-actions-derived fallback")
+            if on_fallback is not None:
+                try:
+                    on_fallback(game, type(exc).__name__)
+                except Exception:
+                    logger.exception("Fallback observer failed; continuing with legal fallback")
             return sanitize_action(fallback_action(game))
 
     return wrapped

@@ -147,6 +147,34 @@ def test_transient_poll_failure_is_tolerated() -> None:
     assert run(fake).completed_game_ids == ("g1",)
 
 
+def test_outer_strategy_fallback_is_structured_and_submitted() -> None:
+    events: list[dict[str, Any]] = []
+    fake = FakeClient(
+        pending=[[], [game("g1")]], stats=[{"active_games": 0}, {"active_games": 0}],
+        submits={"g1": [{"valid": True, "game_over": True, "result": {}}]},
+    )
+    timer = FakeTime()
+
+    def broken_strategy(_: dict[str, Any]) -> dict[str, Any]:
+        raise RuntimeError("local failure")
+
+    result = run_bounded(
+        fake,
+        broken_strategy,
+        game_family="negotiation",
+        max_games=1,
+        requeue=False,
+        poll_interval=1,
+        safety_timeout=20,
+        event_sink=events.append,
+        clock=timer.clock,
+        sleep=timer.sleep,
+    )
+    assert result.completed_game_ids == ("g1",)
+    assert [event["error_type"] for event in events if event["event"] == "strategy_fallback"] == ["RuntimeError"]
+    assert fake.submit_calls == ["g1"]
+
+
 def test_max_three_requeues_only_until_three_and_never_starts_fourth() -> None:
     games = [game(f"g{index}") for index in range(1, 4)]
     fake = FakeClient(
