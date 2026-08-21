@@ -20,29 +20,40 @@ dependent implementation.
 - **dependent components:** Complete-information finite-even negotiation baseline.
 - **action taken:** Finite-even theory implementation is permitted as specified.
 
-## 2. Negotiation legal price bounds
+## 2. Negotiation legal price domain
 
-- **item:** Finite live legal price range and whether accepted trades can yield negative
-  utility.
-- **source inspected:** Official `glee-sdk` v0.0.5 source and README; GLEE reference
-  validator `games/negotiation/negotiation.py`; controlled live rated negotiation canary
-  `ba9c3e41-8b3a-4e77-8d81-d5b01abf17a7` on 2026-08-21.
-- **result:** `BLOCKED`
-- **evidence:** SDK `valid_actions.fields` documents `product_price` only as `number`; it
-  supplies no finite minimum/maximum. The historical validator accepts numeric values but
-  is not authoritative for the current live competition. In the live incomplete-info,
-  unlimited-horizon seller state, `valid_actions` was exactly
-  `{"type":"offer","fields":{"message":"string (optional message)",
-  "product_price":"number (your proposed price)"}}`. The visible game state exposed no
-  `p_min`, `p_max`, `M`, price grid, product-price scale, or other finite-bound metadata.
-  The legal action `product_price=10000.0` was accepted by the server, but one accepted
-  price establishes neither endpoint.
+- **item:** Whether `product_price` has a finite mechanism-defined domain and whether `M`
+  or `product_price_order` supplies its endpoints.
+- **source inspected:** GLEE paper §2.2 footnote 6; original GLEE validator at commit
+  `68a33e98b035b97f945badee8f325001555c0049`; original oTree form and negotiation-bot
+  maximum hook; historical configuration generator/examples; official `glee-sdk` v0.0.5
+  source/README at commit `2a80ef560a603968118b6236067c06fd2e513410`; current competition
+  `llms.txt` and production human UI bundle; first controlled canary payload.
+- **result:** `CONTRADICTED` — **finding status:** `VERIFIED` (no finite upper bound)
+- **evidence:** The paper states that accepted negotiation price `p_ev` is “unbounded in
+  principle.” It separately defines valuations as `V_i=M*F_i`; `M` is a valuation scale,
+  not an action cap. The original validator (`games/negotiation/negotiation.py:201-216`)
+  only accepts numeric/string-numeric input and performs no sign, magnitude, minimum, or
+  maximum check. `product_price_order` multiplies seller/buyer valuation only
+  (`:15,20-21`). The original human form uses `IntegerField(min=0)` without a maximum and
+  its negotiation bot returns `get_max_offer() = None`. The current production human UI
+  rejects non-finite/negative values and renders `min=0` with no `max`. The current SDK
+  forwards the action unchanged, and SDK/current API docs describe only a numeric price.
+  Historical configs contain no price endpoints. Thus there is definitively no finite
+  mechanism `p_max`, and `M` must not be substituted. The exact lower-bound rule of the
+  unpublished current *agent API* remains unresolved: original LLM validation accepts
+  negative numerics, while original/current human clients enforce zero; current agent
+  docs/live `valid_actions` say only `number`. This lower-bound uncertainty cannot restore
+  a bounded domain because the upper endpoint is verified absent.
 - **dependent components:** Negotiation payoff-bound instantiation in
   `glee/normalization.py` and any live legal-price grid construction.
-- **action taken:** No bound is fabricated. `glee/normalization.py` remains unchanged and
-  continues to require explicit verified finite bounds. Resolving this item still requires
-  authoritative validator/config documentation or a live payload that exposes endpoints;
-  probing arbitrary prices in rated games is not used as a discovery method.
+- **action taken:** The finite-bound assumption is rejected rather than left unknown.
+  `glee/normalization.py` now raises `UnboundedPayoffDomainError` for negotiation even if
+  a configured/observed finite range is passed; its finite formula is retained only as an
+  explicitly counterfactual helper for a future independently bounded mechanism. A new
+  statistical design is required before negotiation outcomes can enter the locked bounded
+  e-process. ROBUST likewise does not fabricate a finite grid. No rated-game extreme-price
+  probing was performed.
 
 ## 3. SDK transport interface and credential variable
 
@@ -103,8 +114,45 @@ dependent implementation.
   `requeue=False`, a game completed by the opponent while not pending on our agent does
   not increment `run()`'s local `completed` counter, leaving the loop idle even though
   `active_games=0`. After confirming terminal completion, the loop was interrupted and
-  its `finally` block left the queue. This behavior must be handled before reusing
-  `run(requeue=False)` as an unattended bounded runner.
+  its `finally` block left the queue. This is now handled generically by
+  `glee/supervisor.py`, which independently tracks terminal game IDs and does not rely on
+  the SDK counter for bounded execution.
+
+## Generic policy routing audit
+
+- **item:** Configuration-specific incumbents and the underdetermined negotiation
+  BAYES/ROBUST/EMPIRICAL hierarchy.
+- **source inspected:** `BUILD_SPEC.md` §§4–5 and the first controlled canary route.
+- **result:** `CONFIRMED`
+- **evidence:** The original implementation used
+  `policy_map.get((cell, opponent), theory_action)`. Thus every cell absent from the map
+  entered one generic function; its incomplete-negotiation branch returned the current
+  player's reservation value. This bypassed the specified underdetermined-cell incumbent
+  selection entirely.
+- **dependent components:** Leaderboard and research routing for all three families.
+- **action taken:** Replaced the generic default with explicit configuration
+  classification and structured `RoutingDecision` records. In incomplete multi-round or
+  unknown-horizon negotiation, eligible BAYES plus a loadable frozen artifact selects
+  BAYES; every ineligible, missing-artifact, or corrupt-artifact case selects ROBUST.
+  EMPIRICAL requires an explicit promoted artifact. Bargaining retains its matching
+  theory row and persuasion retains P0 absent a promotion. Unrecognized cells fail closed
+  as `UNSUPPORTED_CELL`.
+
+## Bounded-run lifecycle supervision
+
+- **item:** Opponent-initiated completion and exact finite-run termination.
+- **source inspected:** Official SDK v0.0.5 `GleeClient.run()` and first controlled
+  canary runtime behavior.
+- **result:** `CONFIRMED`
+- **evidence:** The SDK increments its local `completed` counter only when `_handle_game`
+  sees `game_over` in our own move response. An opponent can terminate between our turns,
+  leaving no pending move for `_handle_game`; the API then reports `active_games=0` while
+  the SDK counter remains unchanged.
+- **dependent components:** Controlled canaries and all bounded leaderboard runs.
+- **action taken:** Added an authoritative low-level supervisor that tracks each game ID,
+  polls terminal game state, recognizes disappearance after tracking at active count zero,
+  counts IDs once, prevents queue top-up when `requeue=False`, leaves queues during
+  cleanup, and enforces a hard safety timeout.
 
 ## Historical negotiation data support
 

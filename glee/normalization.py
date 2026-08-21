@@ -5,6 +5,12 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal
 
+NEGOTIATION_PRICE_DOMAIN = "UNBOUNDED_ABOVE"
+
+
+class UnboundedPayoffDomainError(ValueError):
+    """A bounded `[0,1]` transform is undefined for the verified mechanism domain."""
+
 
 @dataclass(frozen=True, slots=True)
 class PayoffBounds:
@@ -33,8 +39,28 @@ def negotiation_bounds(
     verified_price_min: float | None,
     verified_price_max: float | None,
 ) -> PayoffBounds:
-    if verified_price_min is None or verified_price_max is None:
-        raise ValueError("verified finite negotiation price bounds are required")
+    """Reject bounded negotiation normalization for the verified unbounded price domain.
+
+    GLEE negotiation prices have no finite mechanism-defined upper bound. The finite
+    arguments remain in the signature to make accidental historical call sites fail
+    loudly rather than silently reinterpret a configured or observed range as legal
+    mechanism support.
+    """
+    raise UnboundedPayoffDomainError(
+        "GLEE negotiation product_price is unbounded above; the locked bounded-payoff "
+        "normalization is unavailable and no observed/configured maximum may substitute"
+    )
+
+
+def counterfactual_finite_negotiation_bounds(
+    role: Literal["seller", "buyer"],
+    own_value: float,
+    *,
+    price_min: float,
+    price_max: float,
+) -> PayoffBounds:
+    """Pure §9 formula for a future mechanism that independently verifies finite bounds."""
+    verified_price_min, verified_price_max = price_min, price_max
     if verified_price_max <= verified_price_min:
         raise ValueError("invalid legal price range")
     if role == "seller":
