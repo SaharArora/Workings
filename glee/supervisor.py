@@ -72,7 +72,6 @@ def run_bounded(
         raise ValueError("max_games, concurrency, and safety_timeout must be positive")
     family = GameFamily(game_family).value
     emit = event_sink or (lambda event: logger.info("bounded_run %s", event))
-    guarded_strategy = never_raise(strategy)
     tracked: dict[str, dict[str, Any]] = {}
     completed: set[str] = set()
     acted_states: set[tuple[str, str]] = set()
@@ -84,6 +83,15 @@ def run_bounded(
 
     def event(kind: str, **fields: Any) -> None:
         emit({"event": kind, "game_family": family, **fields})
+
+    guarded_strategy = never_raise(
+        strategy,
+        on_fallback=lambda game, error_type: event(
+            "strategy_fallback",
+            game_id=str(game.get("game_id", "unknown")),
+            error_type=error_type,
+        ),
+    )
 
     def mark_completed(game_id: str, reason: str, terminal: dict[str, Any] | None = None) -> None:
         if game_id in completed:

@@ -96,8 +96,9 @@ own-move terminal results, opponent-initiated terminal game states, and disappea
 after tracking when the authoritative active count reaches zero. Once the requested
 number of games has been tracked it leaves the family queue, preventing an extra match.
 
-The outermost strategy boundary remains `never_raise`; transient polling errors are
-logged and retried; identical pending states are not submitted twice; and a hard overall
-safety deadline prevents indefinite idling. Cleanup calls `leave_queue()` on every exit
-path and logs the exact exit reason. With `requeue=False`, the supervisor makes one queue
-call only.
+The outermost strategy boundary remains `never_raise`; every invocation of its legal
+fallback emits a structured `strategy_fallback` event containing only game ID and error
+type. Transient polling errors are logged and retried; identical pending states are not
+submitted twice; and a hard overall safety deadline prevents indefinite idling. Cleanup
+calls `leave_queue()` on every exit path and logs the exact exit reason. With
+`requeue=False`, the supervisor makes one queue call only.
