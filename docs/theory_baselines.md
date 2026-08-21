@@ -19,6 +19,11 @@ The challenger in every bargaining cell is the fixed fairness concession
 
 No-trade (`V_B<V_A`) is checked first in every cell.
 
+The mechanism price is verified unbounded above; `M` scales valuations and is not a legal
+price cap. Consequently the current bounded `[0,1]` payoff normalization is unavailable
+for negotiation pending a separately specified statistical redesign. Observed or
+configured price ranges must not be substituted for mechanism support.
+
 | Information | Horizon | Baseline |
 |---|---|---|
 | Complete | T=1 | Seller posts `V_B`; buyer accepts iff `p<=V_B` |
@@ -46,6 +51,13 @@ Pure worst-case/maximin payoff was rejected because it degenerates to the single
 valuation scenario: altering the other four points does not change its choice. Minimax
 regret uses the grid's composition and changes choices when that composition changes. It
 is a conservative fallback decision rule, not an equilibrium solution and not learned.
+
+The formal mechanism and reference implementation now verify that the current negotiation
+price domain has no finite upper endpoint. Therefore the finite legal-price grid assumed
+by this locked ROBUST v1 rule does not exist for the live mechanism. Routing still selects
+ROBUST for the specified underdetermined cells; action execution fails closed until a
+separately authorized unbounded-domain ROBUST formulation is specified and tested. A
+valuation scale, observed offer range, or historical maximum is not used as a substitute.
 
 BAYES uses a frozen, calibrated rejection-likelihood model and a posterior updated by
 Bayes' rule. Its prior is empirical only at `n>=200`, otherwise uniform on the verified

@@ -1,7 +1,9 @@
 import pytest
 
 from glee.normalization import (
+    UnboundedPayoffDomainError,
     bargaining_bounds,
+    counterfactual_finite_negotiation_bounds,
     negotiation_bounds,
     normalize_payoff,
     persuasion_bounds,
@@ -13,15 +15,20 @@ def test_bargaining_bounds() -> None:
 
 
 def test_negotiation_general_negative_safe_bounds() -> None:
-    seller = negotiation_bounds("seller", 10, verified_price_min=5, verified_price_max=20)
-    buyer = negotiation_bounds("buyer", 15, verified_price_min=5, verified_price_max=20)
+    seller = counterfactual_finite_negotiation_bounds("seller", 10, price_min=5, price_max=20)
+    buyer = counterfactual_finite_negotiation_bounds("buyer", 15, price_min=5, price_max=20)
     assert (seller.minimum, seller.maximum) == (-5, 10)
     assert (buyer.minimum, buyer.maximum) == (-5, 10)
 
 
-def test_negotiation_refuses_unverified_bounds() -> None:
-    with pytest.raises(ValueError, match="verified"):
+def test_negotiation_refuses_bounded_transform_for_verified_unbounded_domain() -> None:
+    with pytest.raises(UnboundedPayoffDomainError, match="unbounded above"):
         negotiation_bounds("seller", 10, verified_price_min=None, verified_price_max=None)
+
+
+def test_negotiation_does_not_accept_configured_range_as_mechanism_bound() -> None:
+    with pytest.raises(UnboundedPayoffDomainError, match="no observed/configured maximum"):
+        negotiation_bounds("seller", 10, verified_price_min=0, verified_price_max=100)
 
 
 def test_persuasion_cumulative_bounds() -> None:
