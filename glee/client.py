@@ -71,6 +71,7 @@ class CompetitionClient:
         poll_interval: float = 2.0,
         max_games: int | None = None,
         max_time: float | None = None,
+        requeue: bool = True,
     ) -> None:
         families = None
         if game_families is not None:
@@ -82,4 +83,32 @@ class CompetitionClient:
             poll_interval=poll_interval,
             max_games=max_games,
             max_time=max_time,
+            requeue=requeue,
+        )
+
+    def run_bounded(
+        self,
+        strategy: Callable[[dict[str, Any]], dict[str, Any]],
+        *,
+        game_family: GameFamily | str,
+        max_games: int,
+        concurrency: int = 1,
+        requeue: bool = False,
+        poll_interval: float = 2.0,
+        safety_timeout: float = 600.0,
+        event_sink: Callable[[dict[str, Any]], None] | None = None,
+    ) -> Any:
+        """Use authoritative state tracking for finite runs instead of SDK counters."""
+        from glee.supervisor import run_bounded
+
+        return run_bounded(
+            self,
+            strategy,
+            game_family=game_family,
+            max_games=max_games,
+            concurrency=concurrency,
+            requeue=requeue,
+            poll_interval=poll_interval,
+            safety_timeout=safety_timeout,
+            event_sink=event_sink,
         )
