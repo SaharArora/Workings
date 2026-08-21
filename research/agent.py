@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 from communication.neutral import neutral_message
-from leaderboard.policy_router import PolicyRouter, theory_action
+from leaderboard.policy_router import PolicyRouter
 
 
 def _neutralize(action: dict[str, Any], game: dict[str, Any]) -> dict[str, Any]:
@@ -16,8 +16,11 @@ def _neutralize(action: dict[str, Any], game: dict[str, Any]) -> dict[str, Any]:
 
 
 class IBOAgent:
+    def __init__(self) -> None:
+        self.router = PolicyRouter()
+
     def decide(self, game: dict[str, Any]) -> dict[str, Any]:
-        return _neutralize(theory_action(game), game)
+        return _neutralize(self.router.decide(game), game)
 
 
 class EGSPMAgent:
