@@ -88,3 +88,16 @@ dependent implementation.
   data-derived persuasion reputation population rates.
 - **action taken:** Implemented incremental ingestion; no synthetic training data is
   substituted. Data-trained artifacts/cells without support are marked blocked.
+
+## Live policy experiments and confirmation
+
+- **item:** Randomized prioritized live experiments, promotion, and fresh same-cell
+  confirmation.
+- **source inspected:** Host credential environment and experiment registry.
+- **result:** `BLOCKED`
+- **evidence:** No rotated `GLEE_API_KEY` is present, no live games were queued, and the
+  registry contains no completed randomized experiment.
+- **dependent components:** Empirical promotions, same-cell confirmation, active
+  non-default policy map, and real leaderboard deployment claims.
+- **action taken:** Implemented the auditable harness and retained default incumbents;
+  no candidate is represented as promoted.
