@@ -115,10 +115,24 @@ class Experiment:
         self.mirror = BettingProcess()
         self.candidate_sum = self.incumbent_sum = 0.0
         self.candidate_n = self.incumbent_n = 0
+        self._rng = random.Random(self.seed)
+        assignment_log = self.log_path.with_suffix(".assignments.jsonl")
+        assignments = []
+        if assignment_log.exists():
+            assignments = [
+                json.loads(line)["assigned_arm"]
+                for line in assignment_log.read_text(encoding="utf-8").splitlines()
+                if line.strip()
+            ]
+        for _ in assignments:
+            self._rng.random()
+        completed = 0
         if not self.log_path.exists():
+            self._pending = assignments
             return
         for line in self.log_path.read_text(encoding="utf-8").splitlines():
             record = json.loads(line)
+            completed += 1
             x = float(record["X_t"])
             self.main.update(x)
             self.mirror.update(-x)
@@ -129,3 +143,4 @@ class Experiment:
             else:
                 self.incumbent_sum += payoff
                 self.incumbent_n += 1
+        self._pending = assignments[completed:]
