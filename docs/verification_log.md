@@ -72,3 +72,19 @@ dependent implementation.
 - **dependent components:** Completion criterion for live API smoke testing.
 - **action taken:** Adapter is tested with an injected SDK fake; live smoke remains
   required after a rotated credential is supplied securely.
+
+## Historical negotiation data support
+
+- **item:** Targeted-first negotiation ingestion and `n >= 200` BAYES gate.
+- **source inspected:** `eilamshapira/GLEE@master`, complete
+  `Data/human_vs_llm/negotiation` subtree and GitHub tree metadata for
+  `Data/llm_vs_llm/negotiation`.
+- **result:** `BLOCKED`
+- **evidence:** Human-vs-LLM: 1,224 games, 30 exact cells, maximum 102 games/cell, so no
+  exact cell is eligible. LLM-vs-LLM: tree response truncated at 80,454 entries after
+  reporting 55,852 blobs / 47,408,482 bytes; two targeted sparse fetches failed with
+  HTTP 400 from the promisor remote.
+- **dependent components:** Per-cell BAYES fitting/eligibility, EMPIRICAL training, and
+  data-derived persuasion reputation population rates.
+- **action taken:** Implemented incremental ingestion; no synthetic training data is
+  substituted. Data-trained artifacts/cells without support are marked blocked.
