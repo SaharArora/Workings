@@ -133,10 +133,11 @@ dependent implementation.
 - **action taken:** Replaced the generic default with explicit configuration
   classification and structured `RoutingDecision` records. In incomplete multi-round or
   unknown-horizon negotiation, eligible BAYES plus a loadable frozen artifact selects
-  BAYES; every ineligible, missing-artifact, or corrupt-artifact case selects ROBUST.
-  EMPIRICAL requires an explicit promoted artifact. Bargaining retains its matching
-  theory row and persuasion retains P0 absent a promotion. Unrecognized cells fail closed
-  as `UNSUPPORTED_CELL`.
+  BAYES; every unavailable-eligibility, ineligible, missing-artifact, or corrupt-artifact
+  case selects ROBUST. Unavailable eligibility is logged as `null`, not misreported as a
+  failed gate. EMPIRICAL requires an explicit promoted artifact. Bargaining retains its
+  matching theory row and persuasion retains P0 absent a promotion. Unrecognized cells
+  fail closed as `UNSUPPORTED_CELL`.
 
 ## Bounded-run lifecycle supervision
 

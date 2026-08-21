@@ -43,8 +43,10 @@ The family rules are:
 - Incomplete-information multi-round and unknown-horizon negotiation always uses the
   locked portfolio hierarchy: BAYES only when the eligibility gates pass and its frozen
   artifact loads; otherwise ROBUST. EMPIRICAL is considered only through an explicit
-  promoted-policy registry entry. Missing or corrupt BAYES artifacts therefore select
-  ROBUST, never a generic reservation-value strategy.
+  promoted-policy registry entry. An absent eligibility record is logged as unavailable
+  (`bayes_eligible=null`), while a recorded failed gate is logged as ineligible; both
+  select ROBUST. Missing or corrupt BAYES artifacts also select ROBUST, never a generic
+  reservation-value strategy.
 - Every no-commitment persuasion cell keeps P0 babbling as theory incumbent unless a
   registered population challenger is promoted.
 
