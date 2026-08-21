@@ -1,0 +1,24 @@
+import pytest
+
+from theory.bargaining.baselines import (
+    bayes_adaptive_reference,
+    finite_horizon_alice_share,
+    finite_horizon_shares,
+    rubinstein_alice_share,
+)
+
+
+def test_finite_horizon_hand_computed_t_1_2_3() -> None:
+    alice, bob = finite_horizon_shares(0.9, 0.8, 3)
+    assert alice == pytest.approx((1.0, 0.2, 0.92))
+    assert bob == pytest.approx((1.0, 0.1, 0.82))
+
+
+def test_finite_converges_to_rubinstein() -> None:
+    exact = rubinstein_alice_share(0.9, 0.8)
+    assert abs(finite_horizon_alice_share(0.9, 0.8, 200) - exact) < 1e-12
+
+
+def test_bayes_approximation_integrates_full_prior() -> None:
+    expected = 0.25 * rubinstein_alice_share(0.9, 0.5) + 0.75 * rubinstein_alice_share(0.9, 0.8)
+    assert bayes_adaptive_reference(0.9, {0.5: 0.25, 0.8: 0.75}, finite_rounds=None) == expected
