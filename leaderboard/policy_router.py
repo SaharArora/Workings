@@ -225,7 +225,16 @@ class PolicyRouter:
 
             baseline = "NEGOTIATION_INCOMPLETE_MULTIROUND_PORTFOLIO"
             eligibility = self.bayes_eligibility.get(key)
-            eligible = bool(eligibility and eligibility.eligible)
+            if eligibility is None:
+                return (
+                    baseline,
+                    "NEGOTIATION_ROBUST",
+                    robust_negotiation_action,
+                    None,
+                    "BAYES_ELIGIBILITY_UNAVAILABLE",
+                    [],
+                )
+            eligible = eligibility.eligible
             if eligible:
                 artifact = self.bayes_artifacts.get(key)
                 bayes_policy, artifact_error = _artifact_status(artifact)

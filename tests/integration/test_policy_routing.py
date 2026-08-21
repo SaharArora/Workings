@@ -89,16 +89,29 @@ def test_underdetermined_bayes_eligible_with_artifact_selects_bayes() -> None:
 
 def test_underdetermined_multi_round_bayes_ineligible_selects_robust() -> None:
     game = negotiation_game(complete=False, rounds=10)
-    route = PolicyRouter().route(game)
+    key = route_key(game)
+    route = PolicyRouter(
+        bayes_eligibility={key: BayesEligibility(199, 0.2, False)}
+    ).route(game)
     assert route.selected_policy == "NEGOTIATION_ROBUST"
     assert route.fallback_reason == "BAYES_INELIGIBLE"
 
 
 def test_underdetermined_unknown_horizon_bayes_ineligible_selects_robust() -> None:
     game = negotiation_game(complete=False, rounds=None)
-    route = PolicyRouter().route(game)
+    key = route_key(game)
+    route = PolicyRouter(
+        bayes_eligibility={key: BayesEligibility(500, 0.05, False)}
+    ).route(game)
     assert route.selected_policy == "NEGOTIATION_ROBUST"
     assert route.theory_baseline == "NEGOTIATION_INCOMPLETE_MULTIROUND_PORTFOLIO"
+
+
+def test_missing_eligibility_record_selects_robust_without_claiming_ineligible() -> None:
+    route = PolicyRouter().route(negotiation_game(complete=False, rounds=None))
+    assert route.selected_policy == "NEGOTIATION_ROBUST"
+    assert route.bayes_eligible is None
+    assert route.fallback_reason == "BAYES_ELIGIBILITY_UNAVAILABLE"
 
 
 def test_robust_without_verified_grids_fails_closed_without_changing_route() -> None:
