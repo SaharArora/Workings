@@ -50,15 +50,23 @@ The family rules are:
 - Every no-commitment persuasion cell keeps P0 babbling as theory incumbent unless a
   registered population challenger is promoted.
 
-ROBUST consumes only explicit legal-price and opponent-valuation grids/ranges supplied by
-authoritative action/config metadata. It never fabricates those inputs from observed
-offers or private values. Source inspection has now verified that the current negotiation
-mechanism is unbounded above and exposes no finite legal price grid. Consequently the
-router still selects ROBUST where the portfolio hierarchy requires it, but ROBUST v1
-cannot execute its finite-grid minimax-regret rule in those live states: execution uses
-the advertised legal safety fallback and records a `PolicyInputsUnavailable` reason.
-This is a policy-input/design blocker, not a routing substitution. Unrecognized
-families/configurations are recorded as `UNSUPPORTED_CELL` and fail closed.
+The negotiation mechanism remains unbounded above. ROBUST bounds only its own action and
+scenario sets: seller candidates are reservation-value multiples
+`(1.00,1.10,1.25,1.50,2.00)` and buyer candidates are own-value fractions
+`(0,.25,.50,.75,1)`. These are policy-generated decision sets, not legal mechanism
+bounds. Seller-side buyer-value scenarios use `(1.00,1.25,1.50,2.00)` times the seller's
+scale; the analogous buyer-side seller scenarios use `(0,.25,.50,.75,1)` times the
+buyer's scale. Both choose minimum maximum regret, with agreement-favorable deterministic
+ties (lower seller ask, higher buyer offer). No learned response model enters ROBUST.
+
+When responding to an offer and a counteroffer remains legal, simplified v1 accepts only
+if the offer is individually rational and at least as favorable as ROBUST's chosen
+minimax-regret proposal; otherwise it counters with that proposal. On a terminal response
+with no counteroffer, it accepts any individually rational offer and rejects a non-IR
+offer. This proposal threshold is an explicit deterministic continuation reference, not
+a probabilistic continuation-value estimate. A zero private value without a verified
+positive configuration scale fails closed as `ROBUST_SCALE_UNAVAILABLE`. Unrecognized
+families/configurations remain `UNSUPPORTED_CELL` and fail closed.
 
 ## Layer boundaries
 
@@ -86,6 +94,21 @@ expired unresolved window is inconclusive. A winner must then confirm on fresh d
 
 Raw data, experiment logs, and unversioned artifacts are not required by leaderboard
 runtime. Frozen model artifacts are versioned beneath `data/processed/models/negotiation`.
+
+## Payoff transforms and research estimands
+
+Bargaining and persuasion retain configuration/role-derived mechanism normalization.
+Negotiation does not: its legal payoff is unbounded. Research instead records raw utility
+`U` and applies the explicit v1 bounded statistical transform with
+`S=max(|V_i|,1)`, `C=2S`, and `Y=(clip(U,-C,C)+C)/(2C)`. Every completed negotiation
+experiment record contains raw payoff, `Y`, the clip bound, clipped utility, and a clipping
+indicator; offline evaluation reports raw and transformed means together.
+
+The negotiation promotion estimand is improvement in expected clipped scale-adjusted
+utility, not unrestricted raw expected payoff. `delta_min=0.01` remains the promotion
+margin. In the transform's unclipped linear region it corresponds locally to
+`delta_U=4S*delta_Y=0.04S`, approximately 4% of the player's own valuation scale. This
+equivalence is not asserted for clipped observations.
 
 ## Bounded-run lifecycle
 

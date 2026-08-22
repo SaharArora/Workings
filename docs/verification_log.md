@@ -50,10 +50,32 @@ dependent implementation.
 - **action taken:** The finite-bound assumption is rejected rather than left unknown.
   `glee/normalization.py` now raises `UnboundedPayoffDomainError` for negotiation even if
   a configured/observed finite range is passed; its finite formula is retained only as an
-  explicitly counterfactual helper for a future independently bounded mechanism. A new
-  statistical design is required before negotiation outcomes can enter the locked bounded
-  e-process. ROBUST likewise does not fabricate a finite grid. No rated-game extreme-price
-  probing was performed.
+  explicitly counterfactual helper for a future independently bounded mechanism. The
+  separately labeled clipped statistical payoff transform now supplies bounded research
+  scores without changing that mechanism finding. ROBUST likewise does not fabricate a
+  mechanism grid; it uses a finite policy-generated decision set. No rated-game
+  extreme-price probing was performed.
+
+## Unbounded-domain ROBUST and negotiation statistical transform
+
+- **item:** Make ROBUST executable without a finite legal `p_max` and bound negotiation
+  research outcomes without calling the result mechanism normalization.
+- **source inspected:** Verified unbounded-domain finding above and the explicitly locked
+  follow-up design for policy candidates, scenarios, clipping, and `delta_min` semantics.
+- **result:** `CONFIRMED`
+- **evidence:** Seller policy candidates are fixed multiples through `2V_S`; buyer
+  candidates are fixed fractions through `V_B`. Corresponding deterministic valuation
+  scenarios feed minimax regret, and agreement-favorable ties are fixed. No finite legal
+  upper endpoint is consumed. The statistical transform records raw `U` and computes
+  `S=max(|V_i|,1)`, `C=2S`, and `Y=(clip(U,-C,C)+C)/(2C)`.
+- **dependent components:** `policies/negotiation/robust.py`, policy router, research
+  experiment logging/evaluation, and negotiation e-process inputs.
+- **action taken:** ROBUST uses its policy-generated set and deterministic current-offer
+  rule. Negotiation experiments must use `observe_negotiation`, which recomputes and
+  validates the transform before betting; raw utility, transform metadata, and clipping
+  status remain in the append-only record. `delta_min=.01` now estimates improvement in
+  expected clipped scale-adjusted utility and corresponds locally, only before clipping,
+  to `.04S` raw utility.
 
 ## 3. SDK transport interface and credential variable
 

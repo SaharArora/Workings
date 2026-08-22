@@ -3,16 +3,37 @@
 from __future__ import annotations
 
 import json
+import math
 import random
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any
 
 from eprocess.betting import BettingProcess
+from glee.normalization import negotiation_payoff_transform
 
 ALPHA_FAMILY = 0.05
 DELTA_MIN = 0.01
 ASSIGNMENT_PROBABILITY = 0.5
+
+
+def _validate_negotiation_transform(
+    normalized_payoff: float,
+    raw_payoff: float,
+    payoff_transform: Any,
+) -> None:
+    if not isinstance(payoff_transform, dict) or "own_value" not in payoff_transform:
+        raise ValueError(
+            "negotiation outcomes require observe_negotiation(); raw payoff cannot "
+            "enter the bounded e-process directly"
+        )
+    verified = negotiation_payoff_transform(raw_payoff, float(payoff_transform["own_value"]))
+    if (
+        payoff_transform.get("name") != "negotiation_clipped_utility_score_v1"
+        or not math.isclose(normalized_payoff, verified.score, abs_tol=1e-12)
+    ):
+        raise ValueError("negotiation payoff transform metadata is inconsistent")
 
 
 @dataclass(slots=True)
@@ -70,11 +91,22 @@ class Experiment:
             }, sort_keys=True) + "\n")
         return arm
 
-    def observe(self, arm: str, normalized_payoff: float, raw_payoff: float) -> dict:
+    def observe(
+        self,
+        arm: str,
+        normalized_payoff: float,
+        raw_payoff: float,
+        *,
+        payoff_transform: dict[str, Any] | None = None,
+    ) -> dict:
+        if "negotiation" in self.game_family_queue:
+            _validate_negotiation_transform(
+                normalized_payoff, raw_payoff, payoff_transform
+            )
+        if not 0 <= normalized_payoff <= 1:
+            raise ValueError("bounded payoff score must lie in [0, 1]")
         if not self._pending or self._pending.pop(0) != arm:
             raise ValueError("outcome must match a pre-committed assignment in order")
-        if not 0 <= normalized_payoff <= 1:
-            raise ValueError("normalized payoff must lie in [0, 1]")
         z = 1 if arm == "candidate" else -1
         x = z * normalized_payoff
         main_value = self.main.update(x)
@@ -92,6 +124,7 @@ class Experiment:
             "timestamp": datetime.now(timezone.utc).isoformat(), "assigned_arm": arm,
             "assignment_probability": ASSIGNMENT_PROBABILITY, "raw_payoff": raw_payoff,
             "Y_t": normalized_payoff, "X_t": x, "X_t_prime": -x,
+            "payoff_transform": payoff_transform,
             "E_components": self.main.copy_components(),
             "E_prime_components": self.mirror.copy_components(),
             "E_t": main_value, "E_t_prime": mirror_value,
@@ -101,6 +134,20 @@ class Experiment:
         with self.log_path.open("a", encoding="utf-8") as handle:
             handle.write(json.dumps(record, sort_keys=True) + "\n")
         return record
+
+    def observe_negotiation(
+        self, arm: str, *, raw_payoff: float, own_value: float
+    ) -> dict:
+        """Transform and record one negotiation outcome without discarding raw utility."""
+        if "negotiation" not in self.game_family_queue:
+            raise ValueError("observe_negotiation requires a negotiation experiment")
+        transformed = negotiation_payoff_transform(raw_payoff, own_value)
+        return self.observe(
+            arm,
+            transformed.score,
+            transformed.raw_payoff,
+            payoff_transform=transformed.structured(),
+        )
 
     def outcome(self, window_closed: bool = False) -> str | None:
         if self.main.value >= self.threshold and self.effect_estimate > DELTA_MIN:
@@ -133,6 +180,12 @@ class Experiment:
         for line in self.log_path.read_text(encoding="utf-8").splitlines():
             record = json.loads(line)
             completed += 1
+            if "negotiation" in self.game_family_queue:
+                _validate_negotiation_transform(
+                    float(record["Y_t"]),
+                    float(record["raw_payoff"]),
+                    record.get("payoff_transform"),
+                )
             x = float(record["X_t"])
             self.main.update(x)
             self.mirror.update(-x)
