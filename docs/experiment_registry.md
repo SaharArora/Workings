@@ -33,8 +33,34 @@ experiment row with all required fields records promotion and same-cell confirma
 | Negotiation/incomplete T=1 | current ROBUST | empirical correction | NOT_YET_BUILT + RESEARCH_BLOCKED: no trusted prior/promotion |
 | Negotiation/incomplete T=1 | current ROBUST | NEGOTIATION_ADAPTIVE | HUMAN_AUTHORIZED_EXPERIMENTAL for bounded 6-game family pilot; first/terminal rules reduce to ROBUST reference/IR behavior |
 | Negotiation/incomplete multi-round | ROBUST (current data gate) | NEGOTIATION_ADAPTIVE | HUMAN_AUTHORIZED_EXPERIMENTAL for bounded 6-game family pilot; not promoted |
-| Negotiation/incomplete multi-round | ROBUST (current data gate) | BAYES / EMPIRICAL | BLOCKED + RESEARCH_BLOCKED: no supported artifact |
+| Negotiation/incomplete multi-round/unknown horizon | ROBUST | BAYES | RESEARCH_BLOCKED where no exact-cell artifact passes its separate support gate |
+| Negotiation/incomplete multi-round/unknown horizon with supported public features | ROBUST | NEGOTIATION_POOLED_EMPIRICAL | OFFLINE IMPLEMENTED; held-out BSS 0.1719, but not live-authorized or promoted because action economic-sanity failed |
 | Persuasion/repeated | P0 babbling | P3 reputation | P3_EXPERIMENT_INPUT_UNAVAILABLE + RESEARCH_BLOCKED: historical cell trust rate unavailable; P0 remains selected |
+| Persuasion/seller message choice | P0 babbling | PERSUASION_POOLED_EMPIRICAL | OFFLINE IMPLEMENTED; held-out BSS 0.6318; not live-authorized or promoted and does not provide P3 inputs |
+
+## Pooled population offline record (not promotion evidence)
+
+The negotiation pooled dataset is derived from original public GLEE data at source commit
+`68a33e98b035b97f945badee8f325001555c0049`: 33,627 games and 96,214 pre-response rows,
+split deterministically by whole game into 20,161/6,726/6,740 train/validation/test games
+(57,675/19,218/19,321 rows). The role-specific regularized logistic response model
+achieves test Brier 0.1764, BSS 0.1719 against the declared global-rate baseline, log loss
+0.5303, acceptance prevalence 0.3076, and calibration ECE 0.0237. Its BSS against the
+stronger structural-group baseline is 0.1536.
+
+This pooled model intentionally does not require an exact structural cell to have 200
+observations. That old gate continues to govern only the distinct exact-cell BAYES path.
+The pooled model passed predictive-skill, calibration, leakage, IR, candidate-generation,
+latency, and non-cloning checks, but failed the additional economic-sanity review: its
+held-out selected actions were more agreement-oriented than ROBUST in 0.0% of seller rows
+and 1.0% of buyer rows. The authorized ten-game validation tranche therefore did not run,
+no rating changed, and no e-process evidence was created.
+
+The separate persuasion pooled dataset contains 13,506 public games and 270,120 buyer
+decisions. Its seller-side message response model achieves held-out Brier 0.0919, BSS
+0.6318, log loss 0.3084, and ECE 0.0209. It remains an offline challenger: it does not
+replace the buyer safety margin, fabricate quality information, or satisfy P3's missing
+population-trust input.
 
 ## Time-constrained leaderboard tranche authorization (not promotion)
 

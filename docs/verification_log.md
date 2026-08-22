@@ -530,3 +530,61 @@ is unavailable.
   unknown-horizon ROBUST observations all yielded zero/walkaway. Persuasion stopped when
   seller P0 produced two zeros in its first three outcomes. No family was requeued after
   its stop. No sustained deployment was started.
+
+## Mechanical-policy and pooled-population verification
+
+- **item:** Negotiation ADAPTIVE concession mechanics.
+- **result:** `VERIFIED` (`MECHANICAL_POLICY_BUG` corrected).
+- **evidence:** The previous rule measured opponent offers against our reservation value,
+  so materially improving but still non-IR offers produced no adaptation. The corrected
+  rule stores the first opponent offer and matches 35% of cumulative improvement from that
+  anchor, constrained by own IR. Hand-computed seller `50 -> 80 -> 110` and buyer
+  `1600 -> 1400 -> 1200` tests pass, as do worsening-offer, repeated-offer, IR, progress,
+  and cycle-guard tests. Replay covers six historical ADAPTIVE games and 31 decisions;
+  24 decisions change. Counterfactual acceptance remains unknown except where the
+  historical transcript directly establishes it.
+
+- **item:** Persuasion exact-indifference behavior.
+- **result:** `VERIFIED` (`MECHANICAL_POLICY_BUG` corrected without changing theory).
+- **evidence:** The P0 theorem still buys at weak indifference. Production now requires
+  `EV >= 1.02 * product_price` for positive prices and handles zero price separately.
+  Boundary tests cover 1.00, 1.01, 1.02, and above-margin ratios. Replay covers five buyer
+  games and 100 decisions; 20 decisions flip, all in the historical exact-indifference
+  game.
+
+- **item:** Complete-information one-shot negotiation extraction.
+- **result:** `VERIFIED` as an explicit theory/behavior distinction.
+- **evidence:** Exact theory remains `p=V_B` under accept-at-indifference. The separately
+  human-authorized production layer routes the existing `NEGOTIATION_FAIRNESS_MARGIN`
+  deviation with locked `SURPLUS_CONCESSION=0.15`; no epsilon or theorem rewrite was
+  introduced.
+
+- **item:** Pooled structural negotiation population layer.
+- **result:** `IMPLEMENTED` (`MISSING_POPULATION_LAYER` corrected), but **not live-authorized
+  or promoted**.
+- **evidence:** Public source commit
+  `68a33e98b035b97f945badee8f325001555c0049` yielded 33,627 games and 96,214 proposal
+  responses. Whole-game deterministic splits contain 20,161/6,726/6,740
+  train/validation/test games and 57,675/19,218/19,321 rows. Separate role-specific
+  regularized logistic models use only pre-outcome public, structural, own-scale, and
+  history features. Test Brier is 0.1764, BSS 0.1719 versus the global-rate baseline
+  (0.1536 versus structural-group rates), log loss 0.5303, prevalence 0.3076, and ECE
+  0.0237. Exact-cell `n>=200` does not gate this distinct pooled path. Game leakage,
+  hidden-value leakage, post-outcome leakage, and model-identity features are absent;
+  model identity overlap across splits remains a disclosed connected-cross-play
+  confounding risk.
+- **action taken:** The finite policy candidate set enforces own IR, excludes fitted-
+  support violations, and retains ROBUST for unsupported/hidden opponent categories or
+  missing/corrupt artifacts. A stable process-scoped 50/50 validation assignment exists,
+  but the held-out optimizer chose actions more agreement-oriented than ROBUST in only
+  0.0% of seller rows and 1.0% of buyer rows. That economic-sanity failure overrode the
+  predictive pass, so the ten-game rated validation tranche was not started and no
+  e-process evidence was created.
+
+- **item:** Pooled persuasion challenger and P3 separation.
+- **result:** `IMPLEMENTED` as an offline-only challenger; P3 remains `RESEARCH_BLOCKED`.
+- **evidence:** The public pooled table contains 13,506 games and 270,120 buyer decisions.
+  The seller-side response model has held-out Brier 0.0919, BSS 0.6318, log loss 0.3084,
+  and ECE 0.0209, without nature quality, terminal outcome, identity, or P3 trust inputs.
+  It never replaces the production buyer margin. Its alternative-message estimates are
+  model-based counterfactuals, not realized outcomes or promotion evidence.

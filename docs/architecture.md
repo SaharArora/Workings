@@ -71,8 +71,11 @@ The family rules are:
 - Every no-commitment persuasion cell keeps P0 babbling as theory incumbent unless a
   registered population challenger is promoted. Buyer P0 evaluates the actual visible
   `p`, `v`, `u`, and `product_price`, which reduces to the normalized build-spec threshold
-  in the canonical price-one/low-value-zero case. Seller P0 remains quality-independent
-  in both text and binary modes and therefore executes even when buyer values are hidden.
+  in the canonical price-one/low-value-zero case. The theorem retains weak indifference
+  (`EV >= price`), while the production buyer requires the locked 2% safety margin
+  (`EV >= 1.02 * price` for positive prices); zero price is handled separately. Seller
+  P0 remains quality-independent in both text and binary modes and therefore executes
+  even when buyer values are hidden.
 
 The negotiation mechanism remains unbounded above. ROBUST bounds only its own action and
 scenario sets: seller candidates are reservation-value multiples
@@ -219,11 +222,57 @@ deterministic text after the economic fields are fixed.
 
 `NEGOTIATION_ADAPTIVE` imports ROBUST's first/reference price without modifying ROBUST.
 It uses only current-game public offers and a locked reciprocal concession rate of 0.35.
+It anchors on the first opponent offer and measures cumulative improvement from that
+anchor: rising buyer offers improve from a seller's perspective and falling seller offers
+improve from a buyer's perspective. It moves 35% of that observed concession toward
+agreement, subject to the acting player's own IR boundary. Worsening or repeated offers
+do not create additional concessions.
 Its nonterminal acceptance approximation accepts an IR offer at 90% of the payoff from
 its current adaptive counter; terminal decisions accept every IR offer. Its unknown-
 horizon guard requires both a materially unchanged adaptive counter and no material
 opponent improvement. This is deterministic observed-history conditioning—not a
 posterior, calibrated response model, or equilibrium.
+
+## Pooled population challengers
+
+`NEGOTIATION_POOLED_EMPIRICAL` is distinct from exact-cell BAYES. It pools public
+historical proposal responses across scale-equivalent games while keeping role,
+information regime, horizon observability, round position, messages, and opponent
+category explicit. Seller and buyer proposal-response models are separate regularized
+logistic models with validation-only calibration and game-level deterministic
+train/validation/test splits. Features are pre-outcome and own-scale normalized; hidden
+opponent values, outcomes, post-decision information, and opponent identity are not
+features.
+
+The empirical policy scores a finite, auditable set of named policy candidates rather
+than treating that set as a legal price bound. It enforces own IR, excludes proposal
+margins outside the model's fitted support, and logs every candidate's predicted response
+probability, one-step value, exclusion reason, chosen action, and artifact version.
+Unknown/hidden opponent categories are outside the frozen artifact's support and retain
+the ROBUST incumbent. A missing or corrupt artifact also leaves the incumbent active.
+
+The process-scoped experimental registry can make a stable 50/50 assignment between an
+eligible pooled challenger and its incumbent before an outcome is observed. This code is
+implemented and tested, but the first fitted negotiation policy failed offline economic-
+sanity diagnostics by selecting systematically more aggressive endpoint candidates.
+Consequently no rated pooled-policy tranche was authorized and the challenger is neither
+promoted nor active by default.
+
+`PERSUASION_POOLED_EMPIRICAL` is a separate seller-side offline response-model challenger.
+It neither replaces the production buyer's 2% margin nor supplies the missing P3 trust
+artifact. Its alternative-message estimates are explicitly counterfactual and are not
+live-authorized.
+
+Policy findings use the canonical categories in `research/status.py`:
+`MECHANICAL_POLICY_BUG`, `CONTROL_POLICY_LIMITATION`, `MISSING_POPULATION_LAYER`, and
+`RESEARCH_BLOCKED`. In particular, the old ADAPTIVE anchor was a mechanical bug, static
+ROBUST's nonadaptation is an auditable control limitation, exact-cell starvation was a
+missing population layer, and the absent P3 trust artifact remains research-blocked.
+
+Complete-information one-shot negotiation keeps exact theory at seller price `p=V_B`
+under accept-at-indifference. The separately authorized production behavioral path uses
+`NEGOTIATION_FAIRNESS_MARGIN` with locked `SURPLUS_CONCESSION=0.15`; it is a deliberate
+deviation, not a rewrite of the theory baseline.
 
 Pilot/tranche monitoring retains exact cell/role groups and adds structural policy
 classes that omit nuisance monetary scales. Structural results record
