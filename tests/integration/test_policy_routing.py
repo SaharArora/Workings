@@ -134,6 +134,7 @@ def test_human_authorized_incomplete_cell_uses_separate_adaptive_challenger() ->
 def test_pooled_validation_selects_frozen_artifact_without_exact_cell_gate() -> None:
     game = negotiation_game(complete=False, rounds=10)
     game["game_id"] = "c"  # Frozen hash assignment to the pooled arm.
+    game["opponent"] = {"type": "agent", "name": "model"}
     router = PolicyRouter(
         pooled_negotiation_artifact=PolicyArtifact.from_policy(
             "pooled-v1", direct_policy(12)
@@ -154,6 +155,7 @@ def test_pooled_validation_selects_frozen_artifact_without_exact_cell_gate() -> 
 def test_missing_or_corrupt_pooled_artifact_preserves_robust_incumbent() -> None:
     game = negotiation_game(complete=False, rounds=None)
     game["game_id"] = "c"
+    game["opponent"] = {"type": "agent", "name": "model"}
     registry = ExperimentalOverrideRegistry.human_authorized_pooled_validation()
     missing = PolicyRouter(experimental_overrides=registry).route(game)
     assert missing.selected_policy == "NEGOTIATION_ROBUST"
@@ -175,6 +177,7 @@ def test_missing_or_corrupt_pooled_artifact_preserves_robust_incumbent() -> None
 def test_pooled_randomization_is_frozen_and_can_keep_current_incumbent() -> None:
     game = negotiation_game(complete=False, rounds=10)
     game["game_id"] = "g"  # Frozen hash assignment to the incumbent arm.
+    game["opponent"] = {"type": "agent", "name": "model"}
     router = PolicyRouter(
         pooled_negotiation_artifact=PolicyArtifact.from_policy(
             "pooled-v1", direct_policy(12)
@@ -187,6 +190,21 @@ def test_pooled_randomization_is_frozen_and_can_keep_current_incumbent() -> None
     second = router.route(game)
     assert first.selected_policy == second.selected_policy == "NEGOTIATION_ROBUST"
     assert first.fallback_reason and "RANDOMIZED_TO_CURRENT_INCUMBENT" in first.fallback_reason
+
+
+def test_pooled_unknown_opponent_category_keeps_robust_incumbent() -> None:
+    game = negotiation_game(complete=False, rounds=10)
+    game["game_id"] = "c"
+    route = PolicyRouter(
+        pooled_negotiation_artifact=PolicyArtifact.from_policy(
+            "pooled-v1", direct_policy(12)
+        ),
+        experimental_overrides=(
+            ExperimentalOverrideRegistry.human_authorized_pooled_validation()
+        ),
+    ).route(game)
+    assert route.selected_policy == "NEGOTIATION_ROBUST"
+    assert "POOLED_OPPONENT_CATEGORY_UNSUPPORTED" in str(route.fallback_reason)
 
 
 def test_tranche_complete_t1_uses_fairness_while_preserving_exact_theory() -> None:

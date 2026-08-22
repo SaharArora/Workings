@@ -17,6 +17,15 @@ class PriceSensitiveModel:
         return (1.0 if margin <= 0.25 else 0.1), ()
 
 
+class BoundedSupportModel(PriceSensitiveModel):
+    def predict_acceptance(
+        self, *, role: str, features: dict[str, float]
+    ) -> tuple[float, tuple[str, ...]]:
+        probability, _ = super().predict_acceptance(role=role, features=features)
+        clipped = ("proposal_margin",) if features["proposal_margin"] > 0.75 else ()
+        return probability, clipped
+
+
 def game(
     *,
     role: str,
@@ -71,6 +80,15 @@ def test_buyer_selects_finite_ir_candidate_by_model_value() -> None:
     plan = pooled_empirical_action_plan(game(role="buyer"), PriceSensitiveModel())
     assert plan.action == {"product_price": 75}
     assert all(0 <= candidate.price <= 100 for candidate in plan.candidates)
+
+
+def test_candidate_outside_fitted_proposal_support_is_not_scored() -> None:
+    plan = pooled_empirical_action_plan(game(role="buyer"), BoundedSupportModel())
+    assert 0 in plan.generated_candidate_prices
+    assert 0 not in [candidate.price for candidate in plan.candidates]
+    assert plan.excluded_candidates[0]["reason"] == (
+        "PROPOSAL_MARGIN_OUTSIDE_TRAINING_SUPPORT"
+    )
 
 
 def test_immediate_ir_offer_can_dominate_counter_value() -> None:

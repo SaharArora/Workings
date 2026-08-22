@@ -30,6 +30,10 @@ POOLED_CONTINUATION_FRACTION = 0.25
 POOLED_NO_PROGRESS_REPEAT_LIMIT = 3
 
 
+class PooledFeatureSupportUnavailable(ValueError):
+    """The frozen pooled artifact has no support for a required live feature."""
+
+
 @dataclass(frozen=True, slots=True)
 class CandidateValue:
     price: float
@@ -62,6 +66,8 @@ class PooledEmpiricalPlan:
     opponent_category: str
     model_version: str
     candidates: tuple[CandidateValue, ...]
+    generated_candidate_prices: tuple[float, ...]
+    excluded_candidates: tuple[Mapping[str, Any], ...]
     chosen_price: float
     chosen_expected_value: float
     current_offer: float | None
@@ -85,6 +91,8 @@ class PooledEmpiricalPlan:
             "robust_price": self.robust_price,
             "adaptive_price": self.adaptive_price,
             "candidate_prices": [candidate.price for candidate in self.candidates],
+            "generated_candidate_prices": list(self.generated_candidate_prices),
+            "excluded_candidates": [dict(item) for item in self.excluded_candidates],
             "candidates": [candidate.structured() for candidate in self.candidates],
             "chosen_price": self.chosen_price,
             "chosen_expected_value": self.chosen_expected_value,
@@ -284,6 +292,9 @@ def pooled_empirical_action_plan(
     me = str(state["current_player"])
     role = str(state[f"{me}_role"])
     own_value = float(state[f"{me}_value"])
+    opponent_category = _opponent_category(game)
+    if opponent_category == "unknown":
+        raise PooledFeatureSupportUnavailable("OPPONENT_CATEGORY_UNKNOWN")
     robust = robust_price_decision(role=role, own_value=own_value, game=game).chosen_price
     own_offers, opponent_offers = _role_offers(game, me=me, role=role)
     adaptive = _adaptive_price(
@@ -301,9 +312,11 @@ def pooled_empirical_action_plan(
             own_value=own_value,
             robust_price=robust,
             adaptive_price=adaptive,
-            opponent_category=_opponent_category(game),
+            opponent_category=opponent_category,
             model_version=model.model_version,
             candidates=(),
+            generated_candidate_prices=(),
+            excluded_candidates=(),
             chosen_price=robust,
             chosen_expected_value=0.0,
             current_offer=float(state["last_offer"]["price"]),
@@ -334,9 +347,29 @@ def pooled_empirical_action_plan(
             opponent_offers=opponent_offers,
         )
         preliminary[price] = model.predict_acceptance(role=role, features=features)
+    excluded = tuple(
+        {
+            "price": price,
+            "reason": "PROPOSAL_MARGIN_OUTSIDE_TRAINING_SUPPORT",
+            "clipped_features": list(preliminary[price][1]),
+        }
+        for price in sorted(raw_candidates)
+        if "proposal_margin" in preliminary[price][1]
+    )
+    supported_prices = [
+        price
+        for price in sorted(raw_candidates)
+        if "proposal_margin" not in preliminary[price][1]
+    ]
+    if not supported_prices:
+        raise PooledFeatureSupportUnavailable(
+            "NO_CANDIDATE_IN_PROPOSAL_MARGIN_SUPPORT"
+        )
     continuation = 0.0
     if action_type == "decision":
-        robust_probability = preliminary[robust][0]
+        robust_probability = (
+            preliminary[robust][0] if robust in supported_prices else 0.0
+        )
         continuation = (
             POOLED_CONTINUATION_FRACTION
             * robust_probability
@@ -355,7 +388,7 @@ def pooled_empirical_action_plan(
             ),
             clipped_features=preliminary[price][1],
         )
-        for price in sorted(raw_candidates)
+        for price in supported_prices
     )
     tie = (
         (lambda candidate: (candidate.expected_value, -candidate.price))
@@ -396,9 +429,11 @@ def pooled_empirical_action_plan(
         own_value=own_value,
         robust_price=robust,
         adaptive_price=adaptive,
-        opponent_category=_opponent_category(game),
+        opponent_category=opponent_category,
         model_version=model.model_version,
         candidates=candidates,
+        generated_candidate_prices=tuple(sorted(raw_candidates)),
+        excluded_candidates=excluded,
         chosen_price=chosen.price,
         chosen_expected_value=chosen.expected_value,
         current_offer=current_offer,

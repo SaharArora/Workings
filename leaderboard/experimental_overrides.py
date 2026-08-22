@@ -342,6 +342,17 @@ class ExperimentalOverrideRegistry:
                 )
                 if not eligible_cell:
                     continue
+                opponent_type = str(
+                    game.get("opponent", {}).get("type", "unknown")
+                ).lower()
+                if opponent_type not in {
+                    "agent", "llm", "bot", "human", "player", "otree"
+                }:
+                    return OverrideResolution(
+                        override=override,
+                        available=False,
+                        unavailable_reason="POOLED_OPPONENT_CATEGORY_UNSUPPORTED",
+                    )
                 if structural_class in self.paused_structural_classes:
                     return OverrideResolution(
                         override=override,
