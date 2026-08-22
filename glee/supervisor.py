@@ -57,6 +57,7 @@ def run_bounded(
     poll_interval: float = 2.0,
     safety_timeout: float = 600.0,
     event_sink: EventSink | None = None,
+    stop_requested: Callable[[], bool] | None = None,
     clock: Callable[[], float] = time.monotonic,
     sleep: Callable[[float], None] = time.sleep,
 ) -> BoundedRunResult:
@@ -80,6 +81,7 @@ def run_bounded(
     queue_calls = 0
     start = clock()
     exit_reason = ""
+    stopping = False
 
     def event(kind: str, **fields: Any) -> None:
         emit({"event": kind, "game_family": family, **fields})
@@ -135,6 +137,12 @@ def run_bounded(
                 raise BoundedRunTimeout(
                     f"bounded {family} run exceeded {safety_timeout}s with {len(completed)}/{max_games} complete"
                 )
+
+            if not stopping and stop_requested is not None and stop_requested():
+                stopping = True
+                client.leave_queue(family)
+                queue_open = False
+                event("stop_requested", tracked_games=len(tracked), completed_games=len(completed))
 
             try:
                 pending_items = client.pending_games()
@@ -213,12 +221,25 @@ def run_bounded(
                     if game_id not in completed and game_id not in pending_last_poll:
                         mark_completed(game_id, "DISAPPEARED_AFTER_TRACKING")
 
+            # A stop may be requested by an action-result or game-completion event in
+            # this same iteration. Observe it before any bounded top-up can occur.
+            if not stopping and stop_requested is not None and stop_requested():
+                stopping = True
+                client.leave_queue(family)
+                queue_open = False
+                event("stop_requested", tracked_games=len(tracked), completed_games=len(completed))
+
             if len(completed) >= max_games and all(game_id in completed for game_id in tracked):
                 exit_reason = "MAX_GAMES_COMPLETED"
                 event("run_exiting", reason=exit_reason, completed_games=len(completed))
                 break
 
-            if requeue and not queue_open and len(tracked) < max_games and active_games < concurrency:
+            if stopping and active_games == 0 and all(game_id in completed for game_id in tracked):
+                exit_reason = "STOP_REQUESTED"
+                event("run_exiting", reason=exit_reason, completed_games=len(completed))
+                break
+
+            if requeue and not stopping and not queue_open and len(tracked) < max_games and active_games < concurrency:
                 queue_once("bounded_top_up")
 
             sleep(poll_interval)

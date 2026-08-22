@@ -122,6 +122,15 @@ def test_robust_runs_without_finite_legal_price_maximum() -> None:
     assert action == {"product_price": 15.0}
 
 
+def test_incomplete_t1_explicit_discrete_prior_uses_its_support_not_a_price_grid() -> None:
+    game = negotiation_game(complete=False, rounds=1)
+    game["game_state"]["opponent_value_prior"] = {12: 0.5, 15: 0.5}
+    action, route = PolicyRouter().decide_with_routing(game)
+    assert route.selected_policy == "NEGOTIATION_INCOMPLETE_T1_BAYES_POSTED_PRICE"
+    assert route.execution_fallback_reason is None
+    assert action == {"product_price": 15.0}
+
+
 def test_robust_zero_value_logs_scale_unavailable_and_fails_closed() -> None:
     game = negotiation_game(complete=False, rounds=None)
     game["game_state"]["player_1_value"] = 0

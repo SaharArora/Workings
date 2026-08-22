@@ -1,0 +1,1009 @@
+{
+  "scope": "current GLEE competition API policy-distinct reachable classes",
+  "authoritative_sources": [
+    "https://glee-competition.com/llms.txt retrieved 2026-08-21",
+    "glee-sdk 0.0.5",
+    "docs/BUILD_SPEC.md"
+  ],
+  "coverage_invariant": "every reachable configuration has an intentional executable incumbent",
+  "row_count": 52,
+  "deployment_blockers": 0,
+  "rows": [
+    {
+      "family": "negotiation",
+      "configuration_signature": "information=complete;horizon=T=1;messages=false;values=positive grid",
+      "role": "seller",
+      "theory_incumbent": "NEGOTIATION_COMPLETE_T1_THEORY",
+      "challenger": "fairness-margin-0.15 (not promoted)",
+      "required_runtime_inputs": [
+        "own_value",
+        "opponent_value",
+        "valid_actions"
+      ],
+      "all_required_inputs_available": true,
+      "selected_incumbent": "NEGOTIATION_COMPLETE_T1_THEORY",
+      "executable": true,
+      "tested_offline": true,
+      "tested_live": false,
+      "deployment_status": "CLEAR",
+      "incomplete_classification": "RESEARCH_BLOCKED"
+    },
+    {
+      "family": "negotiation",
+      "configuration_signature": "information=complete;horizon=T=1;messages=true;values=positive grid",
+      "role": "seller",
+      "theory_incumbent": "NEGOTIATION_COMPLETE_T1_THEORY",
+      "challenger": "fairness-margin-0.15 (not promoted)",
+      "required_runtime_inputs": [
+        "own_value",
+        "opponent_value",
+        "valid_actions"
+      ],
+      "all_required_inputs_available": true,
+      "selected_incumbent": "NEGOTIATION_COMPLETE_T1_THEORY",
+      "executable": true,
+      "tested_offline": true,
+      "tested_live": false,
+      "deployment_status": "CLEAR",
+      "incomplete_classification": "RESEARCH_BLOCKED"
+    },
+    {
+      "family": "negotiation",
+      "configuration_signature": "information=complete;horizon=T=1;messages=false;values=positive grid",
+      "role": "buyer",
+      "theory_incumbent": "NEGOTIATION_COMPLETE_T1_THEORY",
+      "challenger": "fairness-margin-0.15 (not promoted)",
+      "required_runtime_inputs": [
+        "own_value",
+        "opponent_value",
+        "valid_actions"
+      ],
+      "all_required_inputs_available": true,
+      "selected_incumbent": "NEGOTIATION_COMPLETE_T1_THEORY",
+      "executable": true,
+      "tested_offline": true,
+      "tested_live": false,
+      "deployment_status": "CLEAR",
+      "incomplete_classification": "RESEARCH_BLOCKED"
+    },
+    {
+      "family": "negotiation",
+      "configuration_signature": "information=complete;horizon=T=1;messages=true;values=positive grid",
+      "role": "buyer",
+      "theory_incumbent": "NEGOTIATION_COMPLETE_T1_THEORY",
+      "challenger": "fairness-margin-0.15 (not promoted)",
+      "required_runtime_inputs": [
+        "own_value",
+        "opponent_value",
+        "valid_actions"
+      ],
+      "all_required_inputs_available": true,
+      "selected_incumbent": "NEGOTIATION_COMPLETE_T1_THEORY",
+      "executable": true,
+      "tested_offline": true,
+      "tested_live": false,
+      "deployment_status": "CLEAR",
+      "incomplete_classification": "RESEARCH_BLOCKED"
+    },
+    {
+      "family": "negotiation",
+      "configuration_signature": "information=complete;horizon=finite odd T>1;messages=false;values=positive grid",
+      "role": "seller",
+      "theory_incumbent": "NEGOTIATION_COMPLETE_FINITE_ODD_THEORY",
+      "challenger": "fairness-margin-0.15 (not promoted)",
+      "required_runtime_inputs": [
+        "own_value",
+        "opponent_value",
+        "valid_actions"
+      ],
+      "all_required_inputs_available": true,
+      "selected_incumbent": "NEGOTIATION_COMPLETE_FINITE_ODD_THEORY",
+      "executable": true,
+      "tested_offline": true,
+      "tested_live": false,
+      "deployment_status": "CLEAR",
+      "incomplete_classification": "RESEARCH_BLOCKED"
+    },
+    {
+      "family": "negotiation",
+      "configuration_signature": "information=complete;horizon=finite odd T>1;messages=true;values=positive grid",
+      "role": "seller",
+      "theory_incumbent": "NEGOTIATION_COMPLETE_FINITE_ODD_THEORY",
+      "challenger": "fairness-margin-0.15 (not promoted)",
+      "required_runtime_inputs": [
+        "own_value",
+        "opponent_value",
+        "valid_actions"
+      ],
+      "all_required_inputs_available": true,
+      "selected_incumbent": "NEGOTIATION_COMPLETE_FINITE_ODD_THEORY",
+      "executable": true,
+      "tested_offline": true,
+      "tested_live": false,
+      "deployment_status": "CLEAR",
+      "incomplete_classification": "RESEARCH_BLOCKED"
+    },
+    {
+      "family": "negotiation",
+      "configuration_signature": "information=complete;horizon=finite odd T>1;messages=false;values=positive grid",
+      "role": "buyer",
+      "theory_incumbent": "NEGOTIATION_COMPLETE_FINITE_ODD_THEORY",
+      "challenger": "fairness-margin-0.15 (not promoted)",
+      "required_runtime_inputs": [
+        "own_value",
+        "opponent_value",
+        "valid_actions"
+      ],
+      "all_required_inputs_available": true,
+      "selected_incumbent": "NEGOTIATION_COMPLETE_FINITE_ODD_THEORY",
+      "executable": true,
+      "tested_offline": true,
+      "tested_live": false,
+      "deployment_status": "CLEAR",
+      "incomplete_classification": "RESEARCH_BLOCKED"
+    },
+    {
+      "family": "negotiation",
+      "configuration_signature": "information=complete;horizon=finite odd T>1;messages=true;values=positive grid",
+      "role": "buyer",
+      "theory_incumbent": "NEGOTIATION_COMPLETE_FINITE_ODD_THEORY",
+      "challenger": "fairness-margin-0.15 (not promoted)",
+      "required_runtime_inputs": [
+        "own_value",
+        "opponent_value",
+        "valid_actions"
+      ],
+      "all_required_inputs_available": true,
+      "selected_incumbent": "NEGOTIATION_COMPLETE_FINITE_ODD_THEORY",
+      "executable": true,
+      "tested_offline": true,
+      "tested_live": false,
+      "deployment_status": "CLEAR",
+      "incomplete_classification": "RESEARCH_BLOCKED"
+    },
+    {
+      "family": "negotiation",
+      "configuration_signature": "information=complete;horizon=finite even T;messages=false;values=positive grid",
+      "role": "seller",
+      "theory_incumbent": "NEGOTIATION_COMPLETE_FINITE_EVEN_THEORY",
+      "challenger": "fairness-margin-0.15 (not promoted)",
+      "required_runtime_inputs": [
+        "own_value",
+        "opponent_value",
+        "valid_actions"
+      ],
+      "all_required_inputs_available": true,
+      "selected_incumbent": "NEGOTIATION_COMPLETE_FINITE_EVEN_THEORY",
+      "executable": true,
+      "tested_offline": true,
+      "tested_live": false,
+      "deployment_status": "CLEAR",
+      "incomplete_classification": "RESEARCH_BLOCKED"
+    },
+    {
+      "family": "negotiation",
+      "configuration_signature": "information=complete;horizon=finite even T;messages=true;values=positive grid",
+      "role": "seller",
+      "theory_incumbent": "NEGOTIATION_COMPLETE_FINITE_EVEN_THEORY",
+      "challenger": "fairness-margin-0.15 (not promoted)",
+      "required_runtime_inputs": [
+        "own_value",
+        "opponent_value",
+        "valid_actions"
+      ],
+      "all_required_inputs_available": true,
+      "selected_incumbent": "NEGOTIATION_COMPLETE_FINITE_EVEN_THEORY",
+      "executable": true,
+      "tested_offline": true,
+      "tested_live": false,
+      "deployment_status": "CLEAR",
+      "incomplete_classification": "RESEARCH_BLOCKED"
+    },
+    {
+      "family": "negotiation",
+      "configuration_signature": "information=complete;horizon=finite even T;messages=false;values=positive grid",
+      "role": "buyer",
+      "theory_incumbent": "NEGOTIATION_COMPLETE_FINITE_EVEN_THEORY",
+      "challenger": "fairness-margin-0.15 (not promoted)",
+      "required_runtime_inputs": [
+        "own_value",
+        "opponent_value",
+        "valid_actions"
+      ],
+      "all_required_inputs_available": true,
+      "selected_incumbent": "NEGOTIATION_COMPLETE_FINITE_EVEN_THEORY",
+      "executable": true,
+      "tested_offline": true,
+      "tested_live": false,
+      "deployment_status": "CLEAR",
+      "incomplete_classification": "RESEARCH_BLOCKED"
+    },
+    {
+      "family": "negotiation",
+      "configuration_signature": "information=complete;horizon=finite even T;messages=true;values=positive grid",
+      "role": "buyer",
+      "theory_incumbent": "NEGOTIATION_COMPLETE_FINITE_EVEN_THEORY",
+      "challenger": "fairness-margin-0.15 (not promoted)",
+      "required_runtime_inputs": [
+        "own_value",
+        "opponent_value",
+        "valid_actions"
+      ],
+      "all_required_inputs_available": true,
+      "selected_incumbent": "NEGOTIATION_COMPLETE_FINITE_EVEN_THEORY",
+      "executable": true,
+      "tested_offline": true,
+      "tested_live": false,
+      "deployment_status": "CLEAR",
+      "incomplete_classification": "RESEARCH_BLOCKED"
+    },
+    {
+      "family": "negotiation",
+      "configuration_signature": "information=complete;horizon=unknown/unlimited;messages=false;values=positive grid",
+      "role": "seller",
+      "theory_incumbent": "NEGOTIATION_COMPLETE_UNLIMITED_MIDPOINT",
+      "challenger": "anchor-favorable-0.65 (not promoted)",
+      "required_runtime_inputs": [
+        "own_value",
+        "opponent_value",
+        "valid_actions"
+      ],
+      "all_required_inputs_available": true,
+      "selected_incumbent": "NEGOTIATION_COMPLETE_UNLIMITED_MIDPOINT",
+      "executable": true,
+      "tested_offline": true,
+      "tested_live": false,
+      "deployment_status": "CLEAR",
+      "incomplete_classification": "RESEARCH_BLOCKED"
+    },
+    {
+      "family": "negotiation",
+      "configuration_signature": "information=complete;horizon=unknown/unlimited;messages=true;values=positive grid",
+      "role": "seller",
+      "theory_incumbent": "NEGOTIATION_COMPLETE_UNLIMITED_MIDPOINT",
+      "challenger": "anchor-favorable-0.65 (not promoted)",
+      "required_runtime_inputs": [
+        "own_value",
+        "opponent_value",
+        "valid_actions"
+      ],
+      "all_required_inputs_available": true,
+      "selected_incumbent": "NEGOTIATION_COMPLETE_UNLIMITED_MIDPOINT",
+      "executable": true,
+      "tested_offline": true,
+      "tested_live": false,
+      "deployment_status": "CLEAR",
+      "incomplete_classification": "RESEARCH_BLOCKED"
+    },
+    {
+      "family": "negotiation",
+      "configuration_signature": "information=complete;horizon=unknown/unlimited;messages=false;values=positive grid",
+      "role": "buyer",
+      "theory_incumbent": "NEGOTIATION_COMPLETE_UNLIMITED_MIDPOINT",
+      "challenger": "anchor-favorable-0.65 (not promoted)",
+      "required_runtime_inputs": [
+        "own_value",
+        "opponent_value",
+        "valid_actions"
+      ],
+      "all_required_inputs_available": true,
+      "selected_incumbent": "NEGOTIATION_COMPLETE_UNLIMITED_MIDPOINT",
+      "executable": true,
+      "tested_offline": true,
+      "tested_live": false,
+      "deployment_status": "CLEAR",
+      "incomplete_classification": "RESEARCH_BLOCKED"
+    },
+    {
+      "family": "negotiation",
+      "configuration_signature": "information=complete;horizon=unknown/unlimited;messages=true;values=positive grid",
+      "role": "buyer",
+      "theory_incumbent": "NEGOTIATION_COMPLETE_UNLIMITED_MIDPOINT",
+      "challenger": "anchor-favorable-0.65 (not promoted)",
+      "required_runtime_inputs": [
+        "own_value",
+        "opponent_value",
+        "valid_actions"
+      ],
+      "all_required_inputs_available": true,
+      "selected_incumbent": "NEGOTIATION_COMPLETE_UNLIMITED_MIDPOINT",
+      "executable": true,
+      "tested_offline": true,
+      "tested_live": false,
+      "deployment_status": "CLEAR",
+      "incomplete_classification": "RESEARCH_BLOCKED"
+    },
+    {
+      "family": "negotiation",
+      "configuration_signature": "information=incomplete;horizon=T=1;messages=false;values=positive grid",
+      "role": "seller",
+      "theory_incumbent": "NEGOTIATION_INCOMPLETE_T1_ROBUST",
+      "challenger": "trusted-prior Bayes/EMPIRICAL (prior unavailable; not promoted)",
+      "required_runtime_inputs": [
+        "own_value",
+        "valid_actions"
+      ],
+      "all_required_inputs_available": true,
+      "selected_incumbent": "NEGOTIATION_INCOMPLETE_T1_ROBUST",
+      "executable": true,
+      "tested_offline": true,
+      "tested_live": false,
+      "deployment_status": "CLEAR",
+      "incomplete_classification": "RESEARCH_BLOCKED"
+    },
+    {
+      "family": "negotiation",
+      "configuration_signature": "information=incomplete;horizon=T=1;messages=true;values=positive grid",
+      "role": "seller",
+      "theory_incumbent": "NEGOTIATION_INCOMPLETE_T1_ROBUST",
+      "challenger": "trusted-prior Bayes/EMPIRICAL (prior unavailable; not promoted)",
+      "required_runtime_inputs": [
+        "own_value",
+        "valid_actions"
+      ],
+      "all_required_inputs_available": true,
+      "selected_incumbent": "NEGOTIATION_INCOMPLETE_T1_ROBUST",
+      "executable": true,
+      "tested_offline": true,
+      "tested_live": false,
+      "deployment_status": "CLEAR",
+      "incomplete_classification": "RESEARCH_BLOCKED"
+    },
+    {
+      "family": "negotiation",
+      "configuration_signature": "information=incomplete;horizon=T=1;messages=false;values=positive grid",
+      "role": "buyer",
+      "theory_incumbent": "NEGOTIATION_INCOMPLETE_T1_ROBUST",
+      "challenger": "trusted-prior Bayes/EMPIRICAL (prior unavailable; not promoted)",
+      "required_runtime_inputs": [
+        "own_value",
+        "valid_actions"
+      ],
+      "all_required_inputs_available": true,
+      "selected_incumbent": "NEGOTIATION_INCOMPLETE_T1_ROBUST",
+      "executable": true,
+      "tested_offline": true,
+      "tested_live": false,
+      "deployment_status": "CLEAR",
+      "incomplete_classification": "RESEARCH_BLOCKED"
+    },
+    {
+      "family": "negotiation",
+      "configuration_signature": "information=incomplete;horizon=T=1;messages=true;values=positive grid",
+      "role": "buyer",
+      "theory_incumbent": "NEGOTIATION_INCOMPLETE_T1_ROBUST",
+      "challenger": "trusted-prior Bayes/EMPIRICAL (prior unavailable; not promoted)",
+      "required_runtime_inputs": [
+        "own_value",
+        "valid_actions"
+      ],
+      "all_required_inputs_available": true,
+      "selected_incumbent": "NEGOTIATION_INCOMPLETE_T1_ROBUST",
+      "executable": true,
+      "tested_offline": true,
+      "tested_live": false,
+      "deployment_status": "CLEAR",
+      "incomplete_classification": "RESEARCH_BLOCKED"
+    },
+    {
+      "family": "negotiation",
+      "configuration_signature": "information=incomplete;horizon=finite multi-round;messages=false;values=positive grid",
+      "role": "seller",
+      "theory_incumbent": "NEGOTIATION_INCOMPLETE_MULTIROUND_PORTFOLIO",
+      "challenger": "BAYES/EMPIRICAL (artifacts unavailable)",
+      "required_runtime_inputs": [
+        "own_value",
+        "valid_actions"
+      ],
+      "all_required_inputs_available": true,
+      "selected_incumbent": "NEGOTIATION_ROBUST",
+      "executable": true,
+      "tested_offline": true,
+      "tested_live": false,
+      "deployment_status": "CLEAR",
+      "incomplete_classification": "RESEARCH_BLOCKED"
+    },
+    {
+      "family": "negotiation",
+      "configuration_signature": "information=incomplete;horizon=finite multi-round;messages=true;values=positive grid",
+      "role": "seller",
+      "theory_incumbent": "NEGOTIATION_INCOMPLETE_MULTIROUND_PORTFOLIO",
+      "challenger": "BAYES/EMPIRICAL (artifacts unavailable)",
+      "required_runtime_inputs": [
+        "own_value",
+        "valid_actions"
+      ],
+      "all_required_inputs_available": true,
+      "selected_incumbent": "NEGOTIATION_ROBUST",
+      "executable": true,
+      "tested_offline": true,
+      "tested_live": false,
+      "deployment_status": "CLEAR",
+      "incomplete_classification": "RESEARCH_BLOCKED"
+    },
+    {
+      "family": "negotiation",
+      "configuration_signature": "information=incomplete;horizon=finite multi-round;messages=false;values=positive grid",
+      "role": "buyer",
+      "theory_incumbent": "NEGOTIATION_INCOMPLETE_MULTIROUND_PORTFOLIO",
+      "challenger": "BAYES/EMPIRICAL (artifacts unavailable)",
+      "required_runtime_inputs": [
+        "own_value",
+        "valid_actions"
+      ],
+      "all_required_inputs_available": true,
+      "selected_incumbent": "NEGOTIATION_ROBUST",
+      "executable": true,
+      "tested_offline": true,
+      "tested_live": false,
+      "deployment_status": "CLEAR",
+      "incomplete_classification": "RESEARCH_BLOCKED"
+    },
+    {
+      "family": "negotiation",
+      "configuration_signature": "information=incomplete;horizon=finite multi-round;messages=true;values=positive grid",
+      "role": "buyer",
+      "theory_incumbent": "NEGOTIATION_INCOMPLETE_MULTIROUND_PORTFOLIO",
+      "challenger": "BAYES/EMPIRICAL (artifacts unavailable)",
+      "required_runtime_inputs": [
+        "own_value",
+        "valid_actions"
+      ],
+      "all_required_inputs_available": true,
+      "selected_incumbent": "NEGOTIATION_ROBUST",
+      "executable": true,
+      "tested_offline": true,
+      "tested_live": false,
+      "deployment_status": "CLEAR",
+      "incomplete_classification": "RESEARCH_BLOCKED"
+    },
+    {
+      "family": "negotiation",
+      "configuration_signature": "information=incomplete;horizon=unknown/unlimited;messages=false;values=positive grid",
+      "role": "seller",
+      "theory_incumbent": "NEGOTIATION_INCOMPLETE_MULTIROUND_PORTFOLIO",
+      "challenger": "BAYES/EMPIRICAL (artifacts unavailable)",
+      "required_runtime_inputs": [
+        "own_value",
+        "valid_actions"
+      ],
+      "all_required_inputs_available": true,
+      "selected_incumbent": "NEGOTIATION_ROBUST",
+      "executable": true,
+      "tested_offline": true,
+      "tested_live": false,
+      "deployment_status": "CLEAR",
+      "incomplete_classification": "RESEARCH_BLOCKED"
+    },
+    {
+      "family": "negotiation",
+      "configuration_signature": "information=incomplete;horizon=unknown/unlimited;messages=true;values=positive grid",
+      "role": "seller",
+      "theory_incumbent": "NEGOTIATION_INCOMPLETE_MULTIROUND_PORTFOLIO",
+      "challenger": "BAYES/EMPIRICAL (artifacts unavailable)",
+      "required_runtime_inputs": [
+        "own_value",
+        "valid_actions"
+      ],
+      "all_required_inputs_available": true,
+      "selected_incumbent": "NEGOTIATION_ROBUST",
+      "executable": true,
+      "tested_offline": true,
+      "tested_live": false,
+      "deployment_status": "CLEAR",
+      "incomplete_classification": "RESEARCH_BLOCKED"
+    },
+    {
+      "family": "negotiation",
+      "configuration_signature": "information=incomplete;horizon=unknown/unlimited;messages=false;values=positive grid",
+      "role": "buyer",
+      "theory_incumbent": "NEGOTIATION_INCOMPLETE_MULTIROUND_PORTFOLIO",
+      "challenger": "BAYES/EMPIRICAL (artifacts unavailable)",
+      "required_runtime_inputs": [
+        "own_value",
+        "valid_actions"
+      ],
+      "all_required_inputs_available": true,
+      "selected_incumbent": "NEGOTIATION_ROBUST",
+      "executable": true,
+      "tested_offline": true,
+      "tested_live": false,
+      "deployment_status": "CLEAR",
+      "incomplete_classification": "RESEARCH_BLOCKED"
+    },
+    {
+      "family": "negotiation",
+      "configuration_signature": "information=incomplete;horizon=unknown/unlimited;messages=true;values=positive grid",
+      "role": "buyer",
+      "theory_incumbent": "NEGOTIATION_INCOMPLETE_MULTIROUND_PORTFOLIO",
+      "challenger": "BAYES/EMPIRICAL (artifacts unavailable)",
+      "required_runtime_inputs": [
+        "own_value",
+        "valid_actions"
+      ],
+      "all_required_inputs_available": true,
+      "selected_incumbent": "NEGOTIATION_ROBUST",
+      "executable": true,
+      "tested_offline": true,
+      "tested_live": false,
+      "deployment_status": "CLEAR",
+      "incomplete_classification": "RESEARCH_BLOCKED"
+    },
+    {
+      "family": "bargaining",
+      "configuration_signature": "information=complete;horizon=finite;messages=false;money=M;discounts=config-grid",
+      "role": "alice",
+      "theory_incumbent": "BARGAINING_COMPLETE_FINITE",
+      "challenger": "fairness-0.10 (not promoted)",
+      "required_runtime_inputs": [
+        "money_to_divide",
+        "own_delta",
+        "opponent_delta",
+        "round",
+        "valid_actions"
+      ],
+      "all_required_inputs_available": true,
+      "selected_incumbent": "BARGAINING_COMPLETE_FINITE",
+      "executable": true,
+      "tested_offline": true,
+      "tested_live": false,
+      "deployment_status": "CLEAR",
+      "incomplete_classification": "RESEARCH_BLOCKED"
+    },
+    {
+      "family": "bargaining",
+      "configuration_signature": "information=complete;horizon=finite;messages=true;money=M;discounts=config-grid",
+      "role": "alice",
+      "theory_incumbent": "BARGAINING_COMPLETE_FINITE",
+      "challenger": "fairness-0.10 (not promoted)",
+      "required_runtime_inputs": [
+        "money_to_divide",
+        "own_delta",
+        "opponent_delta",
+        "round",
+        "valid_actions"
+      ],
+      "all_required_inputs_available": true,
+      "selected_incumbent": "BARGAINING_COMPLETE_FINITE",
+      "executable": true,
+      "tested_offline": true,
+      "tested_live": false,
+      "deployment_status": "CLEAR",
+      "incomplete_classification": "RESEARCH_BLOCKED"
+    },
+    {
+      "family": "bargaining",
+      "configuration_signature": "information=complete;horizon=finite;messages=false;money=M;discounts=config-grid",
+      "role": "bob",
+      "theory_incumbent": "BARGAINING_COMPLETE_FINITE",
+      "challenger": "fairness-0.10 (not promoted)",
+      "required_runtime_inputs": [
+        "money_to_divide",
+        "own_delta",
+        "opponent_delta",
+        "round",
+        "valid_actions"
+      ],
+      "all_required_inputs_available": true,
+      "selected_incumbent": "BARGAINING_COMPLETE_FINITE",
+      "executable": true,
+      "tested_offline": true,
+      "tested_live": false,
+      "deployment_status": "CLEAR",
+      "incomplete_classification": "RESEARCH_BLOCKED"
+    },
+    {
+      "family": "bargaining",
+      "configuration_signature": "information=complete;horizon=finite;messages=true;money=M;discounts=config-grid",
+      "role": "bob",
+      "theory_incumbent": "BARGAINING_COMPLETE_FINITE",
+      "challenger": "fairness-0.10 (not promoted)",
+      "required_runtime_inputs": [
+        "money_to_divide",
+        "own_delta",
+        "opponent_delta",
+        "round",
+        "valid_actions"
+      ],
+      "all_required_inputs_available": true,
+      "selected_incumbent": "BARGAINING_COMPLETE_FINITE",
+      "executable": true,
+      "tested_offline": true,
+      "tested_live": false,
+      "deployment_status": "CLEAR",
+      "incomplete_classification": "RESEARCH_BLOCKED"
+    },
+    {
+      "family": "bargaining",
+      "configuration_signature": "information=complete;horizon=unknown/unlimited;messages=false;money=M;discounts=config-grid",
+      "role": "alice",
+      "theory_incumbent": "BARGAINING_COMPLETE_UNLIMITED",
+      "challenger": "fairness-0.10 (not promoted)",
+      "required_runtime_inputs": [
+        "money_to_divide",
+        "own_delta",
+        "opponent_delta",
+        "round",
+        "valid_actions"
+      ],
+      "all_required_inputs_available": true,
+      "selected_incumbent": "BARGAINING_COMPLETE_UNLIMITED",
+      "executable": true,
+      "tested_offline": true,
+      "tested_live": false,
+      "deployment_status": "CLEAR",
+      "incomplete_classification": "RESEARCH_BLOCKED"
+    },
+    {
+      "family": "bargaining",
+      "configuration_signature": "information=complete;horizon=unknown/unlimited;messages=true;money=M;discounts=config-grid",
+      "role": "alice",
+      "theory_incumbent": "BARGAINING_COMPLETE_UNLIMITED",
+      "challenger": "fairness-0.10 (not promoted)",
+      "required_runtime_inputs": [
+        "money_to_divide",
+        "own_delta",
+        "opponent_delta",
+        "round",
+        "valid_actions"
+      ],
+      "all_required_inputs_available": true,
+      "selected_incumbent": "BARGAINING_COMPLETE_UNLIMITED",
+      "executable": true,
+      "tested_offline": true,
+      "tested_live": false,
+      "deployment_status": "CLEAR",
+      "incomplete_classification": "RESEARCH_BLOCKED"
+    },
+    {
+      "family": "bargaining",
+      "configuration_signature": "information=complete;horizon=unknown/unlimited;messages=false;money=M;discounts=config-grid",
+      "role": "bob",
+      "theory_incumbent": "BARGAINING_COMPLETE_UNLIMITED",
+      "challenger": "fairness-0.10 (not promoted)",
+      "required_runtime_inputs": [
+        "money_to_divide",
+        "own_delta",
+        "opponent_delta",
+        "round",
+        "valid_actions"
+      ],
+      "all_required_inputs_available": true,
+      "selected_incumbent": "BARGAINING_COMPLETE_UNLIMITED",
+      "executable": true,
+      "tested_offline": true,
+      "tested_live": false,
+      "deployment_status": "CLEAR",
+      "incomplete_classification": "RESEARCH_BLOCKED"
+    },
+    {
+      "family": "bargaining",
+      "configuration_signature": "information=complete;horizon=unknown/unlimited;messages=true;money=M;discounts=config-grid",
+      "role": "bob",
+      "theory_incumbent": "BARGAINING_COMPLETE_UNLIMITED",
+      "challenger": "fairness-0.10 (not promoted)",
+      "required_runtime_inputs": [
+        "money_to_divide",
+        "own_delta",
+        "opponent_delta",
+        "round",
+        "valid_actions"
+      ],
+      "all_required_inputs_available": true,
+      "selected_incumbent": "BARGAINING_COMPLETE_UNLIMITED",
+      "executable": true,
+      "tested_offline": true,
+      "tested_live": false,
+      "deployment_status": "CLEAR",
+      "incomplete_classification": "RESEARCH_BLOCKED"
+    },
+    {
+      "family": "bargaining",
+      "configuration_signature": "information=incomplete;horizon=finite;messages=false;money=M;discounts=config-grid",
+      "role": "alice",
+      "theory_incumbent": "BARGAINING_INCOMPLETE_FINITE_BAYES_REFERENCE",
+      "challenger": "fairness-0.10 (not promoted)",
+      "required_runtime_inputs": [
+        "money_to_divide",
+        "last_offer_on_response",
+        "valid_actions"
+      ],
+      "all_required_inputs_available": true,
+      "selected_incumbent": "BARGAINING_INCOMPLETE_EQUAL_SPLIT",
+      "executable": true,
+      "tested_offline": true,
+      "tested_live": false,
+      "deployment_status": "CLEAR",
+      "incomplete_classification": "RESEARCH_BLOCKED"
+    },
+    {
+      "family": "bargaining",
+      "configuration_signature": "information=incomplete;horizon=finite;messages=true;money=M;discounts=config-grid",
+      "role": "alice",
+      "theory_incumbent": "BARGAINING_INCOMPLETE_FINITE_BAYES_REFERENCE",
+      "challenger": "fairness-0.10 (not promoted)",
+      "required_runtime_inputs": [
+        "money_to_divide",
+        "last_offer_on_response",
+        "valid_actions"
+      ],
+      "all_required_inputs_available": true,
+      "selected_incumbent": "BARGAINING_INCOMPLETE_EQUAL_SPLIT",
+      "executable": true,
+      "tested_offline": true,
+      "tested_live": false,
+      "deployment_status": "CLEAR",
+      "incomplete_classification": "RESEARCH_BLOCKED"
+    },
+    {
+      "family": "bargaining",
+      "configuration_signature": "information=incomplete;horizon=finite;messages=false;money=M;discounts=config-grid",
+      "role": "bob",
+      "theory_incumbent": "BARGAINING_INCOMPLETE_FINITE_BAYES_REFERENCE",
+      "challenger": "fairness-0.10 (not promoted)",
+      "required_runtime_inputs": [
+        "money_to_divide",
+        "last_offer_on_response",
+        "valid_actions"
+      ],
+      "all_required_inputs_available": true,
+      "selected_incumbent": "BARGAINING_INCOMPLETE_EQUAL_SPLIT",
+      "executable": true,
+      "tested_offline": true,
+      "tested_live": false,
+      "deployment_status": "CLEAR",
+      "incomplete_classification": "RESEARCH_BLOCKED"
+    },
+    {
+      "family": "bargaining",
+      "configuration_signature": "information=incomplete;horizon=finite;messages=true;money=M;discounts=config-grid",
+      "role": "bob",
+      "theory_incumbent": "BARGAINING_INCOMPLETE_FINITE_BAYES_REFERENCE",
+      "challenger": "fairness-0.10 (not promoted)",
+      "required_runtime_inputs": [
+        "money_to_divide",
+        "last_offer_on_response",
+        "valid_actions"
+      ],
+      "all_required_inputs_available": true,
+      "selected_incumbent": "BARGAINING_INCOMPLETE_EQUAL_SPLIT",
+      "executable": true,
+      "tested_offline": true,
+      "tested_live": false,
+      "deployment_status": "CLEAR",
+      "incomplete_classification": "RESEARCH_BLOCKED"
+    },
+    {
+      "family": "bargaining",
+      "configuration_signature": "information=incomplete;horizon=unknown/unlimited;messages=false;money=M;discounts=config-grid",
+      "role": "alice",
+      "theory_incumbent": "BARGAINING_INCOMPLETE_UNLIMITED_BAYES_REFERENCE",
+      "challenger": "fairness-0.10 (not promoted)",
+      "required_runtime_inputs": [
+        "money_to_divide",
+        "last_offer_on_response",
+        "valid_actions"
+      ],
+      "all_required_inputs_available": true,
+      "selected_incumbent": "BARGAINING_INCOMPLETE_EQUAL_SPLIT",
+      "executable": true,
+      "tested_offline": true,
+      "tested_live": false,
+      "deployment_status": "CLEAR",
+      "incomplete_classification": "RESEARCH_BLOCKED"
+    },
+    {
+      "family": "bargaining",
+      "configuration_signature": "information=incomplete;horizon=unknown/unlimited;messages=true;money=M;discounts=config-grid",
+      "role": "alice",
+      "theory_incumbent": "BARGAINING_INCOMPLETE_UNLIMITED_BAYES_REFERENCE",
+      "challenger": "fairness-0.10 (not promoted)",
+      "required_runtime_inputs": [
+        "money_to_divide",
+        "last_offer_on_response",
+        "valid_actions"
+      ],
+      "all_required_inputs_available": true,
+      "selected_incumbent": "BARGAINING_INCOMPLETE_EQUAL_SPLIT",
+      "executable": true,
+      "tested_offline": true,
+      "tested_live": false,
+      "deployment_status": "CLEAR",
+      "incomplete_classification": "RESEARCH_BLOCKED"
+    },
+    {
+      "family": "bargaining",
+      "configuration_signature": "information=incomplete;horizon=unknown/unlimited;messages=false;money=M;discounts=config-grid",
+      "role": "bob",
+      "theory_incumbent": "BARGAINING_INCOMPLETE_UNLIMITED_BAYES_REFERENCE",
+      "challenger": "fairness-0.10 (not promoted)",
+      "required_runtime_inputs": [
+        "money_to_divide",
+        "last_offer_on_response",
+        "valid_actions"
+      ],
+      "all_required_inputs_available": true,
+      "selected_incumbent": "BARGAINING_INCOMPLETE_EQUAL_SPLIT",
+      "executable": true,
+      "tested_offline": true,
+      "tested_live": false,
+      "deployment_status": "CLEAR",
+      "incomplete_classification": "RESEARCH_BLOCKED"
+    },
+    {
+      "family": "bargaining",
+      "configuration_signature": "information=incomplete;horizon=unknown/unlimited;messages=true;money=M;discounts=config-grid",
+      "role": "bob",
+      "theory_incumbent": "BARGAINING_INCOMPLETE_UNLIMITED_BAYES_REFERENCE",
+      "challenger": "fairness-0.10 (not promoted)",
+      "required_runtime_inputs": [
+        "money_to_divide",
+        "last_offer_on_response",
+        "valid_actions"
+      ],
+      "all_required_inputs_available": true,
+      "selected_incumbent": "BARGAINING_INCOMPLETE_EQUAL_SPLIT",
+      "executable": true,
+      "tested_offline": true,
+      "tested_live": false,
+      "deployment_status": "CLEAR",
+      "incomplete_classification": "RESEARCH_BLOCKED"
+    },
+    {
+      "family": "persuasion",
+      "configuration_signature": "message_type=text;seller_knows_buyer_values=false;history_aware_buyer=true;rounds=T",
+      "role": "seller",
+      "theory_incumbent": "PERSUASION_P0_BABBLING",
+      "challenger": "P3 reputation (not promoted)",
+      "required_runtime_inputs": [
+        "seller_message_type",
+        "valid_actions"
+      ],
+      "all_required_inputs_available": true,
+      "selected_incumbent": "PERSUASION_P0_BABBLING",
+      "executable": true,
+      "tested_offline": true,
+      "tested_live": false,
+      "deployment_status": "CLEAR",
+      "incomplete_classification": "RESEARCH_BLOCKED"
+    },
+    {
+      "family": "persuasion",
+      "configuration_signature": "message_type=text;seller_knows_buyer_values=false;history_aware_buyer=true;rounds=T",
+      "role": "buyer",
+      "theory_incumbent": "PERSUASION_P0_BABBLING",
+      "challenger": "P3 reputation (not promoted)",
+      "required_runtime_inputs": [
+        "p",
+        "v",
+        "u",
+        "product_price",
+        "valid_actions"
+      ],
+      "all_required_inputs_available": true,
+      "selected_incumbent": "PERSUASION_P0_BABBLING",
+      "executable": true,
+      "tested_offline": true,
+      "tested_live": false,
+      "deployment_status": "CLEAR",
+      "incomplete_classification": "RESEARCH_BLOCKED"
+    },
+    {
+      "family": "persuasion",
+      "configuration_signature": "message_type=text;seller_knows_buyer_values=true;history_aware_buyer=true;rounds=T",
+      "role": "seller",
+      "theory_incumbent": "PERSUASION_P0_BABBLING",
+      "challenger": "P3 reputation (not promoted)",
+      "required_runtime_inputs": [
+        "seller_message_type",
+        "valid_actions"
+      ],
+      "all_required_inputs_available": true,
+      "selected_incumbent": "PERSUASION_P0_BABBLING",
+      "executable": true,
+      "tested_offline": true,
+      "tested_live": false,
+      "deployment_status": "CLEAR",
+      "incomplete_classification": "RESEARCH_BLOCKED"
+    },
+    {
+      "family": "persuasion",
+      "configuration_signature": "message_type=text;seller_knows_buyer_values=true;history_aware_buyer=true;rounds=T",
+      "role": "buyer",
+      "theory_incumbent": "PERSUASION_P0_BABBLING",
+      "challenger": "P3 reputation (not promoted)",
+      "required_runtime_inputs": [
+        "p",
+        "v",
+        "u",
+        "product_price",
+        "valid_actions"
+      ],
+      "all_required_inputs_available": true,
+      "selected_incumbent": "PERSUASION_P0_BABBLING",
+      "executable": true,
+      "tested_offline": true,
+      "tested_live": false,
+      "deployment_status": "CLEAR",
+      "incomplete_classification": "RESEARCH_BLOCKED"
+    },
+    {
+      "family": "persuasion",
+      "configuration_signature": "message_type=binary;seller_knows_buyer_values=false;history_aware_buyer=true;rounds=T",
+      "role": "seller",
+      "theory_incumbent": "PERSUASION_P0_BABBLING",
+      "challenger": "P3 reputation (not promoted)",
+      "required_runtime_inputs": [
+        "seller_message_type",
+        "valid_actions"
+      ],
+      "all_required_inputs_available": true,
+      "selected_incumbent": "PERSUASION_P0_BABBLING",
+      "executable": true,
+      "tested_offline": true,
+      "tested_live": false,
+      "deployment_status": "CLEAR",
+      "incomplete_classification": "RESEARCH_BLOCKED"
+    },
+    {
+      "family": "persuasion",
+      "configuration_signature": "message_type=binary;seller_knows_buyer_values=false;history_aware_buyer=true;rounds=T",
+      "role": "buyer",
+      "theory_incumbent": "PERSUASION_P0_BABBLING",
+      "challenger": "P3 reputation (not promoted)",
+      "required_runtime_inputs": [
+        "p",
+        "v",
+        "u",
+        "product_price",
+        "valid_actions"
+      ],
+      "all_required_inputs_available": true,
+      "selected_incumbent": "PERSUASION_P0_BABBLING",
+      "executable": true,
+      "tested_offline": true,
+      "tested_live": false,
+      "deployment_status": "CLEAR",
+      "incomplete_classification": "RESEARCH_BLOCKED"
+    },
+    {
+      "family": "persuasion",
+      "configuration_signature": "message_type=binary;seller_knows_buyer_values=true;history_aware_buyer=true;rounds=T",
+      "role": "seller",
+      "theory_incumbent": "PERSUASION_P0_BABBLING",
+      "challenger": "P3 reputation (not promoted)",
+      "required_runtime_inputs": [
+        "seller_message_type",
+        "valid_actions"
+      ],
+      "all_required_inputs_available": true,
+      "selected_incumbent": "PERSUASION_P0_BABBLING",
+      "executable": true,
+      "tested_offline": true,
+      "tested_live": false,
+      "deployment_status": "CLEAR",
+      "incomplete_classification": "RESEARCH_BLOCKED"
+    },
+    {
+      "family": "persuasion",
+      "configuration_signature": "message_type=binary;seller_knows_buyer_values=true;history_aware_buyer=true;rounds=T",
+      "role": "buyer",
+      "theory_incumbent": "PERSUASION_P0_BABBLING",
+      "challenger": "P3 reputation (not promoted)",
+      "required_runtime_inputs": [
+        "p",
+        "v",
+        "u",
+        "product_price",
+        "valid_actions"
+      ],
+      "all_required_inputs_available": true,
+      "selected_incumbent": "PERSUASION_P0_BABBLING",
+      "executable": true,
+      "tested_offline": true,
+      "tested_live": false,
+      "deployment_status": "CLEAR",
+      "incomplete_classification": "RESEARCH_BLOCKED"
+    }
+  ]
+}

@@ -15,6 +15,18 @@ claimed equilibria; persuasion P1/P2 are references, not deployable policies.
 The challenger in every bargaining cell is the fixed fairness concession
 `x_dev=x_theory-0.10(x_theory-0.5)`. It is not a re-solved Fehr–Schmidt equilibrium.
 
+Production complete-information offers use the current proposer and the number of rounds
+remaining, rather than replaying the round-one Alice allocation after every rejection.
+Responder acceptance compares the current split with the correct one-step-discounted
+continuation share. For the undiscounted unlimited edge case `delta_A=delta_B=1`, theory
+does not select a unique split; the symmetric equal split is the explicit operational
+convention.
+
+The current incomplete-information API hides the opponent discount and exposes no prior.
+Accordingly, the two Bayes-adaptive rows remain theoretical references while the named
+production incumbent is `BARGAINING_INCOMPLETE_EQUAL_SPLIT`. This input limitation is
+`RESEARCH_BLOCKED`; execution does not enter the emergency fallback.
+
 ## Negotiation
 
 No-trade (`V_B<V_A`) is checked first in every cell.
@@ -33,6 +45,13 @@ documented below; no policy grid or transform clip is interpreted as mechanism s
 | Incomplete, trusted prior | T=1 | Bayes-optimal posted price maximizing `(p-V_A)(1-F_B(p))` |
 | Incomplete, ambiguous prior | T=1 | Robust/minimax-regret randomized pricing |
 | Incomplete | Multi-round/unlimited | No clean closed form; BAYES/ROBUST/EMPIRICAL portfolio |
+
+The current API exposes no trusted valuation prior or distribution parameters in an
+incomplete T=1 state, and the historical parameter grid is not a prior announced to the
+agent. Current live routing therefore instantiates the ambiguous-prior row and selects
+one-shot ROBUST for both roles. The trusted-prior formula remains distinct from learned
+multi-round BAYES and would not use its eligibility gate if a future authoritative prior
+were exposed.
 
 Determined-cell challengers are exactly: 15% surplus fairness margin for the three
 complete finite rows; own-favorable `gamma=0.65` anchor for complete unlimited; and the
@@ -97,7 +116,8 @@ input, never in-game retraining.
 ## Persuasion
 
 - P0 babbling: deployable theory baseline in every no-commitment cell; ignore messages
-  and buy iff `p>=1/v`.
+  and buy iff `p*v+(1-p)*u >= product_price`. This is exactly `p>=1/v` in the canonical
+  normalized `u=0`, `product_price=1` representation.
 - P1 full disclosure: reference only, not an equilibrium or deployable policy.
 - P2 commitment benchmark: reference ceiling only; `sigma(buy|H)=1`,
   `sigma(buy|L)=min(p(v-1)/(1-p),1)`, value `min(pv,1)`.

@@ -4,8 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
-import math
-from collections.abc import Callable, Mapping, Sequence
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field, replace
 from typing import Any
 
@@ -15,8 +14,9 @@ from policies.negotiation.robust import robust_negotiation_action
 from policies.persuasion.babbling import babbling_buyer_buys
 from theory.bargaining.baselines import (
     bayes_adaptive_reference,
-    finite_horizon_alice_share,
-    rubinstein_alice_share,
+    finite_horizon_offer_alice_share,
+    finite_horizon_shares,
+    rubinstein_proposer_share,
 )
 from theory.negotiation.baselines import bayes_optimal_posted_price, complete_information_price
 
@@ -104,6 +104,10 @@ def cell_key(game: Mapping[str, Any]) -> str:
             "money_to_divide",
             "delta_1",
             "delta_2",
+            "player_1_value",
+            "player_2_value",
+            "player_1_role",
+            "player_2_role",
         )
         if key in state
     }
@@ -113,7 +117,14 @@ def cell_key(game: Mapping[str, Any]) -> str:
 def _role(game: Mapping[str, Any]) -> str | None:
     state = game["game_state"]
     player = str(game.get("your_player") or state.get("current_player") or "")
-    return state.get(f"{player}_role") or player or None
+    family = str(game.get("game_family", ""))
+    if family == "negotiation":
+        return state.get(f"{player}_role") or player or None
+    if family == "bargaining":
+        return {"player_1": "alice", "player_2": "bob"}.get(player, player or None)
+    if family == "persuasion":
+        return {"player_1": "seller", "player_2": "buyer"}.get(player, player or None)
+    return player or None
 
 
 def _artifact_status(artifact: PolicyArtifact | None) -> tuple[Policy | None, str | None]:
@@ -251,7 +262,16 @@ class PolicyRouter:
             if finite and (not isinstance(state.get("max_rounds"), int) or state["max_rounds"] < 1):
                 raise UnsupportedCellError("invalid bargaining horizon")
             label = "BARGAINING_" + ("COMPLETE" if complete else "INCOMPLETE") + ("_FINITE" if finite else "_UNLIMITED")
-            return label, label, bargaining_theory_action, None, None, []
+            if complete or isinstance(state.get("opponent_delta_prior"), Mapping):
+                return label, label, bargaining_theory_action, None, None, []
+            return (
+                label + "_BAYES_REFERENCE",
+                "BARGAINING_INCOMPLETE_EQUAL_SPLIT",
+                bargaining_incomplete_equal_split_action,
+                None,
+                "OPPONENT_DELTA_PRIOR_UNAVAILABLE",
+                [],
+            )
 
         if family == "persuasion":
             if "p" not in state or "total_rounds" not in state:
@@ -303,7 +323,11 @@ def negotiation_incomplete_t1_bayes_action(game: dict[str, Any]) -> dict[str, An
     if role != "seller":
         raise PolicyInputsUnavailable("posted-price theory requires the seller move")
     prior = {float(value): float(mass) for value, mass in state["opponent_value_prior"].items()}
-    return {"product_price": bayes_optimal_posted_price(own_value, prior, _explicit_legal_price_grid(game))}
+    # A discrete prior's survival function changes only at support points, so an
+    # optimum exists among V_A and the prior support. This finite candidate set is
+    # justified by the prior itself and assumes no mechanism price ceiling/grid.
+    candidates = tuple(sorted({own_value, *prior}))
+    return {"product_price": bayes_optimal_posted_price(own_value, prior, candidates)}
 
 
 def _negotiation_decision(
@@ -323,66 +347,58 @@ def _negotiation_decision(
     return {"decision": "RejectOffer", "product_price": counter["product_price"]}
 
 
-def _range_values(value: Any) -> tuple[float, float] | None:
-    if not isinstance(value, Mapping):
-        return None
-    minimum = value.get("minimum", value.get("min"))
-    maximum = value.get("maximum", value.get("max"))
-    if isinstance(minimum, (int, float)) and isinstance(maximum, (int, float)):
-        minimum, maximum = float(minimum), float(maximum)
-        if math.isfinite(minimum) and math.isfinite(maximum) and maximum > minimum:
-            return minimum, maximum
-    return None
-
-
-def _explicit_legal_price_grid(game: Mapping[str, Any]) -> tuple[float, ...]:
-    field = game["valid_actions"].get("fields", {}).get("product_price")
-    if isinstance(field, Mapping):
-        values = field.get("values") or field.get("allowed_values")
-        if isinstance(values, Sequence) and not isinstance(values, (str, bytes)):
-            result = tuple(float(value) for value in values)
-            if result:
-                return result
-        bounds = _range_values(field)
-        if bounds:
-            return _evenly_spaced_grid(*bounds)
-    state = game["game_state"]
-    bounds = _range_values(state.get("legal_price_range"))
-    if bounds:
-        return _evenly_spaced_grid(*bounds)
-    if isinstance(state.get("price_min"), (int, float)) and isinstance(state.get("price_max"), (int, float)):
-        bounds = _range_values({"min": state["price_min"], "max": state["price_max"]})
-        if bounds:
-            return _evenly_spaced_grid(*bounds)
-    raise PolicyInputsUnavailable("verified legal price grid is not exposed")
-
-
-def _evenly_spaced_grid(minimum: float, maximum: float, points: int = 5) -> tuple[float, ...]:
-    """Finite grid used only by the trusted-prior T=1 numerical optimizer."""
-    if points < 2 or maximum <= minimum:
-        raise ValueError("a nondegenerate grid needs at least two points")
-    step = (maximum - minimum) / (points - 1)
-    return tuple(minimum + index * step for index in range(points))
-
-
 def bargaining_theory_action(game: dict[str, Any]) -> dict[str, Any]:
     state = game["game_state"]
     action_type = game["valid_actions"]["type"]
     money = float(state["money_to_divide"])
     if action_type == "decision":
         offer = state["last_offer"]
-        own = float(offer[f"{state['current_player']}_gain"])
-        return {"decision": "accept" if own >= money / 2 else "reject"}
+        me = str(state["current_player"])
+        own = float(offer[f"{me}_gain"])
+        complete = bool(state["complete_information"])
+        if not complete:
+            prior = state.get("opponent_delta_prior")
+            if not isinstance(prior, Mapping):
+                raise PolicyInputsUnavailable("incomplete bargaining prior unavailable")
+            threshold = money / 2
+        else:
+            delta_alice = float(state["delta_1"])
+            delta_bob = float(state["delta_2"])
+            own_delta = delta_alice if me == "player_1" else delta_bob
+            if bool(state["horizon_known"]):
+                remaining = int(state["max_rounds"]) - int(state["round"]) + 1
+                if remaining <= 1:
+                    threshold = 0.0
+                else:
+                    alice, bob = finite_horizon_shares(delta_alice, delta_bob, remaining - 1)
+                    next_proposer_share = alice[-1] if me == "player_1" else bob[-1]
+                    threshold = money * own_delta * next_proposer_share
+            else:
+                opponent_delta = delta_bob if me == "player_1" else delta_alice
+                threshold = money * own_delta * rubinstein_proposer_share(
+                    own_delta, opponent_delta
+                )
+        return {"decision": "accept" if own >= threshold else "reject"}
     complete = bool(state["complete_information"])
     finite = bool(state["horizon_known"])
     if complete:
         if "delta_1" not in state or "delta_2" not in state:
             raise PolicyInputsUnavailable("complete bargaining discount factors unavailable")
-        alice = (
-            finite_horizon_alice_share(float(state["delta_1"]), float(state["delta_2"]), int(state["max_rounds"]))
-            if finite
-            else rubinstein_alice_share(float(state["delta_1"]), float(state["delta_2"]))
-        )
+        delta_alice = float(state["delta_1"])
+        delta_bob = float(state["delta_2"])
+        me = str(state["current_player"])
+        if finite:
+            remaining = int(state["max_rounds"]) - int(state.get("round", 1)) + 1
+            alice = finite_horizon_offer_alice_share(
+                delta_alice,
+                delta_bob,
+                remaining,
+                proposer_is_alice=me == "player_1",
+            )
+        elif me == "player_1":
+            alice = rubinstein_proposer_share(delta_alice, delta_bob)
+        else:
+            alice = 1 - rubinstein_proposer_share(delta_bob, delta_alice)
     else:
         prior = state.get("opponent_delta_prior")
         if not isinstance(prior, Mapping):
@@ -399,6 +415,17 @@ def bargaining_theory_action(game: dict[str, Any]) -> dict[str, Any]:
     return {"alice_gain": money * alice, "bob_gain": money * (1 - alice)}
 
 
+def bargaining_incomplete_equal_split_action(game: dict[str, Any]) -> dict[str, Any]:
+    """Intentional conservative incumbent when the API withholds the theory prior."""
+    state = game["game_state"]
+    money = float(state["money_to_divide"])
+    if game["valid_actions"]["type"] == "decision":
+        me = str(state["current_player"])
+        own = float(state["last_offer"][f"{me}_gain"])
+        return {"decision": "accept" if own >= money / 2 else "reject"}
+    return {"alice_gain": money / 2, "bob_gain": money / 2}
+
+
 def persuasion_p0_action(game: dict[str, Any]) -> dict[str, Any]:
     state = game["game_state"]
     action_type = game["valid_actions"]["type"]
@@ -407,7 +434,13 @@ def persuasion_p0_action(game: dict[str, Any]) -> dict[str, Any]:
     if action_type == "seller_recommendation":
         return {"decision": "yes"}
     if action_type == "buyer_decision":
-        if "v" not in state:
-            raise PolicyInputsUnavailable("buyer high value unavailable")
-        return {"decision": "yes" if babbling_buyer_buys(float(state["p"]), float(state["v"])) else "no"}
+        required = ("p", "v", "u", "product_price")
+        if any(key not in state for key in required):
+            raise PolicyInputsUnavailable("buyer expected-value inputs unavailable")
+        expected_value = float(state["p"]) * float(state["v"]) + (
+            1 - float(state["p"])
+        ) * float(state["u"])
+        return {
+            "decision": "yes" if expected_value >= float(state["product_price"]) else "no"
+        }
     raise UnsupportedCellError(f"unknown persuasion action {action_type!r}")
