@@ -1,0 +1,46 @@
+{
+  "changed_rule_game_rate": 0.2093884199614986,
+  "changed_rule_games": 2828,
+  "games": 13506,
+  "interpretation": "Nature's realized product worth is observed. Rule payoffs are deterministic historical-state replays; they do not model strategic seller-message changes.",
+  "p3_redesigned": false,
+  "policies": {
+    "production": {
+      "downside_frequency": 0.01340145120687102,
+      "games": 13506,
+      "lower_tail_normalized_CVaR_0_90": -0.034503183770176346,
+      "lower_tail_payoff_CVaR_0_90": -251109.4328446617,
+      "mean_historical_percentile_proxy": 0.49448819030520075,
+      "mean_normalized_payoff": 0.3920664889678661,
+      "mean_raw_payoff": 2612099.348437731,
+      "zero_payoff_frequency": 0.6146157263438472
+    },
+    "theory": {
+      "downside_frequency": 0.1024729749740856,
+      "games": 13506,
+      "lower_tail_normalized_CVaR_0_90": -0.21601510439804877,
+      "lower_tail_payoff_CVaR_0_90": -1434116.0039982235,
+      "mean_historical_percentile_proxy": 0.49387093072312793,
+      "mean_normalized_payoff": 0.391854546127647,
+      "mean_raw_payoff": 2610593.876795498,
+      "zero_payoff_frequency": 0.43395527913519916
+    }
+  },
+  "production_rule": "buy when EV>=1.02*price for price>0",
+  "rankings": {
+    "lower_tail_payoff": [
+      "production",
+      "theory"
+    ],
+    "percentile_proxy": [
+      "production",
+      "theory"
+    ],
+    "raw_payoff": [
+      "production",
+      "theory"
+    ]
+  },
+  "source_commit": "68a33e98b035b97f945badee8f325001555c0049",
+  "theory_rule": "buy when EV>=price"
+}

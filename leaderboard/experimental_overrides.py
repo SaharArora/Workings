@@ -10,6 +10,9 @@ from typing import Any, Mapping
 HUMAN_AUTHORIZATION_SOURCE = "human_authorized_bounded_pilot"
 HUMAN_TRANCHE_AUTHORIZATION_SOURCE = "human_authorized_time_constrained_tranche"
 HUMAN_POOLED_VALIDATION_SOURCE = "human_authorized_pooled_model_validation"
+POOLED_EMPIRICAL_COMPETITION_PAUSE_REASON = (
+    "POOLED_EMPIRICAL_PAUSED_COMPETITION_CYCLE_RISK_SELECTOR_FAILED"
+)
 
 
 class AuthorizationStatus(StrEnum):
@@ -179,6 +182,7 @@ class ExperimentalOverrideRegistry:
         overrides: tuple[ExperimentalOverride, ...] = PILOT_OVERRIDES,
         adaptive_diagnostic_limit: int | None = None,
         pooled_randomized: bool = False,
+        pooled_paused_reason: str | None = None,
     ) -> None:
         self.enabled = bool(enabled)
         self.authorization_source = authorization_source
@@ -186,6 +190,7 @@ class ExperimentalOverrideRegistry:
         self.overrides = overrides
         self.adaptive_diagnostic_limit = adaptive_diagnostic_limit
         self.pooled_randomized = bool(pooled_randomized)
+        self.pooled_paused_reason = pooled_paused_reason
         self.adaptive_diagnostic_game_ids: set[str] = set()
         self._adaptive_assignment: dict[str, bool] = {}
         self._pooled_assignment: dict[str, bool] = {}
@@ -216,12 +221,13 @@ class ExperimentalOverrideRegistry:
 
     @classmethod
     def human_authorized_pooled_validation(cls) -> "ExperimentalOverrideRegistry":
-        """Authorize deterministic 50/50 assignment in eligible ROBUST cells only."""
+        """Retain the old profile but fail closed after the competition-cycle pause."""
         return cls(
             enabled=True,
             authorization_source=HUMAN_POOLED_VALIDATION_SOURCE,
             overrides=POOLED_VALIDATION_OVERRIDES,
             pooled_randomized=True,
+            pooled_paused_reason=POOLED_EMPIRICAL_COMPETITION_PAUSE_REASON,
         )
 
     def contents(self) -> dict[str, Any]:
@@ -239,6 +245,7 @@ class ExperimentalOverrideRegistry:
                 else None
             ),
             "pooled_randomized": self.pooled_randomized,
+            "pooled_paused_reason": self.pooled_paused_reason,
             "pooled_assignment_method": (
                 "sha256(game_id) parity; frozen for the full game"
                 if self.pooled_randomized
@@ -329,6 +336,12 @@ class ExperimentalOverrideRegistry:
                     ),
                 )
             if override.policy_name == "NEGOTIATION_POOLED_EMPIRICAL":
+                if self.pooled_paused_reason is not None:
+                    return OverrideResolution(
+                        override=override,
+                        available=False,
+                        unavailable_reason=self.pooled_paused_reason,
+                    )
                 state = game.get("game_state", {})
                 eligible_cell = (
                     state.get("complete_information") is False

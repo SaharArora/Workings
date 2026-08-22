@@ -8,6 +8,8 @@ from leaderboard.experimental_overrides import (
     HUMAN_AUTHORIZATION_SOURCE,
     HUMAN_POOLED_VALIDATION_SOURCE,
     HUMAN_TRANCHE_AUTHORIZATION_SOURCE,
+    POOLED_EMPIRICAL_COMPETITION_PAUSE_REASON,
+    POOLED_VALIDATION_OVERRIDES,
 )
 from leaderboard.policy_router import PolicyArtifact, PolicyRouter, cell_key
 from policies.negotiation.bayes import BayesEligibility
@@ -131,7 +133,7 @@ def test_human_authorized_incomplete_cell_uses_separate_adaptive_challenger() ->
     assert route.policy_details["robust_reference_price"] == 15
 
 
-def test_pooled_validation_selects_frozen_artifact_without_exact_cell_gate() -> None:
+def test_failed_risk_selector_pauses_pooled_validation_for_cycle() -> None:
     game = negotiation_game(complete=False, rounds=10)
     game["game_id"] = "c"  # Frozen hash assignment to the pooled arm.
     game["opponent"] = {"type": "agent", "name": "model"}
@@ -144,19 +146,31 @@ def test_pooled_validation_selects_frozen_artifact_without_exact_cell_gate() -> 
         ),
     )
     action, route = router.decide_with_routing(game)
-    assert action == {"product_price": 12}
+    assert action == {"product_price": 15}
     assert route.baseline_policy == "NEGOTIATION_ROBUST"
     assert route.experimental_policy == "NEGOTIATION_POOLED_EMPIRICAL"
-    assert route.selected_policy == "NEGOTIATION_POOLED_EMPIRICAL"
+    assert route.selected_policy == "NEGOTIATION_ROBUST"
     assert route.authorization_source == HUMAN_POOLED_VALIDATION_SOURCE
-    assert route.available_policy_artifacts == ("pooled-v1",)
+    assert route.available_policy_artifacts == ()
+    assert POOLED_EMPIRICAL_COMPETITION_PAUSE_REASON in str(route.fallback_reason)
+
+
+def unpaused_pooled_registry() -> ExperimentalOverrideRegistry:
+    """Low-level fixture; no production constructor exposes this state."""
+    return ExperimentalOverrideRegistry(
+        enabled=True,
+        authorization_source=HUMAN_POOLED_VALIDATION_SOURCE,
+        overrides=POOLED_VALIDATION_OVERRIDES,
+        pooled_randomized=True,
+        pooled_paused_reason=None,
+    )
 
 
 def test_missing_or_corrupt_pooled_artifact_preserves_robust_incumbent() -> None:
     game = negotiation_game(complete=False, rounds=None)
     game["game_id"] = "c"
     game["opponent"] = {"type": "agent", "name": "model"}
-    registry = ExperimentalOverrideRegistry.human_authorized_pooled_validation()
+    registry = unpaused_pooled_registry()
     missing = PolicyRouter(experimental_overrides=registry).route(game)
     assert missing.selected_policy == "NEGOTIATION_ROBUST"
     assert "POOLED_ARTIFACT_MISSING" in str(missing.fallback_reason)
@@ -167,7 +181,7 @@ def test_missing_or_corrupt_pooled_artifact_preserves_robust_incumbent() -> None
     broken = PolicyRouter(
         pooled_negotiation_artifact=PolicyArtifact("pooled-corrupt", corrupt),
         experimental_overrides=(
-            ExperimentalOverrideRegistry.human_authorized_pooled_validation()
+            unpaused_pooled_registry()
         ),
     ).route(game)
     assert broken.selected_policy == "NEGOTIATION_ROBUST"
@@ -183,7 +197,7 @@ def test_pooled_randomization_is_frozen_and_can_keep_current_incumbent() -> None
             "pooled-v1", direct_policy(12)
         ),
         experimental_overrides=(
-            ExperimentalOverrideRegistry.human_authorized_pooled_validation()
+            unpaused_pooled_registry()
         ),
     )
     first = router.route(game)
@@ -200,7 +214,7 @@ def test_pooled_unknown_opponent_category_keeps_robust_incumbent() -> None:
             "pooled-v1", direct_policy(12)
         ),
         experimental_overrides=(
-            ExperimentalOverrideRegistry.human_authorized_pooled_validation()
+            unpaused_pooled_registry()
         ),
     ).route(game)
     assert route.selected_policy == "NEGOTIATION_ROBUST"
