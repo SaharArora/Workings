@@ -7,7 +7,13 @@ completed promotion and confirmation entry is recorded here.
 
 `experiment_id`, `cell`, `opponent_category`, `incumbent`, `candidate`, `model_version`,
 `alpha_family`, `M`, `alpha_test`, `delta_min`, `data_window`, `n_games`, `E_t_final`,
-`E_t_prime_final`, `effect_estimate`, `outcome`, `active_policy`, and `code_commit`.
+`E_t_prime_final`, `effect_estimate`, `raw_payoff_effect`, `payoff_transform_version`,
+`clipping_count`, `clipping_rate`, `outcome`, `active_policy`, and `code_commit`.
+
+For negotiation, `effect_estimate` is the candidate-minus-incumbent mean difference in
+the clipped scale-adjusted score `Y`. `raw_payoff_effect` is always reported alongside it
+as a diagnostic; it is not the bounded e-process input. The locked transform version is
+`negotiation_clipped_utility_score_v1`.
 
 ## Candidate inventory (not promotion records)
 

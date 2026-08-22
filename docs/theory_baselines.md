@@ -20,9 +20,9 @@ The challenger in every bargaining cell is the fixed fairness concession
 No-trade (`V_B<V_A`) is checked first in every cell.
 
 The mechanism price is verified unbounded above; `M` scales valuations and is not a legal
-price cap. Consequently the current bounded `[0,1]` payoff normalization is unavailable
-for negotiation pending a separately specified statistical redesign. Observed or
-configured price ranges must not be substituted for mechanism support.
+price cap. Mechanism-derived min-max payoff normalization is therefore unavailable.
+Negotiation research instead uses the separately labeled clipped statistical transform
+documented below; no policy grid or transform clip is interpreted as mechanism support.
 
 | Information | Horizon | Baseline |
 |---|---|---|
@@ -41,23 +41,51 @@ T=1. The corrections are fixed constants, not learned models.
 
 ### ROBUST v1 fallback policy
 
-ROBUST uses five evenly spaced opponent valuation scenarios over the verified legal range.
-For each legal price and grid point it computes own payoff, the best payoff possible had
-that scenario been known, and regret as their difference. It selects
-`argmin_p max_g regret(p,g)`. The ambiguity grid is static throughout a game and never
-reweighted from history.
+`pi_ROBUST` bounds its own decision set for tractability and conservative
+decision-making. It does not claim or assume that the GLEE mechanism itself is bounded.
+
+For seller reservation value `V_S>0`, its candidates are
+`A_S={V_S,1.10V_S,1.25V_S,1.50V_S,2V_S}` and buyer-value scenarios are
+`{V_S,1.25V_S,1.50V_S,2V_S}`. A scenario buyer accepts iff `p<=v`; seller utility is
+`p-V_S` on acceptance and zero otherwise; ex-post best utility is `max(0,v-V_S)`.
+
+For buyer value `V_B>0`, candidates are
+`A_B={0,.25V_B,.50V_B,.75V_B,V_B}` and the analogous seller-value scenarios use those
+same fractions. A scenario seller accepts iff `p>=v`; buyer utility is `V_B-p` on
+acceptance and zero otherwise; ex-post best utility is `max(0,V_B-v)`. Buyer candidates
+never deliberately exceed `V_B`.
+
+For every candidate, ROBUST computes regret against each scenario and selects
+`argmin_p max_v R(p;v)`. Ties favor agreement probability: lower ask for a seller, higher
+offer for a buyer. The scenario set remains static and is never reweighted from history.
+If an authoritative positive legal minimum is later exposed it clamps candidates upward,
+provided the seller `2V_S` cap or buyer `V_B` cap remains feasible. There is no policy
+upper bound inferred from mechanism metadata.
 
 Pure worst-case/maximin payoff was rejected because it degenerates to the single lowest
 valuation scenario: altering the other four points does not change its choice. Minimax
 regret uses the grid's composition and changes choices when that composition changes. It
 is a conservative fallback decision rule, not an equilibrium solution and not learned.
 
-The formal mechanism and reference implementation now verify that the current negotiation
-price domain has no finite upper endpoint. Therefore the finite legal-price grid assumed
-by this locked ROBUST v1 rule does not exist for the live mechanism. Routing still selects
-ROBUST for the specified underdetermined cells; action execution fails closed until a
-separately authorized unbounded-domain ROBUST formulation is specified and tested. A
-valuation scale, observed offer range, or historical maximum is not used as a substitute.
+For current offers, v1 uses an explicit simplified continuation rule rather than a latent
+belief model: if countering is legal, accept only an individually rational offer at least
+as favorable as the chosen ROBUST proposal; otherwise counter with that proposal. If no
+counteroffer is legal, accept any individually rational offer and reject otherwise. A
+zero-value player without a verified positive scale fails closed as
+`ROBUST_SCALE_UNAVAILABLE`.
+
+### Negotiation bounded statistical payoff transform
+
+This transform is not mechanism normalization. For raw own utility `U` and private value
+`V_i`, set `S=max(|V_i|,1)`, `C=2S`, then
+`Y=(clip(U,-C,C)+C)/(2C)`. Thus `-C -> 0`, `0 -> .5`, `C -> 1`, and more extreme values
+clip to the endpoints. Logs and offline reports retain both raw `U` and transformed `Y`,
+including whether clipping occurred.
+
+The negotiation promotion estimand is expected clipped scale-adjusted utility `Y`.
+Within the unclipped region, `delta_U=4S*delta_Y`; therefore `delta_min=.01` corresponds
+locally to `.04S`, about 4% of own valuation scale. This equivalence does not hold after
+clipping. Raw expected payoff remains a separately reported diagnostic.
 
 BAYES uses a frozen, calibrated rejection-likelihood model and a posterior updated by
 Bayes' rule. Its prior is empirical only at `n>=200`, otherwise uniform on the verified

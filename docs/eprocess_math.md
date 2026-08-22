@@ -6,8 +6,12 @@ derivation and does not authorize substituting another contrast.
 ## Construction
 
 Randomize every comparable game independently, 50/50, before play. Let `Z_t=+1` when
-candidate B is assigned and `Z_t=-1` when incumbent A is assigned. Normalize the realized
-arm's payoff to `Y_t in [0,1]` using configuration/role bounds, and set `X_t=Z_t Y_t`.
+candidate B is assigned and `Z_t=-1` when incumbent A is assigned. Map the realized arm's
+payoff to `Y_t in [0,1]` and set `X_t=Z_t Y_t`. Bargaining and persuasion use their
+configuration/role-derived mechanism bounds. Negotiation uses the explicitly statistical
+v1 transform `S=max(|V_i|,1)`, `C=2S`,
+`Y_t=(clip(U_t,-C,C)+C)/(2C)` and logs raw `U_t` separately. The negotiation transform is
+not a claim that the price mechanism is bounded.
 
 For each `lambda` in `Lambda={0.1, 0.25, 0.5, 0.75}`:
 
@@ -28,7 +32,7 @@ Filtration F_{t-1}:            all information available immediately before game
 Assignment timing:             Z_t is drawn fresh, independently, before game t is
                                 played — never after or influenced by Y_t.
 Assignment probability:        P(Z_t=+1) = P(Z_t=-1) = 1/2, independent of F_{t-1}.
-Potential outcomes:            Y_t(A), Y_t(B) — the normalized payoff that would result
+Potential outcomes:            Y_t(A), Y_t(B) — the bounded payoff score that would result
                                 under each policy for game t; only one is ever realized.
 Observed outcome:              Y_t = Y_t(B) if Z_t=+1, Y_t(A) if Z_t=-1.
 Null hypothesis:               H0: E[Y_t(B)-Y_t(A) | F_{t-1}] <= 0.
@@ -45,7 +49,7 @@ Allowable betting fractions:   1+lambda X_t >= 0 for every X_t in [-1,1]. The bi
 
 ## Validity derivation
 
-Writing `Y_t(A)` and `Y_t(B)` for the two potential normalized payoffs, of which only the
+Writing `Y_t(A)` and `Y_t(B)` for the two potential bounded payoff scores, of which only the
 assigned one is observed:
 
 ```text
@@ -81,3 +85,9 @@ With `alpha_family=0.05`, `M` simultaneous challengers in one cell gives
 candidate-minus-incumbent mean exceeds `delta_min=0.01`. Retain when the mirror process
 crosses `1/alpha_test`; no practical margin is imposed on retention. If the window closes
 before either result, report `INCONCLUSIVE` and leave the incumbent active.
+
+For negotiation, the estimand is improvement in expected clipped scale-adjusted utility
+`Y`, while raw expected payoff is a parallel diagnostic. Inside the unclipped linear
+region, `delta Y = delta U/(4S)`, so `delta_min=.01` corresponds locally to
+`delta U_min=.04S`, approximately 4% of own valuation scale. No such raw-scale
+equivalence is claimed for observations in the clipped region.
