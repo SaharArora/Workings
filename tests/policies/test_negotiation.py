@@ -97,6 +97,41 @@ def test_robust_terminal_decision_accepts_ir_and_rejects_non_ir() -> None:
     assert robust_action_plan(game).action == {"decision": "RejectOffer"}
 
 
+def test_robust_unknown_horizon_has_intentional_no_progress_exit() -> None:
+    repeated = {
+        "decision": "RejectOffer",
+        "decided_by": "player_1",
+        "offer": {"price": 50},
+        "counteroffer": 150,
+    }
+    game = {
+        "game_family": "negotiation",
+        "game_state": {
+            "current_player": "player_1",
+            "player_1_role": "seller",
+            "player_1_value": 100,
+            "last_offer": {"price": 50},
+            "horizon_known": False,
+            "history": [repeated, repeated],
+        },
+        "valid_actions": {
+            "type": "decision",
+            "fields": {
+                "decision": "'AcceptOffer', 'RejectOffer', or 'WalkAway'",
+                "product_price": "number required with RejectOffer",
+            },
+        },
+    }
+    plan = robust_action_plan(game)
+    assert plan.action == {"decision": "WalkAway"}
+    assert plan.decision_rule == "WALK_AWAY_AFTER_THREE_IDENTICAL_OFFER_COUNTER_PAIRS"
+    game["game_state"]["last_offer"] = {"price": 60}
+    assert robust_action_plan(game).action == {
+        "decision": "RejectOffer",
+        "product_price": 150,
+    }
+
+
 def test_bayes_eligibility_and_posterior() -> None:
     assert BayesEligibility(200, 0.10, True).eligible
     policy = BayesPricingPolicy({10: 0.5, 20: 0.5}, lambda value, price, history: 0.9 if value < price else 0.1)

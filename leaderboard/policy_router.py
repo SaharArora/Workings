@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field, replace
 from typing import Any
 
@@ -378,7 +378,10 @@ def bargaining_theory_action(game: dict[str, Any]) -> dict[str, Any]:
                 threshold = money * own_delta * rubinstein_proposer_share(
                     own_delta, opponent_delta
                 )
-        return {"decision": "accept" if own >= threshold else "reject"}
+        decision = "accept" if own >= threshold else "reject"
+        if decision == "reject" and _bargaining_repeated_no_progress(game, me=me):
+            return {"decision": "walkaway"}
+        return {"decision": decision}
     complete = bool(state["complete_information"])
     finite = bool(state["horizon_known"])
     if complete:
@@ -422,8 +425,48 @@ def bargaining_incomplete_equal_split_action(game: dict[str, Any]) -> dict[str, 
     if game["valid_actions"]["type"] == "decision":
         me = str(state["current_player"])
         own = float(state["last_offer"][f"{me}_gain"])
-        return {"decision": "accept" if own >= money / 2 else "reject"}
+        decision = "accept" if own >= money / 2 else "reject"
+        if decision == "reject" and _bargaining_repeated_no_progress(game, me=me):
+            return {"decision": "walkaway"}
+        return {"decision": decision}
     return {"alice_gain": money / 2, "bob_gain": money / 2}
+
+
+def _bargaining_split(offer: Mapping[str, Any]) -> tuple[float, float] | None:
+    alice = offer.get("player_1_gain", offer.get("alice_gain"))
+    bob = offer.get("player_2_gain", offer.get("bob_gain"))
+    if isinstance(alice, (int, float)) and isinstance(bob, (int, float)):
+        return float(alice), float(bob)
+    return None
+
+
+def _bargaining_repeated_no_progress(game: Mapping[str, Any], *, me: str) -> bool:
+    """Return true on the third identical rejected offer in an unknown horizon."""
+    state = game["game_state"]
+    if state.get("horizon_known") is not False:
+        return False
+    fields = str(game.get("valid_actions", {}).get("fields", {})).lower()
+    if "walkaway" not in fields:
+        return False
+    current = state.get("last_offer")
+    current_split = _bargaining_split(current) if isinstance(current, Mapping) else None
+    history = state.get("history", [])
+    if current_split is None or not isinstance(history, Sequence):
+        return False
+    responses = [
+        item
+        for item in history
+        if isinstance(item, Mapping)
+        and str(item.get("proposer", "")) != me
+        and str(item.get("decision", "")).lower() == "reject"
+    ]
+    if len(responses) < 2:
+        return False
+    return all(
+        isinstance(item.get("offer"), Mapping)
+        and _bargaining_split(item["offer"]) == current_split
+        for item in responses[-2:]
+    )
 
 
 def persuasion_p0_action(game: dict[str, Any]) -> dict[str, Any]:

@@ -9,14 +9,14 @@
       "family": "negotiation",
       "selected_policy": "NEGOTIATION_COMPLETE_T1_THEORY",
       "iterations": 1000,
-      "median_seconds": 1.2499978765845299e-05,
-      "p95_seconds": 1.3166922144591808e-05,
-      "max_seconds": 0.00014391704462468624,
+      "median_seconds": 1.2542004697024822e-05,
+      "p95_seconds": 1.6291975043714046e-05,
+      "max_seconds": 0.0014298330061137676,
       "median_components_seconds": {
         "parsing": 5.420297384262085e-07,
-        "routing_policy": 9.95909795165062e-06,
+        "routing_policy": 1.00000761449337e-05,
         "communication": 4.169996827840805e-07,
-        "validation": 1.5419209375977516e-06
+        "validation": 1.5420373529195786e-06
       },
       "within_budget": true
     },
@@ -25,14 +25,14 @@
       "family": "negotiation",
       "selected_policy": "NEGOTIATION_COMPLETE_FINITE_ODD_THEORY",
       "iterations": 1000,
-      "median_seconds": 1.2041069567203522e-05,
-      "p95_seconds": 1.2457952834665775e-05,
-      "max_seconds": 0.00017616699915379286,
+      "median_seconds": 1.2415926903486252e-05,
+      "p95_seconds": 3.0624913051724434e-05,
+      "max_seconds": 0.0012874999083578587,
       "median_components_seconds": {
-        "parsing": 5.420297384262085e-07,
-        "routing_policy": 9.917072020471096e-06,
+        "parsing": 5.828915163874626e-07,
+        "routing_policy": 1.0207993909716606e-05,
         "communication": 1.6693957149982452e-07,
-        "validation": 1.374981366097927e-06
+        "validation": 1.4579854905605316e-06
       },
       "within_budget": true
     },
@@ -41,14 +41,14 @@
       "family": "negotiation",
       "selected_policy": "NEGOTIATION_COMPLETE_FINITE_EVEN_THEORY",
       "iterations": 1000,
-      "median_seconds": 1.2791948392987251e-05,
-      "p95_seconds": 1.3332930393517017e-05,
-      "max_seconds": 0.00024654099252074957,
+      "median_seconds": 1.3167038559913635e-05,
+      "p95_seconds": 1.6875099390745163e-05,
+      "max_seconds": 0.00019162497483193874,
       "median_components_seconds": {
         "parsing": 5.420297384262085e-07,
-        "routing_policy": 9.875046089291573e-06,
-        "communication": 2.0908191800117493e-07,
-        "validation": 2.124928869307041e-06
+        "routing_policy": 1.0167015716433525e-05,
+        "communication": 2.4994369596242905e-07,
+        "validation": 2.1669548004865646e-06
       },
       "within_budget": true
     },
@@ -57,14 +57,14 @@
       "family": "negotiation",
       "selected_policy": "NEGOTIATION_COMPLETE_UNLIMITED_MIDPOINT",
       "iterations": 1000,
-      "median_seconds": 1.2208474799990654e-05,
-      "p95_seconds": 1.2874952517449856e-05,
-      "max_seconds": 0.00012704101391136646,
+      "median_seconds": 1.237494871020317e-05,
+      "p95_seconds": 1.4584045857191086e-05,
+      "max_seconds": 0.0005141659639775753,
       "median_components_seconds": {
-        "parsing": 5.419133231043816e-07,
-        "routing_policy": 9.749899618327618e-06,
+        "parsing": 5.420297384262085e-07,
+        "routing_policy": 9.833020158112049e-06,
         "communication": 4.1606836020946503e-07,
-        "validation": 1.500011421740055e-06
+        "validation": 1.5420373529195786e-06
       },
       "within_budget": true
     },
@@ -73,14 +73,14 @@
       "family": "negotiation",
       "selected_policy": "NEGOTIATION_INCOMPLETE_T1_ROBUST",
       "iterations": 1000,
-      "median_seconds": 6.054149707779288e-05,
-      "p95_seconds": 6.78329961374402e-05,
-      "max_seconds": 0.00034487503580749035,
+      "median_seconds": 6.229197606444359e-05,
+      "p95_seconds": 0.00010070903226733208,
+      "max_seconds": 0.0003003340680152178,
       "median_components_seconds": {
-        "parsing": 5.830079317092896e-07,
-        "routing_policy": 5.825003609061241e-05,
+        "parsing": 5.83939254283905e-07,
+        "routing_policy": 5.9958023484796286e-05,
         "communication": 1.6705598682165146e-07,
-        "validation": 1.459033228456974e-06
+        "validation": 1.5420373529195786e-06
       },
       "within_budget": true
     },
@@ -89,14 +89,14 @@
       "family": "negotiation",
       "selected_policy": "NEGOTIATION_ROBUST",
       "iterations": 1000,
-      "median_seconds": 6.67079584673047e-05,
-      "p95_seconds": 7.554097101092339e-05,
-      "max_seconds": 0.00025795900728553534,
+      "median_seconds": 7.008295506238937e-05,
+      "p95_seconds": 0.00013954192399978638,
+      "max_seconds": 0.000604458968155086,
       "median_components_seconds": {
         "parsing": 5.830079317092896e-07,
-        "routing_policy": 6.325001595541835e-05,
-        "communication": 4.169996827840805e-07,
-        "validation": 2.458924427628517e-06
+        "routing_policy": 6.637501064687967e-05,
+        "communication": 4.5797787606716156e-07,
+        "validation": 2.624932676553726e-06
       },
       "within_budget": true
     },
@@ -105,14 +105,14 @@
       "family": "negotiation",
       "selected_policy": "NEGOTIATION_ROBUST",
       "iterations": 1000,
-      "median_seconds": 6.324995774775743e-05,
-      "p95_seconds": 0.00011454103514552116,
-      "max_seconds": 0.0005600419826805592,
+      "median_seconds": 5.9165991842746735e-05,
+      "p95_seconds": 8.68749339133501e-05,
+      "max_seconds": 0.00019924994558095932,
       "median_components_seconds": {
-        "parsing": 5.828915163874626e-07,
-        "routing_policy": 6.054097320884466e-05,
-        "communication": 4.5797787606716156e-07,
-        "validation": 1.7079291865229607e-06
+        "parsing": 5.420297384262085e-07,
+        "routing_policy": 5.660450551658869e-05,
+        "communication": 4.169996827840805e-07,
+        "validation": 1.583946868777275e-06
       },
       "within_budget": true
     },
@@ -121,14 +121,14 @@
       "family": "bargaining",
       "selected_policy": "BARGAINING_COMPLETE_FINITE",
       "iterations": 1000,
-      "median_seconds": 1.4166987966746092e-05,
-      "p95_seconds": 4.912493750452995e-05,
-      "max_seconds": 0.00028237502556294203,
+      "median_seconds": 1.283304300159216e-05,
+      "p95_seconds": 1.4041084796190262e-05,
+      "max_seconds": 8.687505032867193e-05,
       "median_components_seconds": {
-        "parsing": 5.828915163874626e-07,
-        "routing_policy": 1.1375057511031628e-05,
-        "communication": 2.4994369596242905e-07,
-        "validation": 1.958920620381832e-06
+        "parsing": 5.409820005297661e-07,
+        "routing_policy": 1.0292045772075653e-05,
+        "communication": 2.0908191800117493e-07,
+        "validation": 1.7909333109855652e-06
       },
       "within_budget": true
     },
@@ -137,14 +137,14 @@
       "family": "bargaining",
       "selected_policy": "BARGAINING_COMPLETE_UNLIMITED",
       "iterations": 1000,
-      "median_seconds": 1.283304300159216e-05,
-      "p95_seconds": 4.083407111465931e-05,
-      "max_seconds": 0.00036691699642688036,
+      "median_seconds": 1.166702713817358e-05,
+      "p95_seconds": 1.391698606312275e-05,
+      "max_seconds": 7.233303040266037e-05,
       "median_components_seconds": {
-        "parsing": 5.830079317092896e-07,
-        "routing_policy": 1.0041985660791397e-05,
-        "communication": 2.500019036233425e-07,
-        "validation": 1.9581057131290436e-06
+        "parsing": 5.419133231043816e-07,
+        "routing_policy": 9.125098586082458e-06,
+        "communication": 2.0908191800117493e-07,
+        "validation": 1.750071533024311e-06
       },
       "within_budget": true
     },
@@ -153,14 +153,14 @@
       "family": "bargaining",
       "selected_policy": "BARGAINING_INCOMPLETE_EQUAL_SPLIT",
       "iterations": 1000,
-      "median_seconds": 1.2707896530628204e-05,
-      "p95_seconds": 2.916704397648573e-05,
-      "max_seconds": 0.00020066602155566216,
+      "median_seconds": 1.233397051692009e-05,
+      "p95_seconds": 1.325004268437624e-05,
+      "max_seconds": 0.0006746670696884394,
       "median_components_seconds": {
         "parsing": 5.420297384262085e-07,
-        "routing_policy": 9.916955605149269e-06,
+        "routing_policy": 9.625102393329144e-06,
         "communication": 2.4994369596242905e-07,
-        "validation": 1.9579892978072166e-06
+        "validation": 1.8749851733446121e-06
       },
       "within_budget": true
     },
@@ -169,14 +169,14 @@
       "family": "bargaining",
       "selected_policy": "BARGAINING_INCOMPLETE_EQUAL_SPLIT",
       "iterations": 1000,
-      "median_seconds": 1.2584030628204346e-05,
-      "p95_seconds": 4.224991425871849e-05,
-      "max_seconds": 0.00033429195173084736,
+      "median_seconds": 1.2417091056704521e-05,
+      "p95_seconds": 1.3542012311518192e-05,
+      "max_seconds": 0.0006839580601081252,
       "median_components_seconds": {
         "parsing": 5.420297384262085e-07,
-        "routing_policy": 9.624985978007317e-06,
-        "communication": 2.4994369596242905e-07,
-        "validation": 2.1670712158083916e-06
+        "routing_policy": 9.499955922365189e-06,
+        "communication": 2.0908191800117493e-07,
+        "validation": 2.125045284628868e-06
       },
       "within_budget": true
     },
@@ -185,14 +185,14 @@
       "family": "persuasion",
       "selected_policy": "PERSUASION_P0_BABBLING",
       "iterations": 1000,
-      "median_seconds": 1.0958989150822163e-05,
-      "p95_seconds": 2.1541956812143326e-05,
-      "max_seconds": 0.00028008397202938795,
+      "median_seconds": 1.0624993592500687e-05,
+      "p95_seconds": 1.0875053703784943e-05,
+      "max_seconds": 0.0005795409670099616,
       "median_components_seconds": {
         "parsing": 5.420297384262085e-07,
-        "routing_policy": 8.792034350335598e-06,
-        "communication": 2.4994369596242905e-07,
-        "validation": 1.374981366097927e-06
+        "routing_policy": 8.500064723193645e-06,
+        "communication": 2.0908191800117493e-07,
+        "validation": 1.2920936569571495e-06
       },
       "within_budget": true
     },
@@ -201,14 +201,14 @@
       "family": "persuasion",
       "selected_policy": "PERSUASION_P0_BABBLING",
       "iterations": 1000,
-      "median_seconds": 1.166702713817358e-05,
-      "p95_seconds": 2.3916945792734623e-05,
-      "max_seconds": 0.0002818329958245158,
+      "median_seconds": 1.1165975593030453e-05,
+      "p95_seconds": 1.1791009455919266e-05,
+      "max_seconds": 0.0004310410004109144,
       "median_components_seconds": {
-        "parsing": 5.420297384262085e-07,
-        "routing_policy": 8.916482329368591e-06,
-        "communication": 1.6705598682165146e-07,
-        "validation": 2.00001522898674e-06
+        "parsing": 5.830079317092896e-07,
+        "routing_policy": 8.457922376692295e-06,
+        "communication": 1.6693957149982452e-07,
+        "validation": 1.9579892978072166e-06
       },
       "within_budget": true
     },
@@ -217,14 +217,14 @@
       "family": "persuasion",
       "selected_policy": "PERSUASION_P0_BABBLING",
       "iterations": 1000,
-      "median_seconds": 1.2791017070412636e-05,
-      "p95_seconds": 3.2250070944428444e-05,
-      "max_seconds": 0.00030325003899633884,
+      "median_seconds": 1.1874944902956486e-05,
+      "p95_seconds": 1.2500095181167126e-05,
+      "max_seconds": 0.00016774993855506182,
       "median_components_seconds": {
         "parsing": 5.420297384262085e-07,
-        "routing_policy": 9.999959729611874e-06,
-        "communication": 1.6705598682165146e-07,
-        "validation": 2.00001522898674e-06
+        "routing_policy": 9.25001222640276e-06,
+        "communication": 1.6693957149982452e-07,
+        "validation": 1.915963366627693e-06
       },
       "within_budget": true
     }

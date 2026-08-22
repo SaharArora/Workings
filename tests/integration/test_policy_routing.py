@@ -151,6 +151,40 @@ def test_bargaining_clean_cell_keeps_configuration_theory() -> None:
     assert route.selected_policy == "BARGAINING_COMPLETE_FINITE"
 
 
+def test_incomplete_bargaining_unknown_horizon_has_named_no_progress_exit() -> None:
+    game = bargaining_game()
+    game["game_state"].update(
+        {
+            "complete_information": False,
+            "horizon_known": False,
+            "current_player": "player_2",
+            "last_offer": {"player_1_gain": 80, "player_2_gain": 20},
+            "history": [
+                {
+                    "proposer": "player_1",
+                    "offer": {"player_1_gain": 80, "player_2_gain": 20},
+                    "decision": "reject",
+                },
+                {
+                    "proposer": "player_1",
+                    "offer": {"player_1_gain": 80, "player_2_gain": 20},
+                    "decision": "reject",
+                },
+            ],
+        }
+    )
+    game["game_state"].pop("max_rounds")
+    game["game_state"].pop("delta_1")
+    game["valid_actions"] = {
+        "type": "decision",
+        "fields": {"decision": "'accept', 'reject', or 'walkaway'"},
+    }
+    action, route = PolicyRouter().decide_with_routing(game)
+    assert route.selected_policy == "BARGAINING_INCOMPLETE_EQUAL_SPLIT"
+    assert route.execution_fallback_reason is None
+    assert action == {"decision": "walkaway"}
+
+
 def test_persuasion_no_commitment_keeps_p0() -> None:
     route = PolicyRouter().route(persuasion_game())
     assert route.selected_policy == "PERSUASION_P0_BABBLING"
