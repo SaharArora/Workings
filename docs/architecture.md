@@ -131,6 +131,34 @@ only; communication experiments are the sole research location where language ca
 treatment. The leaderboard alone calls `communication.strategic.render`, and only after
 the numeric/decision action is immutable.
 
+## Architecture decision 2026-08-22: theory is an expert, not runtime scaffolding
+
+The research decompositions remain useful and unchanged:
+
+```text
+IBO    = pi_theory + Delta_instance
+EG-SPM = pi_theory + Delta_population + Delta_instance
+```
+
+Production no longer requires every executable policy to be represented as an additive
+deviation from theory. Its conceptual pipeline is:
+
+```text
+structural-regime eligibility/routing
+    -> selected policy expert
+    -> expert-specific candidate generation
+    -> expert-specific action selection
+    -> communication rendering
+```
+
+Eligible experts may be THEORY, ROBUST, FAIRNESS/FAIRNESS_MARGIN, ADAPTIVE,
+POOLED_EMPIRICAL, or a future promoted policy. THEORY remains the cold-start fallback,
+safety baseline, evaluation control, and a source of candidates where useful. A validated
+empirical expert may directly replace it for a supported structural regime. This does not
+authorize moment-to-moment intuitive switching: policy-family routing remains frozen and
+evidence-governed at the structural-regime level; only an already selected empirical
+expert may choose dynamically within its declared candidate set.
+
 ## Promotion flow
 
 Assignments are seeded, independent, 50/50, logged before outcomes, and stratified by
@@ -253,10 +281,15 @@ the ROBUST incumbent. A missing or corrupt artifact also leaves the incumbent ac
 
 The process-scoped experimental registry can make a stable 50/50 assignment between an
 eligible pooled challenger and its incumbent before an outcome is observed. This code is
-implemented and tested, but the first fitted negotiation policy failed offline economic-
-sanity diagnostics by selecting systematically more aggressive endpoint candidates.
-Consequently no rated pooled-policy tranche was authorized and the challenger is neither
-promoted nor active by default.
+implemented and tested. The first one-step selector failed for aggressive endpoint
+choices. A subsequent continuation-aware risk grid kept the response model frozen and
+represented ACCEPT, one additional opportunity, and terminal nonagreement explicitly,
+but no tested parameter combination achieved complete feasible coverage or corrected the
+seller endpoint pathology. A genuinely response-independent public holdout was also
+unavailable because every public game was already assigned to model train/calibration/
+test and the authoritative source had no newer data. The pooled policy is therefore
+`PAUSED_FOR_COMPETITION_CYCLE`; even the earlier human-authorized validation constructor
+fails closed to ROBUST with a structured pause reason.
 
 `PERSUASION_POOLED_EMPIRICAL` is a separate seller-side offline response-model challenger.
 It neither replaces the production buyer's 2% margin nor supplies the missing P3 trust

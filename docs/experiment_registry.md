@@ -34,7 +34,7 @@ experiment row with all required fields records promotion and same-cell confirma
 | Negotiation/incomplete T=1 | current ROBUST | NEGOTIATION_ADAPTIVE | HUMAN_AUTHORIZED_EXPERIMENTAL for bounded 6-game family pilot; first/terminal rules reduce to ROBUST reference/IR behavior |
 | Negotiation/incomplete multi-round | ROBUST (current data gate) | NEGOTIATION_ADAPTIVE | HUMAN_AUTHORIZED_EXPERIMENTAL for bounded 6-game family pilot; not promoted |
 | Negotiation/incomplete multi-round/unknown horizon | ROBUST | BAYES | RESEARCH_BLOCKED where no exact-cell artifact passes its separate support gate |
-| Negotiation/incomplete multi-round/unknown horizon with supported public features | ROBUST | NEGOTIATION_POOLED_EMPIRICAL | OFFLINE IMPLEMENTED; held-out BSS 0.1719, but not live-authorized or promoted because action economic-sanity failed |
+| Negotiation/incomplete multi-round/unknown horizon with supported public features | ROBUST | NEGOTIATION_POOLED_EMPIRICAL / RISK_SENSITIVE_POOLED_EMPIRICAL | `PAUSED_FOR_COMPETITION_CYCLE`; 0/36 risk-grid combinations passed coverage + endpoint sanity; no live test or promotion |
 | Persuasion/repeated | P0 babbling | P3 reputation | P3_EXPERIMENT_INPUT_UNAVAILABLE + RESEARCH_BLOCKED: historical cell trust rate unavailable; P0 remains selected |
 | Persuasion/seller message choice | P0 babbling | PERSUASION_POOLED_EMPIRICAL | OFFLINE IMPLEMENTED; held-out BSS 0.6318; not live-authorized or promoted and does not provide P3 inputs |
 
@@ -55,6 +55,17 @@ latency, and non-cloning checks, but failed the additional economic-sanity revie
 held-out selected actions were more agreement-oriented than ROBUST in 0.0% of seller rows
 and 1.0% of buyer rows. The authorized ten-game validation tranche therefore did not run,
 no rating changed, and no e-process evidence was created.
+
+The continuation-aware follow-up froze the model and evaluated all 36 predeclared
+`lambda/alpha/epsilon` combinations on 4,031 whole games / 11,591 supported decisions.
+This was fresh to selector tuning but not independent of response fitting: every public
+game had already been consumed by response train/calibration/test, and public HEAD still
+matched source commit `68a33e98...`. Only 2,819 decisions had any candidate satisfying
+the explicit `P(raw Q<=0)<=0.50` constraint. Seller endpoint rate remained 0.8192 among
+selected states (old 0.9959), exceeding the predeclared 0.25 ceiling; buyer improved to
+0.1493. No combination passed, no parameters were selected, and the validation registry
+now fails closed with `POOLED_EMPIRICAL_PAUSED_COMPETITION_CYCLE_RISK_SELECTOR_FAILED`.
+This is not e-process evidence.
 
 The separate persuasion pooled dataset contains 13,506 public games and 270,120 buyer
 decisions. Its seller-side message response model achieves held-out Brier 0.0919, BSS

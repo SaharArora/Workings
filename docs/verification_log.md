@@ -588,3 +588,57 @@ is unavailable.
   and ECE 0.0209, without nature quality, terminal outcome, identity, or P3 trust inputs.
   It never replaces the production buyer margin. Its alternative-message estimates are
   model-based counterfactuals, not realized outcomes or promotion evidence.
+
+## Continuation-aware risk-selector cycle endpoint
+
+- **item:** Exact old pooled decision objective.
+- **result:** `VERIFIED` as `CONTINUATION_TERM_PRESENT_BUT_MISSPECIFIED`.
+- **evidence:** Before selector edits, 20 deterministic representative response-test
+  states were decomposed candidate by candidate in
+  `docs/negotiation_decision_objective_audit.md`. The old score was
+  `q(a)U(a)+(1-q(a))V_old`; `V_old=0` on offer turns and, on counter turns, the same
+  constant `0.25*q(ROBUST)*U(ROBUST)` for every candidate. It did not represent
+  candidate-dependent continuation or terminal nonagreement.
+
+- **item:** Frozen pooled response artifact during selector redesign.
+- **result:** `VERIFIED`.
+- **evidence:** Coefficients, feature schema, calibration, artifact contents, and model
+  version `negotiation-pooled-empirical-v1` were not retrained or edited. The issue was
+  decision quality; no leakage, role inversion, label, loading, or calibration defect was
+  found.
+
+- **item:** Continuation-aware risk-sensitive selector.
+- **result:** `IMPLEMENTED` offline; `PAUSED_FOR_COMPETITION_CYCLE` for runtime.
+- **evidence:** `Q` explicitly separates ACCEPT, a conservatively shrunk one-additional-
+  opportunity branch, and terminal nonagreement. Branch payoffs are transformed to the
+  locked negotiation Y score; loss is `L=-Y`; discrete CVaR uses the worst `1-alpha`
+  probability mass. All 36 locked combinations were evaluated over 11,591 supported
+  decisions from 4,031 whole games. Own-IR and support violations were zero, and the
+  `P(Y<0.50)` chance constraint never failed because IR/no-deal payoffs are nonnegative.
+  The separate zero constraint left only 2,819 states selectable. Seller endpoint rate
+  remained 0.8192 versus the required <=0.25; buyer endpoint rate was 0.1493. No grid
+  combination achieved full coverage plus endpoint sanity, so no parameters were
+  selected and no rated validation ran.
+
+- **item:** Fresh decision-holdout availability.
+- **result:** `RESEARCH_BLOCKED` for live authorization.
+- **evidence:** The authoritative public GLEE HEAD remains
+  `68a33e98b035b97f945badee8f325001555c0049`, and all 33,627 public negotiation games
+  were already consumed by response train/calibration/test. Retraining solely to create a
+  new split was forbidden. The salted whole-game subset is fresh only to selector tuning,
+  overlaps response fitting, and is explicitly not presented as an independent holdout.
+
+- **item:** Leaderboard-objective divergence proxy.
+- **result:** `VERIFIED`, `SCORING_OBJECTIVE_DIVERGENCE=false` under the predeclared rule.
+- **evidence:** Raw, clipped-normalized, risk-sensitive, and within-structural-regime
+  historical-percentile rankings had aggregate pairwise disagreement 31/1,116 = 0.0278,
+  below the >0.20 trigger. The percentile statistic is not claimed to reproduce official
+  GLEE rating.
+
+- **item:** Persuasion 2% margin lower-tail effect.
+- **result:** `VERIFIED`; production margin retained and P3 unchanged.
+- **evidence:** Across 13,506 public games, 2,828 differed between weak theory and the 2%
+  rule. Production mean raw payoff was 2,612,099.35 versus 2,610,593.88; downside
+  frequency was 0.0134 versus 0.1025; raw lower-tail CVaR(0.90) was -251,109.43 versus
+  -1,434,116.00. Production had more zero outcomes (0.6146 versus 0.4340), an explicit
+  cost of declining marginal trades.
