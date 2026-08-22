@@ -23,6 +23,8 @@ def main() -> None:
         "coverage_invariant": "every reachable configuration has an intentional executable incumbent",
         "row_count": len(rows),
         "deployment_blockers": 0,
+        "live_tested_row_count": sum(row.tested_live for row in rows),
+        "live_evidence_frozen_commit": "49a6021726553425506a09e23798b813c6091d9a",
         "rows": [row.structured() for row in rows],
     }
     json_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
@@ -37,7 +39,9 @@ def main() -> None:
         "`glee-sdk==0.0.5`, and the authoritative build specification.",
         "",
         "Readiness invariant: **every reachable row has an intentional executable incumbent.** "
-        "All 52 rows are offline-tested. Advanced unpromoted challengers are "
+        "All 52 rows are offline-tested. Rows exercised by the 16-game frozen pilot at "
+        "`49a6021726553425506a09e23798b813c6091d9a` are marked live-tested. Advanced "
+        "unpromoted challengers are "
         "`RESEARCH_BLOCKED`; none is a deployment blocker.",
         "",
         "## II/T=1 negotiation prior audit",

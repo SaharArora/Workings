@@ -8,6 +8,8 @@
   "coverage_invariant": "every reachable configuration has an intentional executable incumbent",
   "row_count": 52,
   "deployment_blockers": 0,
+  "live_tested_row_count": 12,
+  "live_evidence_frozen_commit": "49a6021726553425506a09e23798b813c6091d9a",
   "rows": [
     {
       "family": "negotiation",
@@ -43,7 +45,7 @@
       "selected_incumbent": "NEGOTIATION_COMPLETE_T1_THEORY",
       "executable": true,
       "tested_offline": true,
-      "tested_live": false,
+      "tested_live": true,
       "deployment_status": "CLEAR",
       "incomplete_classification": "RESEARCH_BLOCKED"
     },
@@ -271,7 +273,7 @@
       "selected_incumbent": "NEGOTIATION_COMPLETE_UNLIMITED_MIDPOINT",
       "executable": true,
       "tested_offline": true,
-      "tested_live": false,
+      "tested_live": true,
       "deployment_status": "CLEAR",
       "incomplete_classification": "RESEARCH_BLOCKED"
     },
@@ -363,7 +365,7 @@
       "selected_incumbent": "NEGOTIATION_INCOMPLETE_T1_ROBUST",
       "executable": true,
       "tested_offline": true,
-      "tested_live": false,
+      "tested_live": true,
       "deployment_status": "CLEAR",
       "incomplete_classification": "RESEARCH_BLOCKED"
     },
@@ -381,7 +383,7 @@
       "selected_incumbent": "NEGOTIATION_INCOMPLETE_T1_ROBUST",
       "executable": true,
       "tested_offline": true,
-      "tested_live": false,
+      "tested_live": true,
       "deployment_status": "CLEAR",
       "incomplete_classification": "RESEARCH_BLOCKED"
     },
@@ -471,7 +473,7 @@
       "selected_incumbent": "NEGOTIATION_ROBUST",
       "executable": true,
       "tested_offline": true,
-      "tested_live": false,
+      "tested_live": true,
       "deployment_status": "CLEAR",
       "incomplete_classification": "RESEARCH_BLOCKED"
     },
@@ -489,7 +491,7 @@
       "selected_incumbent": "NEGOTIATION_ROBUST",
       "executable": true,
       "tested_offline": true,
-      "tested_live": false,
+      "tested_live": true,
       "deployment_status": "CLEAR",
       "incomplete_classification": "RESEARCH_BLOCKED"
     },
@@ -525,7 +527,7 @@
       "selected_incumbent": "NEGOTIATION_ROBUST",
       "executable": true,
       "tested_offline": true,
-      "tested_live": false,
+      "tested_live": true,
       "deployment_status": "CLEAR",
       "incomplete_classification": "RESEARCH_BLOCKED"
     },
@@ -672,7 +674,7 @@
       "selected_incumbent": "BARGAINING_COMPLETE_UNLIMITED",
       "executable": true,
       "tested_offline": true,
-      "tested_live": false,
+      "tested_live": true,
       "deployment_status": "CLEAR",
       "incomplete_classification": "RESEARCH_BLOCKED"
     },
@@ -769,7 +771,7 @@
       "selected_incumbent": "BARGAINING_INCOMPLETE_EQUAL_SPLIT",
       "executable": true,
       "tested_offline": true,
-      "tested_live": false,
+      "tested_live": true,
       "deployment_status": "CLEAR",
       "incomplete_classification": "RESEARCH_BLOCKED"
     },
@@ -826,7 +828,7 @@
       "selected_incumbent": "BARGAINING_INCOMPLETE_EQUAL_SPLIT",
       "executable": true,
       "tested_offline": true,
-      "tested_live": false,
+      "tested_live": true,
       "deployment_status": "CLEAR",
       "incomplete_classification": "RESEARCH_BLOCKED"
     },
@@ -884,7 +886,7 @@
       "selected_incumbent": "PERSUASION_P0_BABBLING",
       "executable": true,
       "tested_offline": true,
-      "tested_live": false,
+      "tested_live": true,
       "deployment_status": "CLEAR",
       "incomplete_classification": "RESEARCH_BLOCKED"
     },
@@ -902,7 +904,7 @@
       "selected_incumbent": "PERSUASION_P0_BABBLING",
       "executable": true,
       "tested_offline": true,
-      "tested_live": false,
+      "tested_live": true,
       "deployment_status": "CLEAR",
       "incomplete_classification": "RESEARCH_BLOCKED"
     },

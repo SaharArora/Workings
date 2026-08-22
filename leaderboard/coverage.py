@@ -28,6 +28,37 @@ class ConfigurationCoverage:
         return value
 
 
+def _live_verified(family: str, signature: str, role: str) -> bool:
+    """Classes exercised by the frozen 2026-08-22 MVL pilots."""
+    if family == "negotiation":
+        if "information=complete;horizon=T=1;messages=true" in signature:
+            return role == "seller"
+        if "information=complete;horizon=unknown/unlimited;messages=true" in signature:
+            return role == "seller"
+        if "information=incomplete;horizon=T=1" in signature:
+            return role == "buyer"
+        if "information=incomplete;horizon=unknown/unlimited" in signature:
+            return role == "seller" or (role == "buyer" and "messages=true" in signature)
+    if family == "bargaining":
+        return role == "bob" and any(
+            marker in signature
+            for marker in (
+                "information=incomplete;horizon=finite;messages=true",
+                "information=complete;horizon=unknown/unlimited;messages=false",
+                "information=incomplete;horizon=unknown/unlimited;messages=false",
+            )
+        )
+    if family == "persuasion":
+        return (
+            role == "buyer"
+            and "message_type=text;seller_knows_buyer_values=false" in signature
+        ) or (
+            role == "seller"
+            and "message_type=text;seller_knows_buyer_values=true" in signature
+        )
+    return False
+
+
 def configuration_coverage() -> tuple[ConfigurationCoverage, ...]:
     """Enumerate policy-distinct classes in the documented current API grid.
 
@@ -74,14 +105,15 @@ def configuration_coverage() -> tuple[ConfigurationCoverage, ...]:
                         if multi
                         else None
                     )
+                    signature = (
+                        f"information={'complete' if complete else 'incomplete'};"
+                        f"horizon={horizon};messages={str(messages).lower()};"
+                        "values=positive grid"
+                    )
                     rows.append(
                         ConfigurationCoverage(
                             family="negotiation",
-                            configuration_signature=(
-                                f"information={'complete' if complete else 'incomplete'};"
-                                f"horizon={horizon};messages={str(messages).lower()};"
-                                "values=positive grid"
-                            ),
+                            configuration_signature=signature,
                             role=role,
                             theory_incumbent=theory,
                             challenger=challenger,
@@ -94,7 +126,7 @@ def configuration_coverage() -> tuple[ConfigurationCoverage, ...]:
                             selected_incumbent=selected,
                             executable=True,
                             tested_offline=True,
-                            tested_live=False,
+                            tested_live=_live_verified("negotiation", signature, role),
                             deployment_status="CLEAR",
                             incomplete_classification="RESEARCH_BLOCKED",
                         )
@@ -120,14 +152,15 @@ def configuration_coverage() -> tuple[ConfigurationCoverage, ...]:
                         if complete
                         else "BARGAINING_INCOMPLETE_EQUAL_SPLIT"
                     )
+                    signature = (
+                        f"information={'complete' if complete else 'incomplete'};"
+                        f"horizon={horizon};messages={str(messages).lower()};"
+                        "money=M;discounts=config-grid"
+                    )
                     rows.append(
                         ConfigurationCoverage(
                             family="bargaining",
-                            configuration_signature=(
-                                f"information={'complete' if complete else 'incomplete'};"
-                                f"horizon={horizon};messages={str(messages).lower()};"
-                                "money=M;discounts=config-grid"
-                            ),
+                            configuration_signature=signature,
                             role=role,
                             theory_incumbent=theory,
                             challenger="fairness-0.10 (not promoted)",
@@ -140,7 +173,7 @@ def configuration_coverage() -> tuple[ConfigurationCoverage, ...]:
                             selected_incumbent=selected,
                             executable=True,
                             tested_offline=True,
-                            tested_live=False,
+                            tested_live=_live_verified("bargaining", signature, role),
                             deployment_status="CLEAR",
                             incomplete_classification="RESEARCH_BLOCKED",
                         )
@@ -149,14 +182,15 @@ def configuration_coverage() -> tuple[ConfigurationCoverage, ...]:
     for message_type in ("text", "binary"):
         for seller_knows_values in (False, True):
             for role in ("seller", "buyer"):
+                signature = (
+                    f"message_type={message_type};seller_knows_buyer_values="
+                    f"{str(seller_knows_values).lower()};history_aware_buyer=true;"
+                    "rounds=T"
+                )
                 rows.append(
                     ConfigurationCoverage(
                         family="persuasion",
-                        configuration_signature=(
-                            f"message_type={message_type};seller_knows_buyer_values="
-                            f"{str(seller_knows_values).lower()};history_aware_buyer=true;"
-                            "rounds=T"
-                        ),
+                        configuration_signature=signature,
                         role=role,
                         theory_incumbent="PERSUASION_P0_BABBLING",
                         challenger="P3 reputation (not promoted)",
@@ -169,7 +203,7 @@ def configuration_coverage() -> tuple[ConfigurationCoverage, ...]:
                         selected_incumbent="PERSUASION_P0_BABBLING",
                         executable=True,
                         tested_offline=True,
-                        tested_live=False,
+                        tested_live=_live_verified("persuasion", signature, role),
                         deployment_status="CLEAR",
                         incomplete_classification="RESEARCH_BLOCKED",
                     )

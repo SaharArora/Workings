@@ -98,6 +98,30 @@ is unavailable.
   The independent pilot guard remains only as a hard-stop backstop. The negotiation pilot
   must restart from zero on the next frozen commit.
 
+## Qualifying frozen MVL pilots
+
+- **item:** Frozen family qualification on
+  `49a6021726553425506a09e23798b813c6091d9a` after all deployment blockers were closed.
+- **result:** `CONFIRMED`
+- **evidence:** Negotiation completed 10/10, bargaining 3/3, and persuasion 3/3. Every
+  family returned `MAX_GAMES_COMPLETED`; the same frozen policy commit produced all 16
+  games. Across the qualifying transcripts there were zero invalid moves, hard-stop
+  events, `UNSUPPORTED_CELL` routes, policy-execution fallbacks, outer never-raise
+  fallbacks, emergency pilot actions, or strategic-review events. Maximum live local
+  policy latencies were 3.6666 ms negotiation, 2.1858 ms bargaining, and 3.4058 ms
+  persuasion. Final cleanup was explicitly repeated after all pilots and returned
+  `active_games=0`, `pending_games=0`.
+- **outcomes:** Negotiation rating 982.37 -> 974.79; bargaining 1680.69 -> 1670.46;
+  persuasion 1403.77 -> 1402.31. Rating increase was not a readiness criterion. Exact
+  game/action/payoff and per-cell/role results are in the three
+  `docs/pilot_*_report.md` files and corresponding JSONL transcripts.
+- **status:** `NEGOTIATION_MVL_READY=yes`, `BARGAINING_MVL_READY=yes`,
+  `PERSUASION_MVL_READY=yes`, `ALL_FAMILIES_MVL_READY=yes`.
+- **classification:** No remaining `DEPLOYMENT_BLOCKER`. The incomplete advanced policies
+  listed in the experiment registry remain `RESEARCH_BLOCKED`.
+- **action taken:** All queues are stopped. No sustained or additional rated execution
+  was started; scaling requires explicit human approval.
+
 ## 1. Negotiation finite-horizon parity mechanics
 
 - **item:** Alice proposes odd stages, Bob even stages, numbering begins at 1, and Bob
