@@ -469,3 +469,36 @@ is unavailable.
   `1402.31 -> 1406.98`. Every family postflight and the final explicit cleanup returned
   `active_games=0`, `pending_games=0`; default experimental overrides were disabled.
   No larger or sustained deployment was started.
+
+## Time-constrained tranche preflight audit
+
+- **item:** Static ROBUST versus ADAPTIVE acceptance-rule status.
+- **source inspected:** `docs/BUILD_SPEC.md`, `policies/negotiation/robust.py`,
+  `policies/negotiation/adaptive.py`, provenance commit `7ced172`, and direct policy
+  regression tests.
+- **result:** `VERIFIED`.
+- **evidence:** `STATIC_ROBUST_OLD_ACCEPTANCE_RULE_ACTIVE = yes` and
+  `ADAPTIVE_OLD_ACCEPTANCE_RULE_ACTIVE = no`. Static ROBUST retains its
+  implementation-added nonterminal IR-plus-fixed-quote threshold. ADAPTIVE accepts
+  terminal IR offers and uses its separate 0.90 adaptive-continuation-payoff threshold
+  with continuation. A regression state at seller value 100 and offer 140 is rejected by
+  ROBUST against quote 150 but accepted by ADAPTIVE against continuation payoff 36.
+- **dependent components:** Frozen tranche policy map and negotiation monitoring.
+- **action taken:** No change to static ROBUST. The exact complete-information T=1 theory
+  remains seller `p=V_B`; FAIRNESS_MARGIN is a manually authorized live deviation rather
+  than a theorem correction.
+
+- **item:** Safe randomized allocation availability for the ADAPTIVE diagnostic.
+- **source inspected:** `eprocess/experiment.py`, `scripts/run_experiment.py`,
+  `research/agent.py`, live policy router, bounded supervisor, and experiment tests.
+- **result:** `NOT LIVE-INTEGRATED`.
+- **evidence:** The seeded 50/50 assignment primitive and append-only assignment/outcome
+  validation are tested. The setup script explicitly queues no game, and no live router
+  binds a pre-outcome assignment to cell-matched bounded lifecycle and terminal outcome
+  observation. Treating the generic primitive alone as an integrated live experiment
+  would be a pseudo-random design.
+- **dependent components:** At most six eligible incomplete-information multi-round or
+  unknown-horizon ADAPTIVE tranche games.
+- **action taken:** Predeclared a nonrandom first-eligible diagnostic allocation, logged
+  it as such, kept its six-distinct-game cap, and retained ROBUST for later eligible
+  matches. No causal or promotion claim is permitted.

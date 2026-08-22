@@ -132,7 +132,7 @@ def test_three_same_cell_floor_results_trigger_strategic_review(tmp_path: Path) 
     assert any(item["event"] == "STRATEGIC_REVIEW_REQUIRED" for item in records(path))
 
 
-def test_two_zero_payoffs_in_structural_policy_class_trigger_review_not_hard_stop(
+def test_first_three_zero_payoffs_pause_structural_class_not_operationally_fail(
     tmp_path: Path,
 ) -> None:
     path = tmp_path / "pilot.jsonl"
@@ -142,10 +142,8 @@ def test_two_zero_payoffs_in_structural_policy_class_trigger_review_not_hard_sto
         output_path=path,
         frozen_commit="abc123",
     )
-    structural = (
-        "negotiation/incomplete-info/unknown-horizon/buyer/NEGOTIATION_ADAPTIVE"
-    )
-    for index, value in enumerate((100, 1_000_000)):
+    structural = "negotiation/ADAPTIVE/incomplete/unknown-horizon"
+    for index, value in enumerate((100, 1_000_000, 10_000)):
         game_id = f"structural-{index}"
         recorder.game_metadata[game_id] = {
             "cell": f"exact-cell-value-{value}",
@@ -158,7 +156,7 @@ def test_two_zero_payoffs_in_structural_policy_class_trigger_review_not_hard_sto
             "selected_policy": "NEGOTIATION_ADAPTIVE",
             "baseline_policy": "NEGOTIATION_ROBUST",
             "experimental_policy": "NEGOTIATION_ADAPTIVE",
-            "authorization_status": "HUMAN_AUTHORIZED_EXPERIMENTAL",
+            "authorization_status": "HUMAN_AUTHORIZED_EXPERIMENTAL_DIAGNOSTIC",
             "authorization_source": "human_authorized_bounded_pilot",
             "structural_policy_class": structural,
             "own_value": value,
@@ -174,10 +172,13 @@ def test_two_zero_payoffs_in_structural_policy_class_trigger_review_not_hard_sto
         )
     recorder.close()
     assert recorder.strategic_review_classes == [structural]
+    assert recorder.paused_policy_classes == {
+        structural: "FIRST_THREE_OBSERVATIONS_ALL_ZERO_OWN_PAYOFF"
+    }
     assert not recorder.stop_requested()
     events = records(path)
     assert any(
-        item.get("reason") == "TWO_OR_MORE_STRUCTURAL_POLICY_CLASS_ZERO_PAYOFFS"
+        item.get("reason") == "FIRST_THREE_OBSERVATIONS_ALL_ZERO_OWN_PAYOFF"
         for item in events
     )
 

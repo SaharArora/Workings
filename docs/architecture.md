@@ -225,9 +225,32 @@ horizon guard requires both a materially unchanged adaptive counter and no mater
 opponent improvement. This is deterministic observed-history conditioning—not a
 posterior, calibrated response model, or equilibrium.
 
-Pilot monitoring retains exact cell/role groups and adds structural policy classes that
-omit nuisance monetary scales. Structural results record agreement/no-deal/walk-away
-counts, raw/scale-adjusted payoffs where defined, rating changes, selected policies, and
-opponent-category distributions. Two all-zero observations in one structural class emit
-`STRATEGIC_REVIEW_REQUIRED` for human review without rewriting or stopping the frozen
-pilot.
+Pilot/tranche monitoring retains exact cell/role groups and adds structural policy
+classes that omit nuisance monetary scales. Structural results record
+agreement/completion, no-deal and walk-away rates; mean/median raw and scale-adjusted
+payoffs; rating changes; opponent categories; fallbacks; invalid actions; and policy
+latency. Bargaining stores `own_payoff / money_to_divide`; negotiation stores raw payoff
+and its bounded statistical `Y` transform; persuasion does not gain a fabricated new
+transform.
+
+## Time-constrained tranche authorization
+
+`ExperimentalOverrideRegistry.human_authorized_tranche()` is a separate, process-scoped
+map rather than a reuse of the broader behavioral-pilot profile. It activates bargaining
+FAIRNESS wherever defined and negotiation FAIRNESS_MARGIN only on complete finite
+extraction controls. It never attempts persuasion P3, never routes II/T=1 through the
+multi-round gate, and assigns ADAPTIVE only to the first six distinct eligible incomplete
+multi-round/unknown-horizon games. That assignment is explicitly diagnostic and
+nonrandom: the tested experiment primitive exists, but there is no live cell-matched
+randomized router binding pre-outcome assignments to the bounded supervisor. Repeated
+states in one game retain one frozen assignment.
+
+The tranche supervisor still uses controlled bounded top-ups at concurrency one. The
+tranche commit and tracked files must remain unchanged. Immediate operational events stop
+the family. Predeclared strategic rules pause a scale-invariant policy class after the
+specified sample thresholds. A paused experimental class reverts future matches to the
+unchanged incumbent; an active game never changes policy. If the paused class is an
+incumbent with no defined alternative, the family run drains and stops rather than
+inventing a replacement. Every pause, reason, and whether incumbent reversion is possible
+is structured in the JSONL log. The exact map and thresholds are frozen in
+`docs/leaderboard_tranche_plan.md`.

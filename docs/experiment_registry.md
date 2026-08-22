@@ -36,6 +36,22 @@ experiment row with all required fields records promotion and same-cell confirma
 | Negotiation/incomplete multi-round | ROBUST (current data gate) | BAYES / EMPIRICAL | BLOCKED + RESEARCH_BLOCKED: no supported artifact |
 | Persuasion/repeated | P0 babbling | P3 reputation | P3_EXPERIMENT_INPUT_UNAVAILABLE + RESEARCH_BLOCKED: historical cell trust rate unavailable; P0 remains selected |
 
+## Time-constrained leaderboard tranche authorization (not promotion)
+
+The frozen precommitment is `docs/leaderboard_tranche_plan.md`: bargaining FAIRNESS for
+20 family games, negotiation FAIRNESS_MARGIN in applicable complete cells plus at most six
+eligible ADAPTIVE diagnostic selections within 20 family games, and persuasion P0 for 12
+family games. Challenger labels remain `HUMAN_AUTHORIZED_EXPERIMENTAL` or
+`HUMAN_AUTHORIZED_EXPERIMENTAL_DIAGNOSTIC`; none is relabeled
+`E_PROCESS_PROMOTED`.
+
+The ADAPTIVE allocation is not entered as a formal randomized experiment. Although the
+pure seeded `Experiment.assign()` primitive is implemented and tested, no live
+cell-matched router currently binds its pre-outcome assignment/order log to bounded game
+lifecycle and outcome observation. The tranche therefore uses a plainly logged
+first-eligible diagnostic assignment instead of improvising a causal design. Its results
+remain descriptive and do not update this promotion registry.
+
 ## Human-authorized bounded pilot record (not promotion evidence)
 
 Frozen commit: `c4e68a569376c178b8844db6594c5ced92fd9f3b`. Assignment came from
