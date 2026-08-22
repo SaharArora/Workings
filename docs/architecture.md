@@ -174,8 +174,10 @@ calls `leave_queue()` on every exit path and logs the exact exit reason. With
 Finite MVL pilots use bounded `requeue=True` only to top up one sequential slot until the
 declared maximum has been tracked. The supervisor leaves the family queue as soon as that
 count is reached, so top-up cannot create game N+1. A stop callback closes queueing in the
-same iteration as a hard/strategic event and drains already-tracked play before returning
-with `STOP_REQUESTED`. `glee/pilot.py` records the frozen commit, every state/action/route,
+same iteration as a hard operational event and drains already-tracked play before
+returning with `STOP_REQUESTED`. Strategic-review events are recorded for post-pilot
+human review and do not change a frozen policy or stop the declared family count.
+`glee/pilot.py` records the frozen commit, every state/action/route,
 latency, terminal result/payoff, rating snapshots when available, and exact exit reason;
 it never reads or serializes the API credential. Predeclared conditions are in
 `docs/pilot_stop_conditions.md`.
@@ -188,3 +190,44 @@ games and persuasion are excluded. The pilot controller independently mirrors th
 condition as an emergency backstop. If the backstop ever fires because a production
 policy failed to exit normally, it remains a hard operational stop rather than being
 misreported as ordinary incumbent behavior.
+
+## Human-authorized behavioral pilot layer
+
+`leaderboard/experimental_overrides.py` is an explicit, process-scoped registry. Default
+construction is disabled. Only `scripts/run_pilot.py --human-authorized-experimental`
+enables its fixed configuration/policy scopes, with
+`authorization_source=human_authorized_bounded_pilot`. Exiting that process disables the
+overrides; no persistent leaderboard configuration is changed.
+
+Routes distinguish `THEORY_INCUMBENT`, `PORTFOLIO_INCUMBENT`,
+`E_PROCESS_PROMOTED`, and `HUMAN_AUTHORIZED_EXPERIMENTAL`. Every route logs the normal
+baseline policy, candidate experimental policy, authorization source/status, selected
+policy, and policy-specific diagnostics. A human-authorized challenger never acquires or
+masquerades as e-process promotion, and an existing e-process promotion is not displaced
+by this registry.
+
+The bounded registry selects the fixed 15% negotiation fairness margin only for complete
+finite full-extraction controls, `NEGOTIATION_ADAPTIVE` only where static ROBUST is the
+normal incomplete-information control, and bargaining fairness for bargaining controls.
+It records seller-side P3 as unavailable unless a real frozen population trust rate is
+provided. Buyer persuasion remains P0.
+
+For persuasion seller turns, the policy-supplied message/recommendation is the economic
+action and the communication renderer preserves it (subject only to the length ceiling).
+For numeric negotiation/bargaining actions and bare decisions, the renderer may still add
+deterministic text after the economic fields are fixed.
+
+`NEGOTIATION_ADAPTIVE` imports ROBUST's first/reference price without modifying ROBUST.
+It uses only current-game public offers and a locked reciprocal concession rate of 0.35.
+Its nonterminal acceptance approximation accepts an IR offer at 90% of the payoff from
+its current adaptive counter; terminal decisions accept every IR offer. Its unknown-
+horizon guard requires both a materially unchanged adaptive counter and no material
+opponent improvement. This is deterministic observed-history conditioning—not a
+posterior, calibrated response model, or equilibrium.
+
+Pilot monitoring retains exact cell/role groups and adds structural policy classes that
+omit nuisance monetary scales. Structural results record agreement/no-deal/walk-away
+counts, raw/scale-adjusted payoffs where defined, rating changes, selected policies, and
+opponent-category distributions. Two all-zero observations in one structural class emit
+`STRATEGIC_REVIEW_REQUIRED` for human review without rewriting or stopping the frozen
+pilot.
