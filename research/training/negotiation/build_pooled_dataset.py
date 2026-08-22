@@ -7,6 +7,7 @@ import csv
 import hashlib
 import json
 import math
+import subprocess
 from collections import Counter
 from pathlib import Path
 from typing import Any, Iterable
@@ -189,6 +190,12 @@ def build_feature_table(root: Path, output: Path, metadata_output: Path) -> dict
     metadata = {
         "dataset_name": "negotiation_pooled_pre_response_v1",
         "source": "public_original_GLEE_Data",
+        "source_commit": subprocess.run(
+            ["git", "-C", str(root.parent), "rev-parse", "HEAD"],
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.strip(),
         "games": len(game_ids),
         "rows": sum(structural.values()),
         "feature_table_sha256": digest.hexdigest(),
