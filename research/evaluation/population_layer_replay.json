@@ -1,0 +1,587 @@
+{
+  "interpretation": {
+    "counterfactual_limit": "changed actions do not identify opponent responses or terminal payoff",
+    "observable": "policy actions are recomputed from the exact logged pre-action state"
+  },
+  "negotiation_adaptive": {
+    "adaptive_decisions": 31,
+    "adaptive_decisions_changed": 24,
+    "adaptive_games": 6,
+    "games": [
+      {
+        "counterfactual_outcome_known": false,
+        "counterfactual_outcome_note": "Unknown: the transcript does not reveal the opponent response to changed actions.",
+        "decisions": [
+          {
+            "best_offer_seen": 11432.0,
+            "first_opponent_offer": 11432.0,
+            "new_counter": 4000.0,
+            "new_counter_moved_toward_agreement": true,
+            "new_decision": "RejectOffer",
+            "old_counter": 4000.0,
+            "old_decision": "RejectOffer",
+            "opponent_offer": 11432.0,
+            "previous_best_offer": null,
+            "role": "buyer",
+            "round": 1,
+            "strategic_action_changed": false
+          },
+          {
+            "best_offer_seen": 6964.98,
+            "first_opponent_offer": 11432.0,
+            "new_counter": 5563.457,
+            "new_counter_moved_toward_agreement": true,
+            "new_decision": "RejectOffer",
+            "old_counter": 4362.257,
+            "old_decision": "RejectOffer",
+            "opponent_offer": 6964.98,
+            "previous_best_offer": 11432.0,
+            "role": "buyer",
+            "round": 3,
+            "strategic_action_changed": true
+          },
+          {
+            "best_offer_seen": 6964.98,
+            "first_opponent_offer": 11432.0,
+            "new_counter": 5563.457,
+            "new_counter_moved_toward_agreement": true,
+            "new_decision": "RejectOffer",
+            "old_counter": 4362.257,
+            "old_decision": "RejectOffer",
+            "opponent_offer": 6964.98,
+            "previous_best_offer": 6964.98,
+            "role": "buyer",
+            "round": 5,
+            "strategic_action_changed": true
+          },
+          {
+            "best_offer_seen": 6964.98,
+            "first_opponent_offer": 11432.0,
+            "new_counter": 5563.457,
+            "new_counter_moved_toward_agreement": null,
+            "new_decision": "RejectOffer",
+            "old_counter": null,
+            "old_decision": "WalkAway",
+            "opponent_offer": 6964.98,
+            "previous_best_offer": 6964.98,
+            "role": "buyer",
+            "round": 7,
+            "strategic_action_changed": true
+          }
+        ],
+        "game_id": "27b69e5b-26f3-4d2f-a8f9-ecfc1324f19c",
+        "old_raw_payoff": 0,
+        "old_terminal_outcome": "walked_away",
+        "source_logs": [
+          "behavioral_pilot_negotiation.jsonl"
+        ]
+      },
+      {
+        "counterfactual_outcome_known": false,
+        "counterfactual_outcome_note": "Unknown: the transcript does not reveal the opponent response to changed actions.",
+        "decisions": [
+          {
+            "best_offer_seen": 1714800.0,
+            "first_opponent_offer": 1714800.0,
+            "new_counter": 500000.0,
+            "new_counter_moved_toward_agreement": true,
+            "new_decision": "RejectOffer",
+            "old_counter": 500000.0,
+            "old_decision": "RejectOffer",
+            "opponent_offer": 1714800.0,
+            "previous_best_offer": null,
+            "role": "buyer",
+            "round": 1,
+            "strategic_action_changed": false
+          },
+          {
+            "best_offer_seen": 1016787.2,
+            "first_opponent_offer": 1714800.0,
+            "new_counter": 744304.48,
+            "new_counter_moved_toward_agreement": true,
+            "new_decision": "RejectOffer",
+            "old_counter": 500000.0,
+            "old_decision": "RejectOffer",
+            "opponent_offer": 1016787.2,
+            "previous_best_offer": 1714800.0,
+            "role": "buyer",
+            "round": 3,
+            "strategic_action_changed": true
+          },
+          {
+            "best_offer_seen": 1015404.8,
+            "first_opponent_offer": 1714800.0,
+            "new_counter": 744788.32,
+            "new_counter_moved_toward_agreement": true,
+            "new_decision": "RejectOffer",
+            "old_counter": 500000.0,
+            "old_decision": "RejectOffer",
+            "opponent_offer": 1015404.8,
+            "previous_best_offer": 1016787.2,
+            "role": "buyer",
+            "round": 5,
+            "strategic_action_changed": true
+          },
+          {
+            "best_offer_seen": 1014022.4,
+            "first_opponent_offer": 1714800.0,
+            "new_counter": 745272.1599999999,
+            "new_counter_moved_toward_agreement": true,
+            "new_decision": "RejectOffer",
+            "old_counter": 500000.0,
+            "old_decision": "RejectOffer",
+            "opponent_offer": 1014022.4,
+            "previous_best_offer": 1015404.8,
+            "role": "buyer",
+            "round": 7,
+            "strategic_action_changed": true
+          },
+          {
+            "best_offer_seen": 1012640.0,
+            "first_opponent_offer": 1714800.0,
+            "new_counter": 745756.0,
+            "new_counter_moved_toward_agreement": true,
+            "new_decision": "RejectOffer",
+            "old_counter": 500000.0,
+            "old_decision": "RejectOffer",
+            "opponent_offer": 1012640.0,
+            "previous_best_offer": 1014022.4,
+            "role": "buyer",
+            "round": 9,
+            "strategic_action_changed": true
+          }
+        ],
+        "game_id": "344cd97e-6dff-4cfe-ab0f-e41f452b9f6b",
+        "old_raw_payoff": 0,
+        "old_terminal_outcome": "no_deal",
+        "source_logs": [
+          "leaderboard_tranche_negotiation.jsonl"
+        ]
+      },
+      {
+        "counterfactual_outcome_known": false,
+        "counterfactual_outcome_note": "Unknown: the transcript does not reveal the opponent response to changed actions.",
+        "decisions": [
+          {
+            "best_offer_seen": null,
+            "first_opponent_offer": null,
+            "new_counter": 225.0,
+            "new_counter_moved_toward_agreement": true,
+            "new_decision": null,
+            "old_counter": 225.0,
+            "old_decision": null,
+            "opponent_offer": null,
+            "previous_best_offer": null,
+            "role": "seller",
+            "round": 1,
+            "strategic_action_changed": false
+          },
+          {
+            "best_offer_seen": 72.0,
+            "first_opponent_offer": 72.0,
+            "new_counter": 225.0,
+            "new_counter_moved_toward_agreement": true,
+            "new_decision": "RejectOffer",
+            "old_counter": 225.0,
+            "old_decision": "RejectOffer",
+            "opponent_offer": 72.0,
+            "previous_best_offer": null,
+            "role": "seller",
+            "round": 2,
+            "strategic_action_changed": false
+          },
+          {
+            "best_offer_seen": 72.75,
+            "first_opponent_offer": 72.0,
+            "new_counter": 224.7375,
+            "new_counter_moved_toward_agreement": true,
+            "new_decision": "RejectOffer",
+            "old_counter": 225.0,
+            "old_decision": "RejectOffer",
+            "opponent_offer": 72.75,
+            "previous_best_offer": 72.0,
+            "role": "seller",
+            "round": 4,
+            "strategic_action_changed": true
+          },
+          {
+            "best_offer_seen": 73.5,
+            "first_opponent_offer": 72.0,
+            "new_counter": 224.475,
+            "new_counter_moved_toward_agreement": true,
+            "new_decision": "RejectOffer",
+            "old_counter": 225.0,
+            "old_decision": "RejectOffer",
+            "opponent_offer": 73.5,
+            "previous_best_offer": 72.75,
+            "role": "seller",
+            "round": 6,
+            "strategic_action_changed": true
+          },
+          {
+            "best_offer_seen": 74.25,
+            "first_opponent_offer": 72.0,
+            "new_counter": 224.2125,
+            "new_counter_moved_toward_agreement": true,
+            "new_decision": "RejectOffer",
+            "old_counter": 225.0,
+            "old_decision": "RejectOffer",
+            "opponent_offer": 74.25,
+            "previous_best_offer": 73.5,
+            "role": "seller",
+            "round": 8,
+            "strategic_action_changed": true
+          },
+          {
+            "best_offer_seen": 75.0,
+            "first_opponent_offer": 72.0,
+            "new_counter": 223.95,
+            "new_counter_moved_toward_agreement": true,
+            "new_decision": "RejectOffer",
+            "old_counter": 225.0,
+            "old_decision": "RejectOffer",
+            "opponent_offer": 75.0,
+            "previous_best_offer": 74.25,
+            "role": "seller",
+            "round": 10,
+            "strategic_action_changed": true
+          },
+          {
+            "best_offer_seen": 75.75,
+            "first_opponent_offer": 72.0,
+            "new_counter": 223.6875,
+            "new_counter_moved_toward_agreement": true,
+            "new_decision": "RejectOffer",
+            "old_counter": 225.0,
+            "old_decision": "RejectOffer",
+            "opponent_offer": 75.75,
+            "previous_best_offer": 75.0,
+            "role": "seller",
+            "round": 12,
+            "strategic_action_changed": true
+          },
+          {
+            "best_offer_seen": 76.5,
+            "first_opponent_offer": 72.0,
+            "new_counter": 223.425,
+            "new_counter_moved_toward_agreement": true,
+            "new_decision": "RejectOffer",
+            "old_counter": 225.0,
+            "old_decision": "RejectOffer",
+            "opponent_offer": 76.5,
+            "previous_best_offer": 75.75,
+            "role": "seller",
+            "round": 14,
+            "strategic_action_changed": true
+          },
+          {
+            "best_offer_seen": 77.25,
+            "first_opponent_offer": 72.0,
+            "new_counter": 223.1625,
+            "new_counter_moved_toward_agreement": true,
+            "new_decision": "RejectOffer",
+            "old_counter": 225.0,
+            "old_decision": "RejectOffer",
+            "opponent_offer": 77.25,
+            "previous_best_offer": 76.5,
+            "role": "seller",
+            "round": 16,
+            "strategic_action_changed": true
+          },
+          {
+            "best_offer_seen": 78.0,
+            "first_opponent_offer": 72.0,
+            "new_counter": 222.9,
+            "new_counter_moved_toward_agreement": true,
+            "new_decision": "RejectOffer",
+            "old_counter": 225.0,
+            "old_decision": "RejectOffer",
+            "opponent_offer": 78.0,
+            "previous_best_offer": 77.25,
+            "role": "seller",
+            "round": 18,
+            "strategic_action_changed": true
+          },
+          {
+            "best_offer_seen": 78.75,
+            "first_opponent_offer": 72.0,
+            "new_counter": 222.6375,
+            "new_counter_moved_toward_agreement": true,
+            "new_decision": "RejectOffer",
+            "old_counter": 225.0,
+            "old_decision": "RejectOffer",
+            "opponent_offer": 78.75,
+            "previous_best_offer": 78.0,
+            "role": "seller",
+            "round": 20,
+            "strategic_action_changed": true
+          },
+          {
+            "best_offer_seen": 79.5,
+            "first_opponent_offer": 72.0,
+            "new_counter": 222.375,
+            "new_counter_moved_toward_agreement": true,
+            "new_decision": "RejectOffer",
+            "old_counter": 225.0,
+            "old_decision": "RejectOffer",
+            "opponent_offer": 79.5,
+            "previous_best_offer": 78.75,
+            "role": "seller",
+            "round": 22,
+            "strategic_action_changed": true
+          },
+          {
+            "best_offer_seen": 79.5,
+            "first_opponent_offer": 72.0,
+            "new_counter": 222.375,
+            "new_counter_moved_toward_agreement": true,
+            "new_decision": "RejectOffer",
+            "old_counter": 225.0,
+            "old_decision": "RejectOffer",
+            "opponent_offer": 79.5,
+            "previous_best_offer": 79.5,
+            "role": "seller",
+            "round": 24,
+            "strategic_action_changed": true
+          },
+          {
+            "best_offer_seen": 79.5,
+            "first_opponent_offer": 72.0,
+            "new_counter": 222.375,
+            "new_counter_moved_toward_agreement": null,
+            "new_decision": "RejectOffer",
+            "old_counter": null,
+            "old_decision": "WalkAway",
+            "opponent_offer": 79.5,
+            "previous_best_offer": 79.5,
+            "role": "seller",
+            "round": 26,
+            "strategic_action_changed": true
+          }
+        ],
+        "game_id": "45cdbd4a-2b42-41c4-a58f-7d17c79e4563",
+        "old_raw_payoff": 0,
+        "old_terminal_outcome": "walked_away",
+        "source_logs": [
+          "leaderboard_tranche_negotiation.jsonl"
+        ]
+      },
+      {
+        "counterfactual_outcome_known": false,
+        "counterfactual_outcome_note": "Unknown: the transcript does not reveal the opponent response to changed actions.",
+        "decisions": [
+          {
+            "best_offer_seen": 17148.0,
+            "first_opponent_offer": 17148.0,
+            "new_counter": 7500.0,
+            "new_counter_moved_toward_agreement": true,
+            "new_decision": "RejectOffer",
+            "old_counter": 7500.0,
+            "old_decision": "RejectOffer",
+            "opponent_offer": 17148.0,
+            "previous_best_offer": null,
+            "role": "buyer",
+            "round": 1,
+            "strategic_action_changed": false
+          },
+          {
+            "best_offer_seen": 10867.87,
+            "first_opponent_offer": 17148.0,
+            "new_counter": 9698.0455,
+            "new_counter_moved_toward_agreement": true,
+            "new_decision": "RejectOffer",
+            "old_counter": 8946.2455,
+            "old_decision": "RejectOffer",
+            "opponent_offer": 10867.87,
+            "previous_best_offer": 17148.0,
+            "role": "buyer",
+            "round": 3,
+            "strategic_action_changed": true
+          },
+          {
+            "best_offer_seen": 10867.87,
+            "first_opponent_offer": 17148.0,
+            "new_counter": 9698.0455,
+            "new_counter_moved_toward_agreement": true,
+            "new_decision": "RejectOffer",
+            "old_counter": 8946.2455,
+            "old_decision": "RejectOffer",
+            "opponent_offer": 10867.87,
+            "previous_best_offer": 10867.87,
+            "role": "buyer",
+            "round": 5,
+            "strategic_action_changed": true
+          },
+          {
+            "best_offer_seen": 10867.87,
+            "first_opponent_offer": 17148.0,
+            "new_counter": 9698.0455,
+            "new_counter_moved_toward_agreement": true,
+            "new_decision": "RejectOffer",
+            "old_counter": 8946.2455,
+            "old_decision": "RejectOffer",
+            "opponent_offer": 10867.87,
+            "previous_best_offer": 10867.87,
+            "role": "buyer",
+            "round": 7,
+            "strategic_action_changed": true
+          },
+          {
+            "best_offer_seen": 10867.87,
+            "first_opponent_offer": 17148.0,
+            "new_counter": 9698.0455,
+            "new_counter_moved_toward_agreement": true,
+            "new_decision": "RejectOffer",
+            "old_counter": 8946.2455,
+            "old_decision": "RejectOffer",
+            "opponent_offer": 10867.87,
+            "previous_best_offer": 10867.87,
+            "role": "buyer",
+            "round": 9,
+            "strategic_action_changed": true
+          }
+        ],
+        "game_id": "4d577ccf-6dab-4bb8-8878-34217f0597ce",
+        "old_raw_payoff": 0,
+        "old_terminal_outcome": "no_deal",
+        "source_logs": [
+          "behavioral_pilot_negotiation.jsonl"
+        ]
+      },
+      {
+        "counterfactual_outcome_known": false,
+        "counterfactual_outcome_note": "Unknown: the transcript does not reveal the opponent response to changed actions.",
+        "decisions": [
+          {
+            "best_offer_seen": 142.9,
+            "first_opponent_offer": 142.9,
+            "new_counter": 75.0,
+            "new_counter_moved_toward_agreement": false,
+            "new_decision": "RejectOffer",
+            "old_counter": 77.485,
+            "old_decision": "RejectOffer",
+            "opponent_offer": 142.9,
+            "previous_best_offer": null,
+            "role": "buyer",
+            "round": 1,
+            "strategic_action_changed": true
+          },
+          {
+            "best_offer_seen": 94.76,
+            "first_opponent_offer": 142.9,
+            "new_counter": null,
+            "new_counter_moved_toward_agreement": true,
+            "new_decision": "AcceptOffer",
+            "old_counter": null,
+            "old_decision": "AcceptOffer",
+            "opponent_offer": 94.76,
+            "previous_best_offer": 142.9,
+            "role": "buyer",
+            "round": 3,
+            "strategic_action_changed": false
+          }
+        ],
+        "game_id": "a2ddadec-3c10-4652-b161-4c4c935f209d",
+        "old_raw_payoff": 55.24,
+        "old_terminal_outcome": "agreement",
+        "source_logs": [
+          "behavioral_pilot_negotiation.jsonl"
+        ]
+      },
+      {
+        "counterfactual_outcome_known": true,
+        "counterfactual_outcome_note": "Historical outcome remains applicable because all strategic actions match.",
+        "decisions": [
+          {
+            "best_offer_seen": null,
+            "first_opponent_offer": null,
+            "new_counter": 2250000.0,
+            "new_counter_moved_toward_agreement": true,
+            "new_decision": null,
+            "old_counter": 2250000.0,
+            "old_decision": null,
+            "opponent_offer": null,
+            "previous_best_offer": null,
+            "role": "seller",
+            "round": 1,
+            "strategic_action_changed": false
+          }
+        ],
+        "game_id": "ff4ac28a-f264-475e-9544-c9b1a2848d15",
+        "old_raw_payoff": 0,
+        "old_terminal_outcome": "no_deal",
+        "source_logs": [
+          "behavioral_pilot_negotiation.jsonl"
+        ]
+      }
+    ]
+  },
+  "persuasion_buyer_margin": {
+    "buyer_decisions": 100,
+    "buyer_decisions_flipped": 20,
+    "buyer_games": 5,
+    "games": [
+      {
+        "decision_count": 20,
+        "expected_value": 62.5,
+        "flipped_decisions": 0,
+        "game_id": "03c1e09c-20bd-4fa7-be99-10a22857a91b",
+        "new_decision": "no",
+        "old_decision": "no",
+        "product_price": 100.0,
+        "source_logs": [
+          "behavioral_pilot_persuasion.jsonl"
+        ]
+      },
+      {
+        "decision_count": 20,
+        "expected_value": 66.66666666666666,
+        "flipped_decisions": 0,
+        "game_id": "70304cc7-30bb-481b-b3d5-da7bb43ff774",
+        "new_decision": "no",
+        "old_decision": "no",
+        "product_price": 100.0,
+        "source_logs": [
+          "leaderboard_tranche_persuasion.jsonl"
+        ]
+      },
+      {
+        "decision_count": 20,
+        "expected_value": 1000000.0,
+        "flipped_decisions": 20,
+        "game_id": "c64c813e-a4d3-4355-a635-71c9d1ccf76f",
+        "new_decision": "no",
+        "old_decision": "yes",
+        "product_price": 1000000.0,
+        "source_logs": [
+          "leaderboard_tranche_persuasion.jsonl"
+        ]
+      },
+      {
+        "decision_count": 20,
+        "expected_value": 1333333.3333333333,
+        "flipped_decisions": 0,
+        "game_id": "f21ecf19-179e-4faa-940f-dbc8324b8476",
+        "new_decision": "yes",
+        "old_decision": "yes",
+        "product_price": 1000000.0,
+        "source_logs": [
+          "pilot_persuasion.jsonl"
+        ]
+      },
+      {
+        "decision_count": 20,
+        "expected_value": 960000.0,
+        "flipped_decisions": 0,
+        "game_id": "fecece80-50eb-4ad3-885d-ac6c1fbdb812",
+        "new_decision": "no",
+        "old_decision": "no",
+        "product_price": 1000000.0,
+        "source_logs": [
+          "pilot_persuasion.jsonl"
+        ]
+      }
+    ]
+  },
+  "scope": "all repository live evaluation transcripts"
+}
