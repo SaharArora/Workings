@@ -1,0 +1,1576 @@
+{
+  "classification": "CONTINUATION_TERM_PRESENT_BUT_MISSPECIFIED",
+  "old_formula": {
+    "nonterminal_counter_V_old": "0.25*q_accept(ROBUST)*U_accept(ROBUST), constant across candidates",
+    "nonterminal_offer_V_old": "0",
+    "score": "q_accept(a)*U_accept(a) + (1-q_accept(a))*V_old",
+    "terminal": "delegate to ROBUST IR response without candidate scoring"
+  },
+  "response_model_retrained": false,
+  "response_model_version": "negotiation-pooled-empirical-v1",
+  "sample_selection": "deterministic SHA256 priority, round-robin across role/information/horizon/opponent/action-context strata",
+  "sample_source": "previously consumed response-model test split",
+  "state_count": 20,
+  "states": [
+    {
+      "action_context": "NONTERMINAL_COUNTER",
+      "adaptive_price": 7500.0,
+      "candidates": [
+        {
+          "immediate_acceptance_payoff": 11250.0,
+          "old_continuation_value": 1383.4403298713605,
+          "old_rejection_contribution": 435.4541171544978,
+          "predicted_acceptance": 0.6852382370586315,
+          "price": 3750.0,
+          "probability_nonacceptance": 0.3147617629413685,
+          "selected": true,
+          "total_old_score": 8144.384284064103
+        },
+        {
+          "immediate_acceptance_payoff": 7500.0,
+          "old_continuation_value": 1383.4403298713605,
+          "old_rejection_contribution": 362.6898518369184,
+          "predicted_acceptance": 0.737834842598059,
+          "price": 7500.0,
+          "probability_nonacceptance": 0.262165157401941,
+          "selected": false,
+          "total_old_score": 5896.45117132236
+        },
+        {
+          "immediate_acceptance_payoff": 5250.0,
+          "old_continuation_value": 1383.4403298713605,
+          "old_rejection_contribution": 322.9913262373406,
+          "predicted_acceptance": 0.7665303524385659,
+          "price": 9750.0,
+          "probability_nonacceptance": 0.23346964756143407,
+          "selected": false,
+          "total_old_score": 4347.275676539812
+        },
+        {
+          "immediate_acceptance_payoff": 3750.0,
+          "old_continuation_value": 1383.4403298713605,
+          "old_rejection_contribution": 298.25900002407167,
+          "predicted_acceptance": 0.784407759710312,
+          "price": 11250.0,
+          "probability_nonacceptance": 0.21559224028968804,
+          "selected": false,
+          "total_old_score": 3239.7880989377413
+        },
+        {
+          "immediate_acceptance_payoff": 3000.0,
+          "old_continuation_value": 1383.4403298713605,
+          "old_rejection_contribution": 286.41877948079326,
+          "predicted_acceptance": 0.792966293307767,
+          "price": 12000.0,
+          "probability_nonacceptance": 0.20703370669223298,
+          "selected": false,
+          "total_old_score": 2665.3176594040942
+        },
+        {
+          "immediate_acceptance_payoff": 1500.0,
+          "old_continuation_value": 1383.4403298713605,
+          "old_rejection_contribution": 263.7902890286947,
+          "predicted_acceptance": 0.8093229730745067,
+          "price": 13500.0,
+          "probability_nonacceptance": 0.19067702692549326,
+          "selected": false,
+          "total_old_score": 1477.7747486404546
+        },
+        {
+          "immediate_acceptance_payoff": 0.0,
+          "old_continuation_value": 1383.4403298713605,
+          "old_rejection_contribution": 108.72595714088241,
+          "predicted_acceptance": 0.9214090013184795,
+          "price": 15000.0,
+          "probability_nonacceptance": 0.07859099868152053,
+          "selected": false,
+          "total_old_score": 108.72595714088241
+        }
+      ],
+      "decision_id": "447740CB14774C24:2",
+      "game_id": "447740CB14774C24",
+      "own_value": 15000.0,
+      "robust_price": 7500.0,
+      "role": "buyer",
+      "round_number": 2,
+      "selected_price": 3750.0,
+      "structural_group": "buyer|complete|known|human"
+    },
+    {
+      "action_context": "NONTERMINAL_COUNTER",
+      "adaptive_price": 5700.0,
+      "candidates": [
+        {
+          "immediate_acceptance_payoff": 7500.0,
+          "old_continuation_value": 320.95161867194594,
+          "old_rejection_contribution": 253.271268510854,
+          "predicted_acceptance": 0.21087399540511437,
+          "price": 2500.0,
+          "probability_nonacceptance": 0.7891260045948856,
+          "selected": true,
+          "total_old_score": 1834.8262340492117
+        },
+        {
+          "immediate_acceptance_payoff": 5000.0,
+          "old_continuation_value": 320.95161867194594,
+          "old_rejection_contribution": 238.54366544943218,
+          "predicted_acceptance": 0.2567612949375567,
+          "price": 5000.0,
+          "probability_nonacceptance": 0.7432387050624433,
+          "selected": false,
+          "total_old_score": 1522.350140137216
+        },
+        {
+          "immediate_acceptance_payoff": 4300.0,
+          "old_continuation_value": 320.95161867194594,
+          "old_rejection_contribution": 234.06329291228744,
+          "predicted_acceptance": 0.27072094578986866,
+          "price": 5700.0,
+          "probability_nonacceptance": 0.7292790542101313,
+          "selected": false,
+          "total_old_score": 1398.1633598087226
+        },
+        {
+          "immediate_acceptance_payoff": 2500.0,
+          "old_continuation_value": 320.95161867194594,
+          "old_rejection_contribution": 221.86506387979628,
+          "predicted_acceptance": 0.30872738764227564,
+          "price": 7500.0,
+          "probability_nonacceptance": 0.6912726123577244,
+          "selected": false,
+          "total_old_score": 993.6835329854854
+        },
+        {
+          "immediate_acceptance_payoff": 500.0,
+          "old_continuation_value": 320.95161867194594,
+          "old_rejection_contribution": 205.44242511571767,
+          "predicted_acceptance": 0.35989596822782693,
+          "price": 9500.0,
+          "probability_nonacceptance": 0.6401040317721731,
+          "selected": false,
+          "total_old_score": 385.39040922963113
+        },
+        {
+          "immediate_acceptance_payoff": 0.0,
+          "old_continuation_value": 320.95161867194594,
+          "old_rejection_contribution": 199.75162265721374,
+          "predicted_acceptance": 0.3776269972285582,
+          "price": 10000.0,
+          "probability_nonacceptance": 0.6223730027714418,
+          "selected": false,
+          "total_old_score": 199.75162265721374
+        }
+      ],
+      "decision_id": "H2ZIW0TWV855QDE0:10",
+      "game_id": "H2ZIW0TWV855QDE0",
+      "own_value": 10000.0,
+      "robust_price": 5000.0,
+      "role": "buyer",
+      "round_number": 6,
+      "selected_price": 2500.0,
+      "structural_group": "buyer|complete|known|llm"
+    },
+    {
+      "action_context": "NONTERMINAL_COUNTER",
+      "adaptive_price": 535000.0,
+      "candidates": [
+        {
+          "immediate_acceptance_payoff": 750000.0,
+          "old_continuation_value": 38337.66087947358,
+          "old_rejection_contribution": 28563.45681087792,
+          "predicted_acceptance": 0.2549504545758262,
+          "price": 250000.0,
+          "probability_nonacceptance": 0.7450495454241738,
+          "selected": true,
+          "total_old_score": 219776.29774274759
+        },
+        {
+          "immediate_acceptance_payoff": 500000.0,
+          "old_continuation_value": 38337.66087947358,
+          "old_rejection_contribution": 26579.45094579743,
+          "predicted_acceptance": 0.30670128703578864,
+          "price": 500000.0,
+          "probability_nonacceptance": 0.6932987129642114,
+          "selected": false,
+          "total_old_score": 179930.09446369176
+        },
+        {
+          "immediate_acceptance_payoff": 465000.0,
+          "old_continuation_value": 38337.66087947358,
+          "old_rejection_contribution": 26284.358990427063,
+          "predicted_acceptance": 0.3143984690912635,
+          "price": 535000.0,
+          "probability_nonacceptance": 0.6856015309087364,
+          "selected": false,
+          "total_old_score": 172479.64711786457
+        },
+        {
+          "immediate_acceptance_payoff": 250000.0,
+          "old_continuation_value": 38337.66087947358,
+          "old_rejection_contribution": 24389.38309749801,
+          "predicted_acceptance": 0.3638270427042052,
+          "price": 750000.0,
+          "probability_nonacceptance": 0.6361729572957948,
+          "selected": false,
+          "total_old_score": 115346.14377354931
+        },
+        {
+          "immediate_acceptance_payoff": 200000.0,
+          "old_continuation_value": 38337.66087947358,
+          "old_rejection_contribution": 23930.540318141157,
+          "predicted_acceptance": 0.3757955031900801,
+          "price": 800000.0,
+          "probability_nonacceptance": 0.6242044968099199,
+          "selected": false,
+          "total_old_score": 99089.64095615718
+        },
+        {
+          "immediate_acceptance_payoff": 50000.0,
+          "old_continuation_value": 38337.66087947358,
+          "old_rejection_contribution": 22289.597945923742,
+          "predicted_acceptance": 0.41859786344299776,
+          "price": 950000.0,
+          "probability_nonacceptance": 0.5814021365570022,
+          "selected": false,
+          "total_old_score": 43219.49111807363
+        },
+        {
+          "immediate_acceptance_payoff": 0.0,
+          "old_continuation_value": 38337.66087947358,
+          "old_rejection_contribution": 21574.693727624144,
+          "predicted_acceptance": 0.43724543353203166,
+          "price": 1000000.0,
+          "probability_nonacceptance": 0.5627545664679683,
+          "selected": false,
+          "total_old_score": 21574.693727624144
+        }
+      ],
+      "decision_id": "R34W6THP6172ZL8A:6",
+      "game_id": "R34W6THP6172ZL8A",
+      "own_value": 1000000.0,
+      "robust_price": 500000.0,
+      "role": "buyer",
+      "round_number": 4,
+      "selected_price": 250000.0,
+      "structural_group": "buyer|complete|unknown|llm"
+    },
+    {
+      "action_context": "NONTERMINAL_COUNTER",
+      "adaptive_price": 750000.0,
+      "candidates": [
+        {
+          "immediate_acceptance_payoff": 1125000.0,
+          "old_continuation_value": 157111.2694261146,
+          "old_rejection_contribution": 31427.450864208604,
+          "predicted_acceptance": 0.7999669216663791,
+          "price": 375000.0,
+          "probability_nonacceptance": 0.20003307833362094,
+          "selected": true,
+          "total_old_score": 931390.2377388851
+        },
+        {
+          "immediate_acceptance_payoff": 750000.0,
+          "old_continuation_value": 157111.2694261146,
+          "old_rejection_contribution": 25463.530862460346,
+          "predicted_acceptance": 0.8379267702726112,
+          "price": 750000.0,
+          "probability_nonacceptance": 0.1620732297273888,
+          "selected": false,
+          "total_old_score": 653908.6085669188
+        },
+        {
+          "immediate_acceptance_payoff": 625000.0,
+          "old_continuation_value": 157111.2694261146,
+          "old_rejection_contribution": 23689.554039534338,
+          "predicted_acceptance": 0.8492179833689465,
+          "price": 875000.0,
+          "probability_nonacceptance": 0.1507820166310535,
+          "selected": false,
+          "total_old_score": 554450.7936451258
+        },
+        {
+          "immediate_acceptance_payoff": 500000.0,
+          "old_continuation_value": 157111.2694261146,
+          "old_rejection_contribution": 22018.494964241156,
+          "predicted_acceptance": 0.8598541336680123,
+          "price": 1000000.0,
+          "probability_nonacceptance": 0.14014586633198767,
+          "selected": false,
+          "total_old_score": 451945.56179824733
+        },
+        {
+          "immediate_acceptance_payoff": 375000.0,
+          "old_continuation_value": 157111.2694261146,
+          "old_rejection_contribution": 20447.247371516194,
+          "predicted_acceptance": 0.8698549922853751,
+          "price": 1125000.0,
+          "probability_nonacceptance": 0.1301450077146249,
+          "selected": false,
+          "total_old_score": 346642.8694785319
+        },
+        {
+          "immediate_acceptance_payoff": 0.0,
+          "old_continuation_value": 157111.2694261146,
+          "old_rejection_contribution": 6971.182139780381,
+          "predicted_acceptance": 0.9556290127038993,
+          "price": 1500000.0,
+          "probability_nonacceptance": 0.04437098729610067,
+          "selected": false,
+          "total_old_score": 6971.182139780381
+        }
+      ],
+      "decision_id": "830D4A3E1EB3C2B3:2",
+      "game_id": "830D4A3E1EB3C2B3",
+      "own_value": 1500000.0,
+      "robust_price": 750000.0,
+      "role": "buyer",
+      "round_number": 2,
+      "selected_price": 375000.0,
+      "structural_group": "buyer|incomplete|known|human"
+    },
+    {
+      "action_context": "NONTERMINAL_COUNTER",
+      "adaptive_price": 40.0,
+      "candidates": [
+        {
+          "immediate_acceptance_payoff": 60.0,
+          "old_continuation_value": 0.290664880021282,
+          "old_rejection_contribution": 0.28408634988657083,
+          "predicted_acceptance": 0.0226326969196605,
+          "price": 20.0,
+          "probability_nonacceptance": 0.9773673030803395,
+          "selected": true,
+          "total_old_score": 1.6420481650662009
+        },
+        {
+          "immediate_acceptance_payoff": 40.0,
+          "old_continuation_value": 0.290664880021282,
+          "old_rejection_contribution": 0.28221627277350336,
+          "predicted_acceptance": 0.0290664880021282,
+          "price": 40.0,
+          "probability_nonacceptance": 0.9709335119978718,
+          "selected": false,
+          "total_old_score": 1.4448757928586313
+        },
+        {
+          "immediate_acceptance_payoff": 30.0,
+          "old_continuation_value": 0.290664880021282,
+          "old_rejection_contribution": 0.281096875500745,
+          "predicted_acceptance": 0.032917649080399534,
+          "price": 50.0,
+          "probability_nonacceptance": 0.9670823509196005,
+          "selected": false,
+          "total_old_score": 1.268626347912731
+        },
+        {
+          "immediate_acceptance_payoff": 20.0,
+          "old_continuation_value": 0.290664880021282,
+          "old_rejection_contribution": 0.27983485536417335,
+          "predicted_acceptance": 0.03725948816491232,
+          "price": 60.0,
+          "probability_nonacceptance": 0.9627405118350877,
+          "selected": false,
+          "total_old_score": 1.0250246186624197
+        },
+        {
+          "immediate_acceptance_payoff": 0.0,
+          "old_continuation_value": 0.290664880021282,
+          "old_rejection_contribution": 0.2584355828911633,
+          "predicted_acceptance": 0.11088129094839015,
+          "price": 80.0,
+          "probability_nonacceptance": 0.8891187090516098,
+          "selected": false,
+          "total_old_score": 0.2584355828911633
+        }
+      ],
+      "decision_id": "6AZ7JKAZ5LF1LTLD:2",
+      "game_id": "6AZ7JKAZ5LF1LTLD",
+      "own_value": 80.0,
+      "robust_price": 40.0,
+      "role": "buyer",
+      "round_number": 2,
+      "selected_price": 20.0,
+      "structural_group": "buyer|incomplete|known|llm"
+    },
+    {
+      "action_context": "NONTERMINAL_COUNTER",
+      "adaptive_price": 64.5,
+      "candidates": [
+        {
+          "immediate_acceptance_payoff": 60.0,
+          "old_continuation_value": 3.189192516355936,
+          "old_rejection_contribution": 2.3411941807811427,
+          "predicted_acceptance": 0.2658975057873711,
+          "price": 20.0,
+          "probability_nonacceptance": 0.7341024942126289,
+          "selected": true,
+          "total_old_score": 18.29504452802341
+        },
+        {
+          "immediate_acceptance_payoff": 40.0,
+          "old_continuation_value": 3.189192516355936,
+          "old_rejection_contribution": 2.172097625717865,
+          "predicted_acceptance": 0.3189192516355936,
+          "price": 40.0,
+          "probability_nonacceptance": 0.6810807483644064,
+          "selected": false,
+          "total_old_score": 14.928867691141608
+        },
+        {
+          "immediate_acceptance_payoff": 20.0,
+          "old_continuation_value": 3.189192516355936,
+          "old_rejection_contribution": 1.986602356442116,
+          "predicted_acceptance": 0.3770829618300793,
+          "price": 60.0,
+          "probability_nonacceptance": 0.6229170381699207,
+          "selected": false,
+          "total_old_score": 9.528261593043702
+        },
+        {
+          "immediate_acceptance_payoff": 15.5,
+          "old_continuation_value": 3.189192516355936,
+          "old_rejection_contribution": 1.9430220463159795,
+          "predicted_acceptance": 0.39074796007105494,
+          "price": 64.5,
+          "probability_nonacceptance": 0.609252039928945,
+          "selected": false,
+          "total_old_score": 7.999615427417331
+        },
+        {
+          "immediate_acceptance_payoff": 5.0,
+          "old_continuation_value": 3.189192516355936,
+          "old_rejection_contribution": 1.7907629107883862,
+          "predicted_acceptance": 0.43849018157280634,
+          "price": 75.0,
+          "probability_nonacceptance": 0.5615098184271936,
+          "selected": false,
+          "total_old_score": 3.983213818652418
+        },
+        {
+          "immediate_acceptance_payoff": 0.0,
+          "old_continuation_value": 3.189192516355936,
+          "old_rejection_contribution": 1.7156027607285167,
+          "predicted_acceptance": 0.46205732268279176,
+          "price": 80.0,
+          "probability_nonacceptance": 0.5379426773172082,
+          "selected": false,
+          "total_old_score": 1.7156027607285167
+        }
+      ],
+      "decision_id": "GP9W6AVNRDF3OWTI:10",
+      "game_id": "GP9W6AVNRDF3OWTI",
+      "own_value": 80.0,
+      "robust_price": 40.0,
+      "role": "buyer",
+      "round_number": 6,
+      "selected_price": 20.0,
+      "structural_group": "buyer|incomplete|unknown|llm"
+    },
+    {
+      "action_context": "NONTERMINAL_COUNTER",
+      "adaptive_price": 18000.0,
+      "candidates": [
+        {
+          "immediate_acceptance_payoff": 0.0,
+          "old_continuation_value": 939.7065856819067,
+          "old_rejection_contribution": 296.89387762405073,
+          "predicted_acceptance": 0.6840568299214302,
+          "price": 12000.0,
+          "probability_nonacceptance": 0.31594317007856976,
+          "selected": false,
+          "total_old_score": 296.89387762405073
+        },
+        {
+          "immediate_acceptance_payoff": 1000.0,
+          "old_continuation_value": 939.7065856819067,
+          "old_rejection_contribution": 323.425739107445,
+          "predicted_acceptance": 0.6558226322605283,
+          "price": 13000.0,
+          "probability_nonacceptance": 0.3441773677394717,
+          "selected": false,
+          "total_old_score": 979.2483713679733
+        },
+        {
+          "immediate_acceptance_payoff": 1200.0,
+          "old_continuation_value": 939.7065856819067,
+          "old_rejection_contribution": 328.86631593896647,
+          "predicted_acceptance": 0.6500329773678009,
+          "price": 13200.0,
+          "probability_nonacceptance": 0.34996702263219914,
+          "selected": false,
+          "total_old_score": 1108.9058887803276
+        },
+        {
+          "immediate_acceptance_payoff": 2000.0,
+          "old_continuation_value": 939.7065856819067,
+          "old_rejection_contribution": 253.35672104783612,
+          "predicted_acceptance": 0.7303874157016943,
+          "price": 14000.0,
+          "probability_nonacceptance": 0.2696125842983057,
+          "selected": false,
+          "total_old_score": 1714.1315524512247
+        },
+        {
+          "immediate_acceptance_payoff": 3000.0,
+          "old_continuation_value": 939.7065856819067,
+          "old_rejection_contribution": 351.02727198651417,
+          "predicted_acceptance": 0.6264501309929759,
+          "price": 15000.0,
+          "probability_nonacceptance": 0.37354986900702414,
+          "selected": false,
+          "total_old_score": 2230.377664965442
+        },
+        {
+          "immediate_acceptance_payoff": 6000.0,
+          "old_continuation_value": 939.7065856819067,
+          "old_rejection_contribution": 351.00760756594224,
+          "predicted_acceptance": 0.6264710571212712,
+          "price": 18000.0,
+          "probability_nonacceptance": 0.37352894287872884,
+          "selected": false,
+          "total_old_score": 4109.83395029357
+        },
+        {
+          "immediate_acceptance_payoff": 12000.0,
+          "old_continuation_value": 939.7065856819067,
+          "old_rejection_contribution": 350.9682800592351,
+          "predicted_acceptance": 0.626512907957805,
+          "price": 24000.0,
+          "probability_nonacceptance": 0.373487092042195,
+          "selected": true,
+          "total_old_score": 7869.123175552895
+        }
+      ],
+      "decision_id": "0CD19E88718D6E65:4",
+      "game_id": "0CD19E88718D6E65",
+      "own_value": 12000.0,
+      "robust_price": 18000.0,
+      "role": "seller",
+      "round_number": 3,
+      "selected_price": 24000.0,
+      "structural_group": "seller|complete|known|human"
+    },
+    {
+      "action_context": "NONTERMINAL_OFFER",
+      "adaptive_price": 15000.0,
+      "candidates": [
+        {
+          "immediate_acceptance_payoff": 0.0,
+          "old_continuation_value": 0.0,
+          "old_rejection_contribution": 0.0,
+          "predicted_acceptance": 0.8325880303336927,
+          "price": 10000.0,
+          "probability_nonacceptance": 0.16741196966630734,
+          "selected": false,
+          "total_old_score": 0.0
+        },
+        {
+          "immediate_acceptance_payoff": 1000.0,
+          "old_continuation_value": 0.0,
+          "old_rejection_contribution": 0.0,
+          "predicted_acceptance": 0.754825403812256,
+          "price": 11000.0,
+          "probability_nonacceptance": 0.24517459618774395,
+          "selected": false,
+          "total_old_score": 754.825403812256
+        },
+        {
+          "immediate_acceptance_payoff": 1500.0,
+          "old_continuation_value": 0.0,
+          "old_rejection_contribution": 0.0,
+          "predicted_acceptance": 0.7548287136651722,
+          "price": 11500.0,
+          "probability_nonacceptance": 0.24517128633482776,
+          "selected": false,
+          "total_old_score": 1132.2430704977583
+        },
+        {
+          "immediate_acceptance_payoff": 2500.0,
+          "old_continuation_value": 0.0,
+          "old_rejection_contribution": 0.0,
+          "predicted_acceptance": 0.754835333280495,
+          "price": 12500.0,
+          "probability_nonacceptance": 0.245164666719505,
+          "selected": false,
+          "total_old_score": 1887.0883332012374
+        },
+        {
+          "immediate_acceptance_payoff": 5000.0,
+          "old_continuation_value": 0.0,
+          "old_rejection_contribution": 0.0,
+          "predicted_acceptance": 0.7548518817908224,
+          "price": 15000.0,
+          "probability_nonacceptance": 0.2451481182091776,
+          "selected": false,
+          "total_old_score": 3774.259408954112
+        },
+        {
+          "immediate_acceptance_payoff": 10000.0,
+          "old_continuation_value": 0.0,
+          "old_rejection_contribution": 0.0,
+          "predicted_acceptance": 0.7548849765486593,
+          "price": 20000.0,
+          "probability_nonacceptance": 0.24511502345134073,
+          "selected": true,
+          "total_old_score": 7548.849765486592
+        }
+      ],
+      "decision_id": "D7E1AE9AE4412B89:0",
+      "game_id": "D7E1AE9AE4412B89",
+      "own_value": 10000.0,
+      "robust_price": 15000.0,
+      "role": "seller",
+      "round_number": 1,
+      "selected_price": 20000.0,
+      "structural_group": "seller|complete|known|human"
+    },
+    {
+      "action_context": "NONTERMINAL_COUNTER",
+      "adaptive_price": 120.0,
+      "candidates": [
+        {
+          "immediate_acceptance_payoff": 0.0,
+          "old_continuation_value": 2.557789796049067,
+          "old_rejection_contribution": 1.8262524098231963,
+          "predicted_acceptance": 0.2860037159253088,
+          "price": 80.0,
+          "probability_nonacceptance": 0.7139962840746912,
+          "selected": false,
+          "total_old_score": 1.8262524098231963
+        },
+        {
+          "immediate_acceptance_payoff": 5.0,
+          "old_continuation_value": 2.557789796049067,
+          "old_rejection_contribution": 1.8752527890925723,
+          "predicted_acceptance": 0.26684640309801344,
+          "price": 85.0,
+          "probability_nonacceptance": 0.7331535969019866,
+          "selected": false,
+          "total_old_score": 3.2094848045826394
+        },
+        {
+          "immediate_acceptance_payoff": 6.0,
+          "old_continuation_value": 2.557789796049067,
+          "old_rejection_contribution": 1.884798505110517,
+          "predicted_acceptance": 0.2631143857005363,
+          "price": 86.0,
+          "probability_nonacceptance": 0.7368856142994638,
+          "selected": false,
+          "total_old_score": 3.463484819313735
+        },
+        {
+          "immediate_acceptance_payoff": 8.0,
+          "old_continuation_value": 2.557789796049067,
+          "old_rejection_contribution": 1.6447511905816135,
+          "predicted_acceptance": 0.3569638939360044,
+          "price": 88.0,
+          "probability_nonacceptance": 0.6430361060639955,
+          "selected": false,
+          "total_old_score": 4.500462342069649
+        },
+        {
+          "immediate_acceptance_payoff": 20.0,
+          "old_continuation_value": 2.557789796049067,
+          "old_rejection_contribution": 1.9036044712124403,
+          "predicted_acceptance": 0.2557619573927167,
+          "price": 100.0,
+          "probability_nonacceptance": 0.7442380426072833,
+          "selected": false,
+          "total_old_score": 7.018843619066774
+        },
+        {
+          "immediate_acceptance_payoff": 22.5,
+          "old_continuation_value": 2.557789796049067,
+          "old_rejection_contribution": 1.9035990289113653,
+          "predicted_acceptance": 0.25576408512857807,
+          "price": 102.5,
+          "probability_nonacceptance": 0.7442359148714219,
+          "selected": false,
+          "total_old_score": 7.6582909443043725
+        },
+        {
+          "immediate_acceptance_payoff": 40.0,
+          "old_continuation_value": 2.557789796049067,
+          "old_rejection_contribution": 1.9035609319717943,
+          "predicted_acceptance": 0.2557789796049067,
+          "price": 120.0,
+          "probability_nonacceptance": 0.7442210203950933,
+          "selected": false,
+          "total_old_score": 12.134720116168063
+        },
+        {
+          "immediate_acceptance_payoff": 80.0,
+          "old_continuation_value": 2.557789796049067,
+          "old_rejection_contribution": 1.9034738477851887,
+          "predicted_acceptance": 0.25581302625985086,
+          "price": 160.0,
+          "probability_nonacceptance": 0.7441869737401492,
+          "selected": true,
+          "total_old_score": 22.368515948573258
+        }
+      ],
+      "decision_id": "ITIGXM8K8REFBXLM:8",
+      "game_id": "ITIGXM8K8REFBXLM",
+      "own_value": 80.0,
+      "robust_price": 120.0,
+      "role": "seller",
+      "round_number": 5,
+      "selected_price": 160.0,
+      "structural_group": "seller|complete|known|llm"
+    },
+    {
+      "action_context": "NONTERMINAL_OFFER",
+      "adaptive_price": 18000.0,
+      "candidates": [
+        {
+          "immediate_acceptance_payoff": 0.0,
+          "old_continuation_value": 0.0,
+          "old_rejection_contribution": 0.0,
+          "predicted_acceptance": 0.23332545488757428,
+          "price": 12000.0,
+          "probability_nonacceptance": 0.7666745451124257,
+          "selected": false,
+          "total_old_score": 0.0
+        },
+        {
+          "immediate_acceptance_payoff": 1200.0,
+          "old_continuation_value": 0.0,
+          "old_rejection_contribution": 0.0,
+          "predicted_acceptance": 0.15853173146829103,
+          "price": 13200.0,
+          "probability_nonacceptance": 0.841468268531709,
+          "selected": false,
+          "total_old_score": 190.23807776194923
+        },
+        {
+          "immediate_acceptance_payoff": 3000.0,
+          "old_continuation_value": 0.0,
+          "old_rejection_contribution": 0.0,
+          "predicted_acceptance": 0.1585388891413247,
+          "price": 15000.0,
+          "probability_nonacceptance": 0.8414611108586754,
+          "selected": false,
+          "total_old_score": 475.6166674239741
+        },
+        {
+          "immediate_acceptance_payoff": 4000.0,
+          "old_continuation_value": 0.0,
+          "old_rejection_contribution": 0.0,
+          "predicted_acceptance": 0.1585428657396729,
+          "price": 16000.0,
+          "probability_nonacceptance": 0.8414571342603271,
+          "selected": false,
+          "total_old_score": 634.1714629586917
+        },
+        {
+          "immediate_acceptance_payoff": 6000.0,
+          "old_continuation_value": 0.0,
+          "old_rejection_contribution": 0.0,
+          "predicted_acceptance": 0.1585508191792216,
+          "price": 18000.0,
+          "probability_nonacceptance": 0.8414491808207785,
+          "selected": false,
+          "total_old_score": 951.3049150753295
+        },
+        {
+          "immediate_acceptance_payoff": 12000.0,
+          "old_continuation_value": 0.0,
+          "old_rejection_contribution": 0.0,
+          "predicted_acceptance": 0.15857468144073744,
+          "price": 24000.0,
+          "probability_nonacceptance": 0.8414253185592626,
+          "selected": true,
+          "total_old_score": 1902.8961772888492
+        }
+      ],
+      "decision_id": "Y5ZBRRJMKU8TKNK0:0",
+      "game_id": "Y5ZBRRJMKU8TKNK0",
+      "own_value": 12000.0,
+      "robust_price": 18000.0,
+      "role": "seller",
+      "round_number": 1,
+      "selected_price": 24000.0,
+      "structural_group": "seller|complete|known|llm"
+    },
+    {
+      "action_context": "NONTERMINAL_COUNTER",
+      "adaptive_price": 1800000.0,
+      "candidates": [
+        {
+          "immediate_acceptance_payoff": 0.0,
+          "old_continuation_value": 45888.20135903953,
+          "old_rejection_contribution": 28563.518781283692,
+          "predicted_acceptance": 0.3775411121957833,
+          "price": 1200000.0,
+          "probability_nonacceptance": 0.6224588878042168,
+          "selected": false,
+          "total_old_score": 28563.518781283692
+        },
+        {
+          "immediate_acceptance_payoff": 100000.0,
+          "old_continuation_value": 45888.20135903953,
+          "old_rejection_contribution": 29918.080950746018,
+          "predicted_acceptance": 0.34802236599642955,
+          "price": 1300000.0,
+          "probability_nonacceptance": 0.6519776340035704,
+          "selected": false,
+          "total_old_score": 64720.31755038898
+        },
+        {
+          "immediate_acceptance_payoff": 120000.0,
+          "old_continuation_value": 45888.20135903953,
+          "old_rejection_contribution": 30183.058793097316,
+          "predicted_acceptance": 0.34224794393359786,
+          "price": 1320000.0,
+          "probability_nonacceptance": 0.6577520560664021,
+          "selected": false,
+          "total_old_score": 71252.81206512907
+        },
+        {
+          "immediate_acceptance_payoff": 175000.0,
+          "old_continuation_value": 45888.20135903953,
+          "old_rejection_contribution": 30900.602415701665,
+          "predicted_acceptance": 0.32661116582172284,
+          "price": 1375000.0,
+          "probability_nonacceptance": 0.6733888341782772,
+          "selected": false,
+          "total_old_score": 88057.55643450316
+        },
+        {
+          "immediate_acceptance_payoff": 300000.0,
+          "old_continuation_value": 45888.20135903953,
+          "old_rejection_contribution": 31850.892505177577,
+          "predicted_acceptance": 0.3059023548129706,
+          "price": 1500000.0,
+          "probability_nonacceptance": 0.6940976451870293,
+          "selected": false,
+          "total_old_score": 123621.59894906876
+        },
+        {
+          "immediate_acceptance_payoff": 350000.0,
+          "old_continuation_value": 45888.20135903953,
+          "old_rejection_contribution": 31850.747289624112,
+          "predicted_acceptance": 0.30590551936396987,
+          "price": 1550000.0,
+          "probability_nonacceptance": 0.6940944806360301,
+          "selected": false,
+          "total_old_score": 138917.67906701358
+        },
+        {
+          "immediate_acceptance_payoff": 600000.0,
+          "old_continuation_value": 45888.20135903953,
+          "old_rejection_contribution": 31850.02119925448,
+          "predicted_acceptance": 0.30592134239359686,
+          "price": 1800000.0,
+          "probability_nonacceptance": 0.6940786576064031,
+          "selected": false,
+          "total_old_score": 215402.82663541258
+        },
+        {
+          "immediate_acceptance_payoff": 1200000.0,
+          "old_continuation_value": 45888.20135903953,
+          "old_rejection_contribution": 31848.278496677052,
+          "predicted_acceptance": 0.3059593195320729,
+          "price": 2400000.0,
+          "probability_nonacceptance": 0.6940406804679271,
+          "selected": true,
+          "total_old_score": 398999.4619351645
+        }
+      ],
+      "decision_id": "J9DMSH0N1USIUSGZ:4",
+      "game_id": "J9DMSH0N1USIUSGZ",
+      "own_value": 1200000.0,
+      "robust_price": 1800000.0,
+      "role": "seller",
+      "round_number": 3,
+      "selected_price": 2400000.0,
+      "structural_group": "seller|complete|unknown|llm"
+    },
+    {
+      "action_context": "NONTERMINAL_OFFER",
+      "adaptive_price": 150.0,
+      "candidates": [
+        {
+          "immediate_acceptance_payoff": 0.0,
+          "old_continuation_value": 0.0,
+          "old_rejection_contribution": 0.0,
+          "predicted_acceptance": 0.4395642198364013,
+          "price": 100.0,
+          "probability_nonacceptance": 0.5604357801635986,
+          "selected": false,
+          "total_old_score": 0.0
+        },
+        {
+          "immediate_acceptance_payoff": 10.0,
+          "old_continuation_value": 0.0,
+          "old_rejection_contribution": 0.0,
+          "predicted_acceptance": 0.3268435269793258,
+          "price": 110.0,
+          "probability_nonacceptance": 0.6731564730206743,
+          "selected": false,
+          "total_old_score": 3.2684352697932577
+        },
+        {
+          "immediate_acceptance_payoff": 25.0,
+          "old_continuation_value": 0.0,
+          "old_rejection_contribution": 0.0,
+          "predicted_acceptance": 0.3268553320856174,
+          "price": 125.0,
+          "probability_nonacceptance": 0.6731446679143827,
+          "selected": false,
+          "total_old_score": 8.171383302140436
+        },
+        {
+          "immediate_acceptance_payoff": 40.0,
+          "old_continuation_value": 0.0,
+          "old_rejection_contribution": 0.0,
+          "predicted_acceptance": 0.32686713741125156,
+          "price": 140.0,
+          "probability_nonacceptance": 0.6731328625887485,
+          "selected": false,
+          "total_old_score": 13.074685496450062
+        },
+        {
+          "immediate_acceptance_payoff": 50.0,
+          "old_continuation_value": 0.0,
+          "old_rejection_contribution": 0.0,
+          "predicted_acceptance": 0.32687500775019274,
+          "price": 150.0,
+          "probability_nonacceptance": 0.6731249922498073,
+          "selected": false,
+          "total_old_score": 16.343750387509637
+        },
+        {
+          "immediate_acceptance_payoff": 100.0,
+          "old_continuation_value": 0.0,
+          "old_rejection_contribution": 0.0,
+          "predicted_acceptance": 0.326914360906997,
+          "price": 200.0,
+          "probability_nonacceptance": 0.673085639093003,
+          "selected": true,
+          "total_old_score": 32.691436090699696
+        }
+      ],
+      "decision_id": "67LINBYMAJMWUWEZ:0",
+      "game_id": "67LINBYMAJMWUWEZ",
+      "own_value": 100.0,
+      "robust_price": 150.0,
+      "role": "seller",
+      "round_number": 1,
+      "selected_price": 200.0,
+      "structural_group": "seller|complete|unknown|llm"
+    },
+    {
+      "action_context": "NONTERMINAL_COUNTER",
+      "adaptive_price": 225.0,
+      "candidates": [
+        {
+          "immediate_acceptance_payoff": 0.0,
+          "old_continuation_value": 16.05125315512428,
+          "old_rejection_contribution": 1.4707385110176725,
+          "predicted_acceptance": 0.9083723559273534,
+          "price": 150.0,
+          "probability_nonacceptance": 0.09162764407264656,
+          "selected": false,
+          "total_old_score": 1.4707385110176725
+        },
+        {
+          "immediate_acceptance_payoff": 12.5,
+          "old_continuation_value": 16.05125315512428,
+          "old_rejection_contribution": 1.650538902289691,
+          "predicted_acceptance": 0.8971707139412498,
+          "price": 162.5,
+          "probability_nonacceptance": 0.10282928605875019,
+          "selected": false,
+          "total_old_score": 12.865172826555314
+        },
+        {
+          "immediate_acceptance_payoff": 15.0,
+          "old_continuation_value": 16.05125315512428,
+          "old_rejection_contribution": 1.6887581109896062,
+          "predicted_acceptance": 0.8947896407421324,
+          "price": 165.0,
+          "probability_nonacceptance": 0.10521035925786759,
+          "selected": false,
+          "total_old_score": 15.110602722121593
+        },
+        {
+          "immediate_acceptance_payoff": 25.0,
+          "old_continuation_value": 16.05125315512428,
+          "old_rejection_contribution": 1.8495319405413468,
+          "predicted_acceptance": 0.8847733617639135,
+          "price": 175.0,
+          "probability_nonacceptance": 0.11522663823608648,
+          "selected": false,
+          "total_old_score": 23.968865984639184
+        },
+        {
+          "immediate_acceptance_payoff": 37.5,
+          "old_continuation_value": 16.05125315512428,
+          "old_rejection_contribution": 2.069069072545133,
+          "predicted_acceptance": 0.8710961036780737,
+          "price": 187.5,
+          "probability_nonacceptance": 0.12890389632192634,
+          "selected": false,
+          "total_old_score": 34.735172960472894
+        },
+        {
+          "immediate_acceptance_payoff": 75.0,
+          "old_continuation_value": 16.05125315512428,
+          "old_rejection_contribution": 2.3103076697969667,
+          "predicted_acceptance": 0.8560668349399615,
+          "price": 225.0,
+          "probability_nonacceptance": 0.1439331650600385,
+          "selected": false,
+          "total_old_score": 66.51532029029408
+        },
+        {
+          "immediate_acceptance_payoff": 150.0,
+          "old_continuation_value": 16.05125315512428,
+          "old_rejection_contribution": 2.3099539669686906,
+          "predicted_acceptance": 0.856088870778837,
+          "price": 300.0,
+          "probability_nonacceptance": 0.143911129221163,
+          "selected": true,
+          "total_old_score": 130.72328458379425
+        }
+      ],
+      "decision_id": "AE5F90773B198ABF:4",
+      "game_id": "AE5F90773B198ABF",
+      "own_value": 150.0,
+      "robust_price": 225.0,
+      "role": "seller",
+      "round_number": 3,
+      "selected_price": 300.0,
+      "structural_group": "seller|incomplete|known|human"
+    },
+    {
+      "action_context": "NONTERMINAL_OFFER",
+      "adaptive_price": 1200000.0,
+      "candidates": [
+        {
+          "immediate_acceptance_payoff": 0.0,
+          "old_continuation_value": 0.0,
+          "old_rejection_contribution": 0.0,
+          "predicted_acceptance": 0.9643061589591072,
+          "price": 800000.0,
+          "probability_nonacceptance": 0.03569384104089279,
+          "selected": false,
+          "total_old_score": 0.0
+        },
+        {
+          "immediate_acceptance_payoff": 80000.00000000012,
+          "old_continuation_value": 0.0,
+          "old_rejection_contribution": 0.0,
+          "predicted_acceptance": 0.9435804158645877,
+          "price": 880000.0000000001,
+          "probability_nonacceptance": 0.05641958413541226,
+          "selected": false,
+          "total_old_score": 75486.43326916713
+        },
+        {
+          "immediate_acceptance_payoff": 200000.0,
+          "old_continuation_value": 0.0,
+          "old_rejection_contribution": 0.0,
+          "predicted_acceptance": 0.9435832721948104,
+          "price": 1000000.0,
+          "probability_nonacceptance": 0.05641672780518958,
+          "selected": false,
+          "total_old_score": 188716.65443896208
+        },
+        {
+          "immediate_acceptance_payoff": 400000.0,
+          "old_continuation_value": 0.0,
+          "old_rejection_contribution": 0.0,
+          "predicted_acceptance": 0.9435880324430496,
+          "price": 1200000.0,
+          "probability_nonacceptance": 0.05641196755695044,
+          "selected": false,
+          "total_old_score": 377435.21297721984
+        },
+        {
+          "immediate_acceptance_payoff": 800000.0,
+          "old_continuation_value": 0.0,
+          "old_rejection_contribution": 0.0,
+          "predicted_acceptance": 0.9435975518066261,
+          "price": 1600000.0,
+          "probability_nonacceptance": 0.05640244819337392,
+          "selected": true,
+          "total_old_score": 754878.0414453009
+        }
+      ],
+      "decision_id": "9BBE5FE493176394:0",
+      "game_id": "9BBE5FE493176394",
+      "own_value": 800000.0,
+      "robust_price": 1200000.0,
+      "role": "seller",
+      "round_number": 1,
+      "selected_price": 1600000.0,
+      "structural_group": "seller|incomplete|known|human"
+    },
+    {
+      "action_context": "NONTERMINAL_COUNTER",
+      "adaptive_price": 1200000.0,
+      "candidates": [
+        {
+          "immediate_acceptance_payoff": 0.0,
+          "old_continuation_value": 37012.86474992806,
+          "old_rejection_contribution": 20760.31812067538,
+          "predicted_acceptance": 0.43910534186047495,
+          "price": 800000.0,
+          "probability_nonacceptance": 0.5608946581395251,
+          "selected": false,
+          "total_old_score": 20760.31812067538
+        },
+        {
+          "immediate_acceptance_payoff": 80000.00000000012,
+          "old_continuation_value": 37012.86474992806,
+          "old_rejection_contribution": 22142.14145733956,
+          "predicted_acceptance": 0.40177174593375425,
+          "price": 880000.0000000001,
+          "probability_nonacceptance": 0.5982282540662458,
+          "selected": false,
+          "total_old_score": 54283.88113203995
+        },
+        {
+          "immediate_acceptance_payoff": 200000.0,
+          "old_continuation_value": 37012.86474992806,
+          "old_rejection_contribution": 24133.96558019796,
+          "predicted_acceptance": 0.34795737257152276,
+          "price": 1000000.0,
+          "probability_nonacceptance": 0.6520426274284772,
+          "selected": false,
+          "total_old_score": 93725.44009450253
+        },
+        {
+          "immediate_acceptance_payoff": 300000.0,
+          "old_continuation_value": 37012.86474992806,
+          "old_rejection_contribution": 25692.910405484334,
+          "predicted_acceptance": 0.3058383732500935,
+          "price": 1100000.0,
+          "probability_nonacceptance": 0.6941616267499064,
+          "selected": false,
+          "total_old_score": 117444.42238051238
+        },
+        {
+          "immediate_acceptance_payoff": 350000.0,
+          "old_continuation_value": 37012.86474992806,
+          "old_rejection_contribution": 26431.46246618141,
+          "predicted_acceptance": 0.28588444464481005,
+          "price": 1150000.0,
+          "probability_nonacceptance": 0.7141155553551899,
+          "selected": false,
+          "total_old_score": 126491.01809186494
+        },
+        {
+          "immediate_acceptance_payoff": 400000.0,
+          "old_continuation_value": 37012.86474992806,
+          "old_rejection_contribution": 23313.343179963387,
+          "predicted_acceptance": 0.37012864749928065,
+          "price": 1200000.0,
+          "probability_nonacceptance": 0.6298713525007194,
+          "selected": false,
+          "total_old_score": 171364.80217967564
+        },
+        {
+          "immediate_acceptance_payoff": 800000.0,
+          "old_continuation_value": 37012.86474992806,
+          "old_rejection_contribution": 27139.049476729706,
+          "predicted_acceptance": 0.2667671184035422,
+          "price": 1600000.0,
+          "probability_nonacceptance": 0.7332328815964577,
+          "selected": true,
+          "total_old_score": 240552.7441995635
+        }
+      ],
+      "decision_id": "MR918T4V7S99QX4T:4",
+      "game_id": "MR918T4V7S99QX4T",
+      "own_value": 800000.0,
+      "robust_price": 1200000.0,
+      "role": "seller",
+      "round_number": 3,
+      "selected_price": 1600000.0,
+      "structural_group": "seller|incomplete|known|llm"
+    },
+    {
+      "action_context": "NONTERMINAL_OFFER",
+      "adaptive_price": 120.0,
+      "candidates": [
+        {
+          "immediate_acceptance_payoff": 0.0,
+          "old_continuation_value": 0.0,
+          "old_rejection_contribution": 0.0,
+          "predicted_acceptance": 0.2601905617455276,
+          "price": 80.0,
+          "probability_nonacceptance": 0.7398094382544724,
+          "selected": false,
+          "total_old_score": 0.0
+        },
+        {
+          "immediate_acceptance_payoff": 8.0,
+          "old_continuation_value": 0.0,
+          "old_rejection_contribution": 0.0,
+          "predicted_acceptance": 0.1787934005165807,
+          "price": 88.0,
+          "probability_nonacceptance": 0.8212065994834192,
+          "selected": false,
+          "total_old_score": 1.4303472041326457
+        },
+        {
+          "immediate_acceptance_payoff": 20.0,
+          "old_continuation_value": 0.0,
+          "old_rejection_contribution": 0.0,
+          "predicted_acceptance": 0.17880127861409778,
+          "price": 100.0,
+          "probability_nonacceptance": 0.8211987213859022,
+          "selected": false,
+          "total_old_score": 3.5760255722819556
+        },
+        {
+          "immediate_acceptance_payoff": 40.0,
+          "old_continuation_value": 0.0,
+          "old_rejection_contribution": 0.0,
+          "predicted_acceptance": 0.17881440938006188,
+          "price": 120.0,
+          "probability_nonacceptance": 0.8211855906199381,
+          "selected": false,
+          "total_old_score": 7.152576375202475
+        },
+        {
+          "immediate_acceptance_payoff": 80.0,
+          "old_continuation_value": 0.0,
+          "old_rejection_contribution": 0.0,
+          "predicted_acceptance": 0.17884067317491925,
+          "price": 160.0,
+          "probability_nonacceptance": 0.8211593268250807,
+          "selected": true,
+          "total_old_score": 14.30725385399354
+        }
+      ],
+      "decision_id": "ITXEPYAV0E5FZGXP:0",
+      "game_id": "ITXEPYAV0E5FZGXP",
+      "own_value": 80.0,
+      "robust_price": 120.0,
+      "role": "seller",
+      "round_number": 1,
+      "selected_price": 160.0,
+      "structural_group": "seller|incomplete|known|llm"
+    },
+    {
+      "action_context": "NONTERMINAL_COUNTER",
+      "adaptive_price": 18000.0,
+      "candidates": [
+        {
+          "immediate_acceptance_payoff": 0.0,
+          "old_continuation_value": 205.66503288585247,
+          "old_rejection_contribution": 166.78916224285592,
+          "predicted_acceptance": 0.1890251838025052,
+          "price": 12000.0,
+          "probability_nonacceptance": 0.8109748161974948,
+          "selected": false,
+          "total_old_score": 166.78916224285592
+        },
+        {
+          "immediate_acceptance_payoff": 1200.0,
+          "old_continuation_value": 205.66503288585247,
+          "old_rejection_contribution": 171.3936200995098,
+          "predicted_acceptance": 0.16663704230832407,
+          "price": 13200.0,
+          "probability_nonacceptance": 0.8333629576916759,
+          "selected": false,
+          "total_old_score": 371.3580708694987
+        },
+        {
+          "immediate_acceptance_payoff": 1500.0,
+          "old_continuation_value": 205.66503288585247,
+          "old_rejection_contribution": 172.4742251009683,
+          "predicted_acceptance": 0.1613828433504571,
+          "price": 13500.0,
+          "probability_nonacceptance": 0.8386171566495428,
+          "selected": false,
+          "total_old_score": 414.548490126654
+        },
+        {
+          "immediate_acceptance_payoff": 3000.0,
+          "old_continuation_value": 205.66503288585247,
+          "old_rejection_contribution": 163.65966838193367,
+          "predicted_acceptance": 0.20424164435979975,
+          "price": 15000.0,
+          "probability_nonacceptance": 0.7957583556402003,
+          "selected": false,
+          "total_old_score": 776.3846014613329
+        },
+        {
+          "immediate_acceptance_payoff": 6000.0,
+          "old_continuation_value": 205.66503288585247,
+          "old_rejection_contribution": 177.46629571789327,
+          "predicted_acceptance": 0.13711002192390165,
+          "price": 18000.0,
+          "probability_nonacceptance": 0.8628899780760984,
+          "selected": false,
+          "total_old_score": 1000.1264272613032
+        },
+        {
+          "immediate_acceptance_payoff": 12000.0,
+          "old_continuation_value": 205.66503288585247,
+          "old_rejection_contribution": 177.46194358679665,
+          "predicted_acceptance": 0.13713118318323475,
+          "price": 24000.0,
+          "probability_nonacceptance": 0.8628688168167653,
+          "selected": true,
+          "total_old_score": 1823.0361417856136
+        }
+      ],
+      "decision_id": "DUMXQGNBXY6D8VVO:4",
+      "game_id": "DUMXQGNBXY6D8VVO",
+      "own_value": 12000.0,
+      "robust_price": 18000.0,
+      "role": "seller",
+      "round_number": 3,
+      "selected_price": 24000.0,
+      "structural_group": "seller|incomplete|unknown|llm"
+    },
+    {
+      "action_context": "NONTERMINAL_OFFER",
+      "adaptive_price": 180.0,
+      "candidates": [
+        {
+          "immediate_acceptance_payoff": 0.0,
+          "old_continuation_value": 0.0,
+          "old_rejection_contribution": 0.0,
+          "predicted_acceptance": 0.5156359109740628,
+          "price": 120.0,
+          "probability_nonacceptance": 0.4843640890259372,
+          "selected": false,
+          "total_old_score": 0.0
+        },
+        {
+          "immediate_acceptance_payoff": 12.0,
+          "old_continuation_value": 0.0,
+          "old_rejection_contribution": 0.0,
+          "predicted_acceptance": 0.39723451553444833,
+          "price": 132.0,
+          "probability_nonacceptance": 0.6027654844655517,
+          "selected": false,
+          "total_old_score": 4.76681418641338
+        },
+        {
+          "immediate_acceptance_payoff": 30.0,
+          "old_continuation_value": 0.0,
+          "old_rejection_contribution": 0.0,
+          "predicted_acceptance": 0.3972473627112176,
+          "price": 150.0,
+          "probability_nonacceptance": 0.6027526372887824,
+          "selected": false,
+          "total_old_score": 11.917420881336527
+        },
+        {
+          "immediate_acceptance_payoff": 60.0,
+          "old_continuation_value": 0.0,
+          "old_rejection_contribution": 0.0,
+          "predicted_acceptance": 0.39726877498728863,
+          "price": 180.0,
+          "probability_nonacceptance": 0.6027312250127114,
+          "selected": false,
+          "total_old_score": 23.836126499237317
+        },
+        {
+          "immediate_acceptance_payoff": 120.0,
+          "old_continuation_value": 0.0,
+          "old_rejection_contribution": 0.0,
+          "predicted_acceptance": 0.3973116007196203,
+          "price": 240.0,
+          "probability_nonacceptance": 0.6026883992803798,
+          "selected": true,
+          "total_old_score": 47.67739208635444
+        }
+      ],
+      "decision_id": "HE2653ISD1BBCT1P:0",
+      "game_id": "HE2653ISD1BBCT1P",
+      "own_value": 120.0,
+      "robust_price": 180.0,
+      "role": "seller",
+      "round_number": 1,
+      "selected_price": 240.0,
+      "structural_group": "seller|incomplete|unknown|llm"
+    },
+    {
+      "action_context": "NONTERMINAL_COUNTER",
+      "adaptive_price": 6000.0,
+      "candidates": [
+        {
+          "immediate_acceptance_payoff": 9000.0,
+          "old_continuation_value": 1091.3016879757931,
+          "old_rejection_contribution": 355.99897819142745,
+          "predicted_acceptance": 0.6737850017883193,
+          "price": 3000.0,
+          "probability_nonacceptance": 0.32621499821168065,
+          "selected": true,
+          "total_old_score": 6420.063994286302
+        },
+        {
+          "immediate_acceptance_payoff": 6000.0,
+          "old_continuation_value": 1091.3016879757931,
+          "old_rejection_contribution": 297.3421051899162,
+          "predicted_acceptance": 0.7275344586505288,
+          "price": 6000.0,
+          "probability_nonacceptance": 0.2724655413494712,
+          "selected": false,
+          "total_old_score": 4662.548857093088
+        },
+        {
+          "immediate_acceptance_payoff": 3500.0,
+          "old_continuation_value": 1091.3016879757931,
+          "old_rejection_contribution": 253.35848779115722,
+          "predicted_acceptance": 0.7678382700377743,
+          "price": 8500.0,
+          "probability_nonacceptance": 0.23216172996222573,
+          "selected": false,
+          "total_old_score": 2940.792432923367
+        },
+        {
+          "immediate_acceptance_payoff": 3000.0,
+          "old_continuation_value": 1091.3016879757931,
+          "old_rejection_contribution": 245.1280192733794,
+          "predicted_acceptance": 0.7753801520017288,
+          "price": 9000.0,
+          "probability_nonacceptance": 0.22461984799827117,
+          "selected": false,
+          "total_old_score": 2571.268475278566
+        },
+        {
+          "immediate_acceptance_payoff": 2500.0,
+          "old_continuation_value": 1091.3016879757931,
+          "old_rejection_contribution": 237.08927100369627,
+          "predicted_acceptance": 0.7827463536288828,
+          "price": 9500.0,
+          "probability_nonacceptance": 0.21725364637111721,
+          "selected": false,
+          "total_old_score": 2193.9551550759033
+        },
+        {
+          "immediate_acceptance_payoff": 1000.0,
+          "old_continuation_value": 1091.3016879757931,
+          "old_rejection_contribution": 214.12636428102383,
+          "predicted_acceptance": 0.803788112269672,
+          "price": 11000.0,
+          "probability_nonacceptance": 0.19621188773032805,
+          "selected": false,
+          "total_old_score": 1017.9144765506958
+        },
+        {
+          "immediate_acceptance_payoff": 0.0,
+          "old_continuation_value": 1091.3016879757931,
+          "old_rejection_contribution": 90.0161635476843,
+          "predicted_acceptance": 0.9175148682170086,
+          "price": 12000.0,
+          "probability_nonacceptance": 0.08248513178299144,
+          "selected": false,
+          "total_old_score": 90.0161635476843
+        }
+      ],
+      "decision_id": "C666370E6E461E03:2",
+      "game_id": "C666370E6E461E03",
+      "own_value": 12000.0,
+      "robust_price": 6000.0,
+      "role": "buyer",
+      "round_number": 2,
+      "selected_price": 3000.0,
+      "structural_group": "buyer|complete|known|human"
+    },
+    {
+      "action_context": "NONTERMINAL_COUNTER",
+      "adaptive_price": 6175.0,
+      "candidates": [
+        {
+          "immediate_acceptance_payoff": 9000.0,
+          "old_continuation_value": 336.7367303390801,
+          "old_rejection_contribution": 275.1302670936274,
+          "predicted_acceptance": 0.18295142078328525,
+          "price": 3000.0,
+          "probability_nonacceptance": 0.8170485792167148,
+          "selected": true,
+          "total_old_score": 1921.6930541431948
+        },
+        {
+          "immediate_acceptance_payoff": 6000.0,
+          "old_continuation_value": 336.7367303390801,
+          "old_rejection_contribution": 261.14231329944386,
+          "predicted_acceptance": 0.22449115355938676,
+          "price": 6000.0,
+          "probability_nonacceptance": 0.7755088464406132,
+          "selected": false,
+          "total_old_score": 1608.0892346557644
+        },
+        {
+          "immediate_acceptance_payoff": 5825.0,
+          "old_continuation_value": 336.7367303390801,
+          "old_rejection_contribution": 260.26051873999074,
+          "predicted_acceptance": 0.22710980035376876,
+          "price": 6175.0,
+          "probability_nonacceptance": 0.7728901996462312,
+          "selected": false,
+          "total_old_score": 1583.175105800694
+        },
+        {
+          "immediate_acceptance_payoff": 3750.0,
+          "old_continuation_value": 336.7367303390801,
+          "old_rejection_contribution": 249.25762186205375,
+          "predicted_acceptance": 0.2597848722618957,
+          "price": 8250.0,
+          "probability_nonacceptance": 0.7402151277381043,
+          "selected": false,
+          "total_old_score": 1223.4508928441628
+        },
+        {
+          "immediate_acceptance_payoff": 3000.0,
+          "old_continuation_value": 336.7367303390801,
+          "old_rejection_contribution": 174.2232340595887,
+          "predicted_acceptance": 0.4826129187506422,
+          "price": 9000.0,
+          "probability_nonacceptance": 0.5173870812493577,
+          "selected": false,
+          "total_old_score": 1622.0619903115155
+        },
+        {
+          "immediate_acceptance_payoff": 2000.0,
+          "old_continuation_value": 336.7367303390801,
+          "old_rejection_contribution": 236.32412755751864,
+          "predicted_acceptance": 0.2981931988246429,
+          "price": 10000.0,
+          "probability_nonacceptance": 0.7018068011753571,
+          "selected": false,
+          "total_old_score": 832.7105252068044
+        },
+        {
+          "immediate_acceptance_payoff": 1500.0,
+          "old_continuation_value": 336.7367303390801,
+          "old_rejection_contribution": 231.79374200626313,
+          "predicted_acceptance": 0.31164698970362886,
+          "price": 10500.0,
+          "probability_nonacceptance": 0.6883530102963711,
+          "selected": false,
+          "total_old_score": 699.2642265617064
+        },
+        {
+          "immediate_acceptance_payoff": 0.0,
+          "old_continuation_value": 336.7367303390801,
+          "old_rejection_contribution": 217.56815875447165,
+          "predicted_acceptance": 0.3538924056921577,
+          "price": 12000.0,
+          "probability_nonacceptance": 0.6461075943078423,
+          "selected": false,
+          "total_old_score": 217.56815875447165
+        }
+      ],
+      "decision_id": "NVZSF3CHKO412Z2P:6",
+      "game_id": "NVZSF3CHKO412Z2P",
+      "own_value": 12000.0,
+      "robust_price": 6000.0,
+      "role": "buyer",
+      "round_number": 4,
+      "selected_price": 3000.0,
+      "structural_group": "buyer|complete|known|llm"
+    }
+  ]
+}
