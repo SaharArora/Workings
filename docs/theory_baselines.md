@@ -50,6 +50,11 @@ documented below; no policy grid or transform clip is interpreted as mechanism s
 | Incomplete, ambiguous prior | T=1 | Robust/minimax-regret randomized pricing |
 | Incomplete | Multi-round/unlimited | No clean closed form; BAYES/ROBUST/EMPIRICAL portfolio |
 
+The complete-information unknown-horizon midpoint incumbent uses the same operational
+cycle convention as ROBUST: it walks away on the third identical rejected
+offer/counter pair. This does not alter the midpoint price or claim a unique equilibrium;
+it only supplies a terminal rule when two deterministic policies make no progress.
+
 The current API exposes no trusted valuation prior or distribution parameters in an
 incomplete T=1 state, and the historical parameter grid is not a prior announced to the
 agent. Current live routing therefore instantiates the ambiguous-prior row and selects
