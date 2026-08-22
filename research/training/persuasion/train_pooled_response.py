@@ -6,6 +6,7 @@ import argparse
 import csv
 import hashlib
 import json
+import math
 import subprocess
 from collections import Counter, defaultdict
 from pathlib import Path
@@ -140,6 +141,14 @@ def _split(game_id: str) -> str:
     return "train" if bucket < 6 else "validation" if bucket < 8 else "test"
 
 
+def _sigmoid(value: float) -> float:
+    if value >= 0:
+        exp_neg = math.exp(-value)
+        return 1.0 / (1.0 + exp_neg)
+    exp_pos = math.exp(value)
+    return exp_pos / (1.0 + exp_pos)
+
+
 def train(table: Path, metadata_path: Path, output: Path, *, version: str) -> dict[str, Any]:
     rows = [json.loads(line) for line in table.read_text().splitlines() if line.strip()]
     splits: dict[str, list[dict[str, Any]]] = defaultdict(list)
@@ -158,7 +167,7 @@ def train(table: Path, metadata_path: Path, output: Path, *, version: str) -> di
     calibration = _fit_calibration(validation_logits, validation_targets, seed=4343)
     test_logits = [_raw_logit(fitted, row["features"]) for row in splits["test"]]
     predictions = [
-        1 / (1 + __import__("math").exp(-(calibration["intercept"] + calibration["coefficient"] * value)))
+        _sigmoid(calibration["intercept"] + calibration["coefficient"] * value)
         for value in test_logits
     ]
     targets = [int(row["bought"]) for row in splits["test"]]

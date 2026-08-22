@@ -1,0 +1,17 @@
+{
+  "counts": {
+    "bought:0": 126828,
+    "bought:1": 143292,
+    "message_type:binary": 131880,
+    "message_type:text": 138240,
+    "source:human_vs_llm": 9700,
+    "source:llm_vs_llm": 260420
+  },
+  "dataset_name": "persuasion_pooled_pre_purchase_v1",
+  "feature_table_sha256": "abf3728d25ba39219e5eccab56173447a164b58f19f2eaa741e0034d12048787",
+  "games": 13506,
+  "p3_inputs_used": false,
+  "quality_or_terminal_leakage_used": false,
+  "rows": 270120,
+  "source_commit": "68a33e98b035b97f945badee8f325001555c0049"
+}

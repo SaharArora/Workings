@@ -1,0 +1,32 @@
+{
+  "counts": {
+    "accept": 29678,
+    "reject_or_counter": 66536,
+    "role:buyer": 35222,
+    "role:seller": 60992,
+    "source:human_vs_llm": 2015,
+    "source:llm_vs_llm": 94199
+  },
+  "dataset_name": "negotiation_pooled_pre_response_v1",
+  "feature_leakage_guard": "feature_map contains only pre-response observables; responder values are used only for the explicitly named nonfeature ROBUST diagnostic",
+  "feature_table_sha256": "152a6f84d9edebfc1cf69c76efdf28112f750f9e200386ca486d23411c3108b9",
+  "games": 33627,
+  "rows": 96214,
+  "source": "public_original_GLEE_Data",
+  "source_commit": "68a33e98b035b97f945badee8f325001555c0049",
+  "structural_group_counts": {
+    "buyer|complete|known|human": 336,
+    "buyer|complete|known|llm": 11316,
+    "buyer|complete|unknown|llm": 6586,
+    "buyer|incomplete|known|human": 126,
+    "buyer|incomplete|known|llm": 10923,
+    "buyer|incomplete|unknown|llm": 5935,
+    "seller|complete|known|human": 512,
+    "seller|complete|known|llm": 20468,
+    "seller|complete|unknown|llm": 10219,
+    "seller|incomplete|known|human": 208,
+    "seller|incomplete|known|llm": 19830,
+    "seller|incomplete|unknown|llm": 9755
+  },
+  "walkaway_model_status": "UNAVAILABLE_NO_HISTORICAL_WALKAWAY_LABELS"
+}

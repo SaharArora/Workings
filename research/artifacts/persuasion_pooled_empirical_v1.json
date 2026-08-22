@@ -1,0 +1,259 @@
+{
+  "calibration": {
+    "coefficient": 1.1966631199987992,
+    "identity_validation_brier": 0.0912959092226537,
+    "intercept": -0.037839134672269875,
+    "selected": true,
+    "validation_brier": 0.08906553987917677
+  },
+  "calibration_diagnostic": {
+    "bins": [
+      {
+        "lower": 0.0,
+        "mean_prediction": 0.0409901898867883,
+        "n": 12364,
+        "observed_rate": 0.030249110320284697,
+        "upper": 0.1
+      },
+      {
+        "lower": 0.1,
+        "mean_prediction": 0.14685754312912913,
+        "n": 6538,
+        "observed_rate": 0.13107984092994798,
+        "upper": 0.2
+      },
+      {
+        "lower": 0.2,
+        "mean_prediction": 0.24382975627967585,
+        "n": 2835,
+        "observed_rate": 0.24620811287477953,
+        "upper": 0.3
+      },
+      {
+        "lower": 0.3,
+        "mean_prediction": 0.3481496522886405,
+        "n": 2216,
+        "observed_rate": 0.30776173285198555,
+        "upper": 0.4
+      },
+      {
+        "lower": 0.4,
+        "mean_prediction": 0.4467636363811275,
+        "n": 1557,
+        "observed_rate": 0.36416184971098264,
+        "upper": 0.5
+      },
+      {
+        "lower": 0.5,
+        "mean_prediction": 0.5529261310992206,
+        "n": 1625,
+        "observed_rate": 0.5323076923076923,
+        "upper": 0.6
+      },
+      {
+        "lower": 0.6,
+        "mean_prediction": 0.6508504263049892,
+        "n": 2388,
+        "observed_rate": 0.72571189279732,
+        "upper": 0.7
+      },
+      {
+        "lower": 0.7,
+        "mean_prediction": 0.7514499542029595,
+        "n": 2853,
+        "observed_rate": 0.8121275849982474,
+        "upper": 0.8
+      },
+      {
+        "lower": 0.8,
+        "mean_prediction": 0.8606643137497386,
+        "n": 4966,
+        "observed_rate": 0.8892468787756745,
+        "upper": 0.9
+      },
+      {
+        "lower": 0.9,
+        "mean_prediction": 0.9520797603074106,
+        "n": 16018,
+        "observed_rate": 0.9598576601323511,
+        "upper": 1.0
+      }
+    ],
+    "expected_calibration_error": 0.020853175037410594,
+    "max_bin_gap": 0.08260178667014484
+  },
+  "code_commit": "eb09ba3c205d809f59b1327d52ac0f3433a9e99d",
+  "feature_names": [
+    "prior_high",
+    "expected_value_edge",
+    "round_fraction",
+    "seller_knows_values",
+    "opponent_human",
+    "opponent_llm",
+    "signal_yes",
+    "signal_no",
+    "signal_text",
+    "message_mentions_high",
+    "message_mentions_low",
+    "message_buy_language",
+    "message_negation",
+    "prior_buy_rate",
+    "prior_positive_signal_rate",
+    "previous_buyer_bought"
+  ],
+  "frozen": true,
+  "leakage_checks": {
+    "game_id_disjoint": true,
+    "model_identity_in_features": false,
+    "nature_quality_in_features": false,
+    "p3_trust_artifact_used": false,
+    "terminal_outcome_in_features": false
+  },
+  "model_class": "L2_logistic_with_optional_Platt_calibration",
+  "model_version": "persuasion-pooled-empirical-v1",
+  "policy_name": "PERSUASION_POOLED_EMPIRICAL",
+  "response_model": {
+    "coefficients": [
+      0.29149258396883243,
+      0.14054460475712402,
+      -0.09128347471822429,
+      0.0217489461982917,
+      0.004765160410409191,
+      -0.004765160410409196,
+      0.8833272391646472,
+      -0.8241631766981006,
+      -0.22866009158458578,
+      0.2834785767664172,
+      -0.19640479719236167,
+      0.024827077917082784,
+      -0.20614984021110536,
+      1.0506344882436338,
+      -0.6968806748320853,
+      0.4582421467531106
+    ],
+    "feature_max": [
+      0.8,
+      0.55,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "feature_min": [
+      0.333333333,
+      -0.5000000003333334,
+      0.05,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "intercept": 0.14499625286495715,
+    "means": [
+      0.5459290953530123,
+      -0.0010656071738384674,
+      0.525,
+      0.5169926650366748,
+      0.024572127139364304,
+      0.9754278728606357,
+      0.32995110024449875,
+      0.15855745721271394,
+      0.5114914425427873,
+      0.36071515892420536,
+      0.04111246943765281,
+      0.18027506112469438,
+      0.15210268948655256,
+      0.5068945602176552,
+      0.31268913077658717,
+      0.5056295843520783
+    ],
+    "optimizer": {
+      "batch_size": 1024,
+      "epochs": 30,
+      "learning_rate": 0.06,
+      "seed": 4242,
+      "type": "deterministic_minibatch_gradient_descent"
+    },
+    "regularization": {
+      "strength": 0.02,
+      "type": "L2"
+    },
+    "scales": [
+      0.19198097788539806,
+      0.30520264406025355,
+      0.2883140648667213,
+      0.49971116591034215,
+      0.15481711051210115,
+      0.15481711051210115,
+      0.4701950358006442,
+      0.36526290528220945,
+      0.4998679293061554,
+      0.48020801018507664,
+      0.1985503318920662,
+      0.3844163933302659,
+      0.35912039950064784,
+      0.39521022388945265,
+      0.4000463194892566,
+      0.49996830677547865
+    ]
+  },
+  "source_metadata": {
+    "counts": {
+      "bought:0": 126828,
+      "bought:1": 143292,
+      "message_type:binary": 131880,
+      "message_type:text": 138240,
+      "source:human_vs_llm": 9700,
+      "source:llm_vs_llm": 260420
+    },
+    "dataset_name": "persuasion_pooled_pre_purchase_v1",
+    "feature_table_sha256": "abf3728d25ba39219e5eccab56173447a164b58f19f2eaa741e0034d12048787",
+    "games": 13506,
+    "p3_inputs_used": false,
+    "quality_or_terminal_leakage_used": false,
+    "rows": 270120,
+    "source_commit": "68a33e98b035b97f945badee8f325001555c0049"
+  },
+  "split_counts": {
+    "test": {
+      "games": 2668,
+      "rows": 53360
+    },
+    "train": {
+      "games": 8180,
+      "rows": 163600
+    },
+    "validation": {
+      "games": 2658,
+      "rows": 53160
+    }
+  },
+  "split_method": "sha256(game_id) 60/20/20",
+  "test_metrics": {
+    "acceptance_prevalence": 0.5225637181409295,
+    "baseline_brier_score": 0.24959627667276954,
+    "baseline_log_loss": 0.69234012479601,
+    "brier_score": 0.09190635718372192,
+    "brier_skill_score": 0.631779935146169,
+    "log_loss": 0.3083624063646744
+  }
+}

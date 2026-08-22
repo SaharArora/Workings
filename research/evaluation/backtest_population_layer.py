@@ -15,6 +15,7 @@ from opponent_models.pooled_negotiation import (
     PooledNegotiationModel,
     economic_margin,
 )
+from opponent_models.pooled_persuasion import PooledPersuasionModel
 from policies.negotiation.adaptive import adaptive_action_plan
 from policies.negotiation.pooled_empirical import (
     PooledFeatureSupportUnavailable,
@@ -316,7 +317,86 @@ def bargaining_structural_diagnostic(evaluation_dir: Path) -> dict[str, Any]:
     }
 
 
-def run(feature_table: Path, artifact: Path, evaluation_dir: Path) -> dict[str, Any]:
+def persuasion_challenger_diagnostic(
+    feature_table: Path, model: PooledPersuasionModel
+) -> dict[str, Any]:
+    counts: Counter[str] = Counter()
+    probabilities: dict[str, list[float]] = defaultdict(list)
+    with feature_table.open(encoding="utf-8") as handle:
+        for line in handle:
+            if not line.strip():
+                continue
+            row = json.loads(line)
+            if _split_name(str(row["game_id"])) != "test":
+                continue
+            actual = dict(row["feature_map"])
+            actual_probability, _ = model.predict_purchase(actual)
+            message_type = str(row["seller_message_type"])
+            candidates: dict[str, dict[str, float]] = {}
+            if message_type == "binary":
+                for signal in ("yes", "no"):
+                    features = dict(actual)
+                    features.update(
+                        {
+                            "signal_yes": float(signal == "yes"),
+                            "signal_no": float(signal == "no"),
+                            "signal_text": 0.0,
+                            "message_mentions_high": 0.0,
+                            "message_mentions_low": 0.0,
+                            "message_buy_language": 0.0,
+                            "message_negation": 0.0,
+                        }
+                    )
+                    candidates[signal] = features
+                p0 = "yes"
+            else:
+                recommend = dict(actual)
+                recommend.update(
+                    {
+                        "signal_yes": 0.0,
+                        "signal_no": 0.0,
+                        "signal_text": 1.0,
+                        "message_mentions_high": 0.0,
+                        "message_mentions_low": 0.0,
+                        "message_buy_language": 1.0,
+                        "message_negation": 0.0,
+                    }
+                )
+                neutral = dict(recommend)
+                neutral["message_buy_language"] = 0.0
+                candidates = {"recommend_buy": recommend, "neutral": neutral}
+                p0 = "neutral"
+            scored = {
+                name: model.predict_purchase(features)[0]
+                for name, features in candidates.items()
+            }
+            chosen = max(scored, key=scored.get)  # type: ignore[arg-type]
+            counts[f"n:{message_type}"] += 1
+            counts[f"chosen:{message_type}:{chosen}"] += 1
+            counts[f"different_from_p0:{message_type}"] += chosen != p0
+            probabilities[f"actual:{message_type}"].append(actual_probability)
+            probabilities[f"chosen:{message_type}"].append(scored[chosen])
+    return {
+        "policy": "PERSUASION_POOLED_EMPIRICAL",
+        "status": "OFFLINE_CHALLENGER_NOT_LIVE_AUTHORIZED",
+        "counts": dict(sorted(counts.items())),
+        "mean_predicted_purchase": {
+            key: statistics.fmean(values) for key, values in sorted(probabilities.items())
+        },
+        "p3_trust_artifact_used": False,
+        "counterfactual_warning": (
+            "Alternative-message purchase outcomes are model estimates, not observed counterfactuals."
+        ),
+    }
+
+
+def run(
+    feature_table: Path,
+    artifact: Path,
+    persuasion_feature_table: Path,
+    persuasion_artifact: Path,
+    evaluation_dir: Path,
+) -> dict[str, Any]:
     model = PooledNegotiationModel.load(artifact)
     return {
         "negotiation_historical_test": historical_negotiation_diagnostic(
@@ -328,6 +408,10 @@ def run(feature_table: Path, artifact: Path, evaluation_dir: Path) -> dict[str, 
         "bargaining_structural_diagnostic": bargaining_structural_diagnostic(
             evaluation_dir
         ),
+        "persuasion_pooled_challenger": persuasion_challenger_diagnostic(
+            persuasion_feature_table,
+            PooledPersuasionModel.load(persuasion_artifact),
+        ),
     }
 
 
@@ -335,10 +419,18 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("feature_table", type=Path)
     parser.add_argument("artifact", type=Path)
+    parser.add_argument("persuasion_feature_table", type=Path)
+    parser.add_argument("persuasion_artifact", type=Path)
     parser.add_argument("evaluation_dir", type=Path)
     parser.add_argument("output", type=Path)
     args = parser.parse_args()
-    report = run(args.feature_table, args.artifact, args.evaluation_dir)
+    report = run(
+        args.feature_table,
+        args.artifact,
+        args.persuasion_feature_table,
+        args.persuasion_artifact,
+        args.evaluation_dir,
+    )
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(
         json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8"

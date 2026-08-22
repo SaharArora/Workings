@@ -10874,5 +10874,25 @@
     ],
     "pooled_differs_from_adaptive_count": 71,
     "pooled_differs_from_robust_count": 36
+  },
+  "persuasion_pooled_challenger": {
+    "counterfactual_warning": "Alternative-message purchase outcomes are model estimates, not observed counterfactuals.",
+    "counts": {
+      "chosen:binary:yes": 26160,
+      "chosen:text:recommend_buy": 27200,
+      "different_from_p0:binary": 0,
+      "different_from_p0:text": 27200,
+      "n:binary": 26160,
+      "n:text": 27200
+    },
+    "mean_predicted_purchase": {
+      "actual:binary": 0.522959344920401,
+      "actual:text": 0.5171251439363868,
+      "chosen:binary": 0.7492635765087573,
+      "chosen:text": 0.5027575882653571
+    },
+    "p3_trust_artifact_used": false,
+    "policy": "PERSUASION_POOLED_EMPIRICAL",
+    "status": "OFFLINE_CHALLENGER_NOT_LIVE_AUTHORIZED"
   }
 }
