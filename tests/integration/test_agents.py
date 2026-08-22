@@ -31,3 +31,10 @@ def test_leaderboard_attaches_language_after_price() -> None:
     result = LeaderboardAgent().decide(negotiation_game())
     assert result["product_price"] == 20
     assert "message" in result
+
+
+def test_strategic_renderer_preserves_policy_supplied_persuasion_message() -> None:
+    game = negotiation_game()
+    game["valid_actions"] = {"type": "seller_message", "fields": {"message": "string"}}
+    action = {"message": "I recommend buying this product."}
+    assert render(action, game) == action

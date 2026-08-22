@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import math
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from pathlib import Path
@@ -14,6 +15,7 @@ from glee.normalization import negotiation_payoff_transform
 from glee.retry import fallback_action
 from glee.supervisor import BoundedRunResult, BoundedRunTimeout
 from leaderboard.agent import LeaderboardAgent
+from leaderboard.policy_router import RoutingDecision
 from research.evaluation.latency import POLICY_MAX_BUDGET_SECONDS
 
 
@@ -38,6 +40,7 @@ class PilotResult:
     exit_reason: str
     hard_stop_reasons: tuple[str, ...]
     strategic_review_cells: tuple[str, ...]
+    strategic_review_classes: tuple[str, ...]
     preflight_stats: Mapping[str, Any]
     postflight_stats: Mapping[str, Any]
     postflight_pending_games: int
@@ -78,6 +81,29 @@ def _family_rating(stats: Mapping[str, Any], family: str) -> Any:
     return score.get("rating") if isinstance(score, Mapping) else None
 
 
+def structural_policy_class(
+    game: Mapping[str, Any], routing: RoutingDecision
+) -> str:
+    """Aggregate policy-equivalent states while omitting nuisance monetary scales."""
+    state = game.get("game_state", {})
+    family = str(game.get("game_family", "unknown"))
+    role = routing.role or "unknown-role"
+    policy = routing.selected_policy
+    if family in {"negotiation", "bargaining"}:
+        information = "complete-info" if state.get("complete_information") else "incomplete-info"
+        if state.get("horizon_known") is False:
+            horizon = "unknown-horizon"
+        elif int(state.get("max_rounds", 0)) == 1:
+            horizon = "T1"
+        else:
+            horizon = "finite-horizon"
+        return f"{family}/{information}/{horizon}/{role}/{policy}"
+    if family == "persuasion":
+        horizon = "repeated" if int(state.get("total_rounds", 1)) > 1 else "one-shot"
+        return f"persuasion/{role}/{horizon}/{policy}"
+    return f"{family}/{role}/{policy}"
+
+
 class PilotRecorder:
     """Strategy/event adapter that requests a graceful drain on declared stop events."""
 
@@ -99,8 +125,10 @@ class PilotRecorder:
         self.agent = agent or LeaderboardAgent()
         self.hard_stop_reasons: list[str] = []
         self.strategic_review_cells: list[str] = []
+        self.strategic_review_classes: list[str] = []
         self.game_metadata: dict[str, dict[str, Any]] = {}
         self.floor_history: dict[tuple[str, str], list[bool]] = {}
+        self.structural_zero_history: dict[str, list[bool]] = {}
         self.no_progress: dict[str, tuple[str, int]] = {}
         self.latest_stats: Mapping[str, Any] = {}
 
@@ -124,7 +152,9 @@ class PilotRecorder:
             self.write(HARD_OPERATIONAL_STOP, reason=reason, evidence=evidence)
 
     def stop_requested(self) -> bool:
-        return bool(self.hard_stop_reasons or self.strategic_review_cells)
+        # Strategic events are report/review gates, not operational hard stops. The
+        # frozen bounded family completes unless one of the declared hard-stop events fires.
+        return bool(self.hard_stop_reasons)
 
     def strategy(self, game: dict[str, Any]) -> dict[str, Any]:
         game_id = str(game["game_id"])
@@ -134,6 +164,7 @@ class PilotRecorder:
             return action
         action, diagnostics = self.agent.decide_with_diagnostics(game)
         route = diagnostics.routing
+        structural_class = structural_policy_class(game, route)
         metadata = self.game_metadata.setdefault(
             game_id,
             {
@@ -144,6 +175,12 @@ class PilotRecorder:
                 "opponent": game.get("opponent"),
                 "rating_before": _family_rating(self.latest_stats, self.family),
                 "selected_incumbent": route.selected_policy,
+                "selected_policy": route.selected_policy,
+                "baseline_policy": route.baseline_policy,
+                "experimental_policy": route.experimental_policy,
+                "authorization_status": route.authorization_status,
+                "authorization_source": route.authorization_source,
+                "structural_policy_class": structural_class,
                 "own_value": game.get("game_state", {}).get(
                     f"{game.get('your_player')}_value"
                 ),
@@ -158,6 +195,7 @@ class PilotRecorder:
             state=game.get("game_state"),
             valid_actions=game.get("valid_actions"),
             routing=route.structured(),
+            structural_policy_class=structural_class,
             action=action,
             latency_seconds={
                 "parsing": diagnostics.parsing_seconds,
@@ -183,6 +221,38 @@ class PilotRecorder:
                 game_id=game_id,
                 total_seconds=diagnostics.total_seconds,
             )
+        details = route.policy_details
+        if (
+            route.selected_policy == "NEGOTIATION_ADAPTIVE"
+            and details.get("opponent_offer_improved") is True
+            and details.get("continuation_available") is True
+            and action.get("decision") == "RejectOffer"
+            and details.get("proposal_materially_changed") is False
+        ):
+            structural = metadata["structural_policy_class"]
+            if structural not in self.strategic_review_classes:
+                self.strategic_review_classes.append(structural)
+                self.write(
+                    STRATEGIC_REVIEW_REQUIRED,
+                    structural_policy_class=structural,
+                    reason="ADAPTIVE_IGNORED_MATERIALLY_IMPROVING_OPPONENT_OFFER",
+                    game_id=game_id,
+                    policy_details=details,
+                )
+        if (
+            route.authorization_status == "HUMAN_AUTHORIZED_EXPERIMENTAL"
+            and details.get("rule_invariants_satisfied") is False
+        ):
+            structural = metadata["structural_policy_class"]
+            if structural not in self.strategic_review_classes:
+                self.strategic_review_classes.append(structural)
+                self.write(
+                    STRATEGIC_REVIEW_REQUIRED,
+                    structural_policy_class=structural,
+                    reason="EXPERIMENTAL_ACTION_DOMINATED_UNDER_OWN_STATED_RULE",
+                    game_id=game_id,
+                    policy_details=details,
+                )
         cycle = self._no_progress_cycle(game_id, game, action)
         if cycle is not None:
             self.request_hard_stop(
@@ -268,12 +338,19 @@ class PilotRecorder:
         role = str(metadata.get("role", "unknown"))
         rating_after = _family_rating(self.latest_stats, self.family)
         transformed_payoff = None
+        scale_adjusted_payoff = None
         if self.family == "negotiation" and isinstance(payoff, (int, float)):
             own_value = metadata.get("own_value")
             if isinstance(own_value, (int, float)):
                 transformed_payoff = negotiation_payoff_transform(
                     float(payoff), float(own_value)
                 ).structured()
+                scale_adjusted_payoff = transformed_payoff.get("Y_t")
+        elif self.family == "bargaining" and isinstance(payoff, (int, float)):
+            money = metadata.get("configuration", {}).get("money_to_divide")
+            if isinstance(money, (int, float)) and money > 0:
+                scale_adjusted_payoff = float(payoff) / float(money)
+        structural_class = str(metadata.get("structural_policy_class", "unknown"))
         self.write(
             "game_result",
             game_id=game_id,
@@ -282,10 +359,17 @@ class PilotRecorder:
             role=role,
             opponent=metadata.get("opponent"),
             selected_incumbent=metadata.get("selected_incumbent"),
+            selected_policy=metadata.get("selected_policy"),
+            baseline_policy=metadata.get("baseline_policy"),
+            experimental_policy=metadata.get("experimental_policy"),
+            authorization_status=metadata.get("authorization_status"),
+            authorization_source=metadata.get("authorization_source"),
+            structural_policy_class=structural_class,
             terminal=terminal,
             outcome=outcome,
             raw_payoff=payoff,
             transformed_payoff=transformed_payoff,
+            scale_adjusted_payoff=scale_adjusted_payoff,
             rating_before=metadata.get("rating_before"),
             rating_after=rating_after,
         )
@@ -302,6 +386,26 @@ class PilotRecorder:
                 reason="THREE_OR_MORE_SAME_CELL_ROLE_OUTCOMES_AT_NO_DEAL_FLOOR",
                 observations=len(observations),
             )
+        zero = isinstance(payoff, (int, float)) and math.isclose(
+            float(payoff), 0.0, rel_tol=0.0, abs_tol=1e-12
+        )
+        structural_observations = self.structural_zero_history.setdefault(
+            structural_class, []
+        )
+        structural_observations.append(zero)
+        if (
+            len(structural_observations) >= 2
+            and all(structural_observations)
+            and structural_class not in self.strategic_review_classes
+        ):
+            self.strategic_review_classes.append(structural_class)
+            self.write(
+                STRATEGIC_REVIEW_REQUIRED,
+                structural_policy_class=structural_class,
+                reason="TWO_OR_MORE_STRUCTURAL_POLICY_CLASS_ZERO_PAYOFFS",
+                observations=len(structural_observations),
+                selected_policy=metadata.get("selected_policy"),
+            )
 
 
 def run_pilot(
@@ -313,12 +417,14 @@ def run_pilot(
     frozen_commit: str,
     poll_interval: float = 4.0,
     safety_timeout: float = 3_600.0,
+    agent: LeaderboardAgent | None = None,
 ) -> PilotResult:
     recorder = PilotRecorder(
         client=client,
         family=family,
         output_path=output_path,
         frozen_commit=frozen_commit,
+        agent=agent,
     )
     preflight_stats: Mapping[str, Any] = {}
     postflight_stats: Mapping[str, Any] = {}
@@ -337,6 +443,7 @@ def run_pilot(
             requeue=True,
             poll_interval=poll_interval,
             safety_timeout=safety_timeout,
+            experimental_override_registry=recorder.agent.router.experimental_overrides.contents(),
         )
         if int(preflight_stats.get("active_games", 0)) != 0 or preflight_pending:
             recorder.request_hard_stop("NON_IDLE_PREFLIGHT")
@@ -380,6 +487,7 @@ def run_pilot(
         exit_reason=bounded.exit_reason,
         hard_stop_reasons=tuple(recorder.hard_stop_reasons),
         strategic_review_cells=tuple(recorder.strategic_review_cells),
+        strategic_review_classes=tuple(recorder.strategic_review_classes),
         preflight_stats=preflight_stats,
         postflight_stats=postflight_stats,
         postflight_pending_games=postflight_pending,

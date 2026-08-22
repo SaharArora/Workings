@@ -2,6 +2,11 @@ from __future__ import annotations
 
 from typing import Any
 
+from leaderboard.experimental_overrides import (
+    AuthorizationStatus,
+    ExperimentalOverrideRegistry,
+    HUMAN_AUTHORIZATION_SOURCE,
+)
 from leaderboard.policy_router import PolicyArtifact, PolicyRouter, cell_key
 from policies.negotiation.bayes import BayesEligibility
 
@@ -55,6 +60,25 @@ def persuasion_game() -> dict[str, Any]:
     }
 
 
+def persuasion_seller_game() -> dict[str, Any]:
+    game = persuasion_game()
+    game["your_player"] = "player_1"
+    game["phase"] = "seller_message"
+    game["game_state"].update(
+        {
+            "phase": "seller_message",
+            "current_player": "player_1",
+            "current_quality": "high",
+            "history": [],
+        }
+    )
+    game["valid_actions"] = {
+        "type": "seller_message",
+        "fields": {"message": "string"},
+    }
+    return game
+
+
 def direct_policy(price: float):
     return lambda game: {"product_price": price}
 
@@ -67,6 +91,42 @@ def test_complete_information_t1_uses_its_theory_baseline() -> None:
     route = PolicyRouter().route(negotiation_game(complete=True, rounds=1))
     assert route.selected_policy == "NEGOTIATION_COMPLETE_T1_THEORY"
     assert route.theory_baseline == route.selected_policy
+    assert route.authorization_status == AuthorizationStatus.THEORY_INCUMBENT
+    assert route.experimental_policy is None
+
+
+def test_human_authorized_complete_t1_uses_fairness_without_rewriting_theory() -> None:
+    game = negotiation_game(complete=True, rounds=1)
+    router = PolicyRouter(
+        experimental_overrides=ExperimentalOverrideRegistry.human_authorized_bounded_pilot()
+    )
+    action, route = router.decide_with_routing(game)
+    assert route.theory_baseline == "NEGOTIATION_COMPLETE_T1_THEORY"
+    assert route.baseline_policy == "NEGOTIATION_COMPLETE_T1_THEORY"
+    assert route.experimental_policy == "NEGOTIATION_FAIRNESS_MARGIN"
+    assert route.selected_policy == "NEGOTIATION_FAIRNESS_MARGIN"
+    assert route.authorization_status == AuthorizationStatus.HUMAN_AUTHORIZED_EXPERIMENTAL
+    assert route.authorization_source == HUMAN_AUTHORIZATION_SOURCE
+    assert route.promoted_policy is None
+    assert action == {"product_price": 18.5}
+    assert route.policy_details["theory_offer"] == 20
+    assert route.policy_details["fairness_adjusted_offer"] == 18.5
+    assert route.policy_details["selected_live_offer"] == 18.5
+
+
+def test_human_authorized_incomplete_cell_uses_separate_adaptive_challenger() -> None:
+    game = negotiation_game(complete=False, rounds=None)
+    router = PolicyRouter(
+        experimental_overrides=ExperimentalOverrideRegistry.human_authorized_bounded_pilot()
+    )
+    action, route = router.decide_with_routing(game)
+    assert route.baseline_policy == "NEGOTIATION_ROBUST"
+    assert route.experimental_policy == "NEGOTIATION_ADAPTIVE"
+    assert route.selected_policy == "NEGOTIATION_ADAPTIVE"
+    assert route.authorization_status == AuthorizationStatus.HUMAN_AUTHORIZED_EXPERIMENTAL
+    assert route.fallback_reason == "BAYES_ELIGIBILITY_UNAVAILABLE"
+    assert action == {"product_price": 15}
+    assert route.policy_details["robust_reference_price"] == 15
 
 
 def test_complete_information_even_horizon_uses_buyer_terminal_theory() -> None:
@@ -181,6 +241,20 @@ def test_bargaining_clean_cell_keeps_configuration_theory() -> None:
     assert route.selected_policy == "BARGAINING_COMPLETE_FINITE"
 
 
+def test_human_authorized_bargaining_fairness_logs_control_and_live_offer() -> None:
+    game = bargaining_game()
+    router = PolicyRouter(
+        experimental_overrides=ExperimentalOverrideRegistry.human_authorized_bounded_pilot()
+    )
+    action, route = router.decide_with_routing(game)
+    assert route.baseline_policy == "BARGAINING_COMPLETE_FINITE"
+    assert route.experimental_policy == "BARGAINING_FAIRNESS"
+    assert route.selected_policy == "BARGAINING_FAIRNESS"
+    assert route.authorization_status == AuthorizationStatus.HUMAN_AUTHORIZED_EXPERIMENTAL
+    assert route.policy_details["theory_offer"] != route.policy_details["fairness_adjusted_offer"]
+    assert route.policy_details["selected_live_offer"] == action
+
+
 def test_incomplete_bargaining_unknown_horizon_has_named_no_progress_exit() -> None:
     game = bargaining_game()
     game["game_state"].update(
@@ -220,6 +294,48 @@ def test_persuasion_no_commitment_keeps_p0() -> None:
     assert route.selected_policy == "PERSUASION_P0_BABBLING"
 
 
+def test_p3_cannot_activate_without_real_population_input() -> None:
+    game = persuasion_seller_game()
+    router = PolicyRouter(
+        experimental_overrides=ExperimentalOverrideRegistry.human_authorized_bounded_pilot()
+    )
+    action, route = router.decide_with_routing(game)
+    assert action == {"message": "This product is available."}
+    assert route.baseline_policy == "PERSUASION_P0_BABBLING"
+    assert route.experimental_policy == "PERSUASION_P3_REPUTATION"
+    assert route.selected_policy == "PERSUASION_P0_BABBLING"
+    assert route.authorization_status == AuthorizationStatus.THEORY_INCUMBENT
+    assert route.authorization_source == HUMAN_AUTHORIZATION_SOURCE
+    assert route.fallback_reason == "P3_EXPERIMENT_INPUT_UNAVAILABLE"
+
+
+def test_p3_route_is_human_authorized_experimental_when_real_input_is_supplied() -> None:
+    game = persuasion_seller_game()
+    router = PolicyRouter(
+        experimental_overrides=ExperimentalOverrideRegistry.human_authorized_bounded_pilot(
+            population_positive_purchase_rate=0.37
+        )
+    )
+    action, route = router.decide_with_routing(game)
+    assert action == {"message": "I recommend buying this product."}
+    assert route.baseline_policy == "PERSUASION_P0_BABBLING"
+    assert route.experimental_policy == "PERSUASION_P3_REPUTATION"
+    assert route.selected_policy == "PERSUASION_P3_REPUTATION"
+    assert route.authorization_status == AuthorizationStatus.HUMAN_AUTHORIZED_EXPERIMENTAL
+    assert route.authorization_source == HUMAN_AUTHORIZATION_SOURCE
+    assert route.policy_details["population_positive_purchase_rate"] == 0.37
+
+
+def test_buyer_side_p0_is_not_overridden_by_seller_only_p3() -> None:
+    route = PolicyRouter(
+        experimental_overrides=ExperimentalOverrideRegistry.human_authorized_bounded_pilot(
+            population_positive_purchase_rate=0.37
+        )
+    ).route(persuasion_game())
+    assert route.selected_policy == "PERSUASION_P0_BABBLING"
+    assert route.experimental_policy is None
+
+
 def test_promoted_challenger_overrides_incumbent_deliberately() -> None:
     game = bargaining_game()
     key = route_key(game)
@@ -229,6 +345,24 @@ def test_promoted_challenger_overrides_incumbent_deliberately() -> None:
     route = router.route(game)
     assert route.promoted_policy == "fairness-promoted-v1"
     assert route.selected_policy == "fairness-promoted-v1"
+    assert route.authorization_status == AuthorizationStatus.E_PROCESS_PROMOTED
+
+
+def test_human_registry_never_relabels_or_overrides_eprocess_promotion() -> None:
+    game = bargaining_game()
+    key = route_key(game)
+    router = PolicyRouter(
+        promoted_policies={
+            key: PolicyArtifact.from_policy(
+                "promoted-v1", lambda _: {"alice_gain": 55, "bob_gain": 45}
+            )
+        },
+        experimental_overrides=ExperimentalOverrideRegistry.human_authorized_bounded_pilot(),
+    )
+    route = router.route(game)
+    assert route.selected_policy == "promoted-v1"
+    assert route.experimental_policy is None
+    assert route.authorization_status == AuthorizationStatus.E_PROCESS_PROMOTED
 
 
 def test_missing_or_corrupt_bayes_artifact_falls_back_to_robust() -> None:
