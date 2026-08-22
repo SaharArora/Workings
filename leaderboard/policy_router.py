@@ -241,7 +241,7 @@ class PolicyRouter:
                     experimental_name,
                     baseline_policy=selected_policy,
                 )
-                authorization_status = AuthorizationStatus.HUMAN_AUTHORIZED_EXPERIMENTAL
+                authorization_status = resolution.authorization_status
             else:
                 unavailable = resolution.unavailable_reason or "EXPERIMENT_INPUT_UNAVAILABLE"
                 fallback_reason = (

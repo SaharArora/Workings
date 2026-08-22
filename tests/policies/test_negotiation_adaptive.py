@@ -13,6 +13,7 @@ from policies.negotiation.fairness_margin import (
     SURPLUS_CONCESSION,
     fairness_margin_price,
 )
+from policies.negotiation.robust import robust_action_plan
 
 
 def adaptive_game(
@@ -168,6 +169,21 @@ def test_nonterminal_acceptance_uses_90_percent_continuation_threshold() -> None
     assert plan.current_payoff == 47
     assert plan.continuation_target_payoff == pytest.approx(33.55)
     assert plan.action == {"decision": "AcceptOffer"}
+
+
+def test_adaptive_does_not_reuse_static_robust_fixed_quote_acceptance_rule() -> None:
+    game = adaptive_game(role="seller", action_type="decision", offer=140)
+    assert robust_action_plan(game).action == {
+        "decision": "RejectOffer",
+        "product_price": 150,
+    }
+    adaptive = adaptive_action_plan(game)
+    assert adaptive.current_payoff == 40
+    assert adaptive.continuation_target_payoff == 36
+    assert adaptive.action == {"decision": "AcceptOffer"}
+    assert adaptive.decision_rule == (
+        "ACCEPT_IF_IR_AND_90_PERCENT_OF_ADAPTIVE_CONTINUATION_TARGET"
+    )
 
 
 def test_nonterminal_rejects_and_submits_adaptive_counter_below_threshold() -> None:
