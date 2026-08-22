@@ -64,3 +64,18 @@ e-process or authorize promotion.
 | Negotiation | 6/6 | ADAPTIVE 4; FAIRNESS_MARGIN 2 | ADAPTIVE: 1 agreement (55.24), 2 no-deals (0), 1 walkaway (0); fairness: 2 agreements (3, 1960) | 974.79 -> 976.73 | zero hard stops/fallbacks/invalid/timeouts/strategic events | HUMAN_AUTHORIZED_EXPERIMENTAL; NOT PROMOTED |
 | Bargaining | 4/4 | FAIRNESS 4 | 4 agreements; payoffs 5156.4, 5000, 580943.09, 95 | 1670.46 -> 1693.53 | zero hard stops/fallbacks/invalid/timeouts/strategic events | HUMAN_AUTHORIZED_EXPERIMENTAL; NOT PROMOTED |
 | Persuasion | 4/4 | P3 selected 0; P0 control 4 | P0 seller payoffs 0, 2000, 20000000; buyer payoff 0 | 1402.31 -> 1406.98 | P3 input unavailable on all 60 seller turns; zero operational/strategic events | P3_EXPERIMENT_INPUT_UNAVAILABLE; NOT PROMOTED |
+
+## Time-constrained tranche record (not promotion evidence)
+
+Frozen commit: `9fcae232ea1f6f474ad5382c0936bd1f1a0a5b4d`. This was a
+nonrandom deployment tranche governed by `docs/leaderboard_tranche_plan.md`, not an
+e-process experiment. Its outcomes must not enter promotion evidence.
+
+| Family | Requested/completed | Manually authorized selections | Rating | Operational status | Strategic result | Deployment classification |
+| --- | ---: | --- | --- | --- | --- | --- |
+| Bargaining | 20/20 | FAIRNESS 11; safe/theory incumbents 9 after pauses | 1693.53 -> 1712.58 | zero hard stops/fallbacks/invalid/timeouts; exact bounded exit | incomplete FAIRNESS and complete finite FAIRNESS paused | PAUSE_AND_REDESIGN |
+| Negotiation | 20/6 | ADAPTIVE 2; ROBUST 3; complete unlimited midpoint 1 | 976.73 -> 969.14 | zero hard stops/fallbacks/invalid/timeouts; strategic stop with clean drain | both ADAPTIVE classes paused; unknown-horizon ROBUST first three all zero | PAUSE_AND_REDESIGN |
+| Persuasion | 12/5 | P0 5; P3 0 | 1406.98 -> 1383.34 | zero hard stops/fallbacks/invalid/timeouts; strategic stop with clean drain | seller P0 zero-payoff rate 2/3 | PAUSE_AND_REDESIGN |
+
+The samples remain descriptive. No challenger or incumbent is relabeled
+`E_PROCESS_PROMOTED`, and no sustained deployment was started.

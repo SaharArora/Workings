@@ -502,3 +502,31 @@ is unavailable.
 - **action taken:** Predeclared a nonrandom first-eligible diagnostic allocation, logged
   it as such, kept its six-distinct-game cap, and retained ROBUST for later eligible
   matches. No causal or promotion claim is permitted.
+
+## Time-constrained rated tranche execution
+
+- **item:** Frozen 20 bargaining / 20 negotiation / 12 persuasion allocation with
+  predeclared operational and structural stop-losses.
+- **source inspected:** Complete structured transcripts in
+  `research/evaluation/leaderboard_tranche_{bargaining,negotiation,persuasion}.jsonl`,
+  frozen commit `9fcae232ea1f6f474ad5382c0936bd1f1a0a5b4d`, final API cleanup, and full post-run test
+  and secret scans.
+- **result:** `VERIFIED` for bounded lifecycle/monitoring; `PAUSE_AND_REDESIGN` for all
+  three family deployment decisions.
+- **evidence:** Bargaining completed 20/20 with `MAX_GAMES_COMPLETED`; negotiation stopped
+  at 6/20 and persuasion at 5/12 with `STOP_REQUESTED` after incumbent structural classes
+  paused. Queue-call/tracked/completed counts were exactly 20/20/20, 6/6/6, and 5/5/5.
+  Every postflight plus the final independent cleanup returned `active_games=0` and
+  `pending_games=0`. Across all 31 games there were zero hard operational stops,
+  execution/outer fallbacks, invalid actions, timeouts, unsupported cells, or extra games.
+  The full 234-test suite passed before play and after shutdown; the exact API key was
+  absent from logs, tracked files, and Git history.
+- **dependent components:** Sustained family deployment decision and frozen live policy
+  map.
+- **action taken:** Bargaining paused incomplete FAIRNESS at 2/3 failed outcomes and
+  complete finite FAIRNESS when 4/5 valid normalized comparisons were no better than
+  same-state theory. Negotiation paused both ADAPTIVE horizon classes for repeatedly
+  holding a fixed counter through improving offers, then stopped when the first three
+  unknown-horizon ROBUST observations all yielded zero/walkaway. Persuasion stopped when
+  seller P0 produced two zeros in its first three outcomes. No family was requeued after
+  its stop. No sustained deployment was started.
