@@ -74,6 +74,36 @@ def test_complete_information_even_horizon_uses_buyer_terminal_theory() -> None:
     assert route.selected_policy == "NEGOTIATION_COMPLETE_FINITE_EVEN_THEORY"
 
 
+def test_complete_unknown_horizon_theory_has_intentional_no_progress_exit() -> None:
+    game = negotiation_game(complete=True, rounds=None)
+    repeated = {
+        "decision": "RejectOffer",
+        "decided_by": "player_1",
+        "offer": {"price": 8},
+        "counteroffer": 15,
+    }
+    game["phase"] = "decision"
+    game["game_state"].update(
+        {
+            "phase": "decision",
+            "current_player": "player_1",
+            "last_offer": {"price": 8},
+            "history": [repeated, repeated],
+        }
+    )
+    game["valid_actions"] = {
+        "type": "decision",
+        "fields": {
+            "decision": "'AcceptOffer', 'RejectOffer', or 'WalkAway'",
+            "product_price": "number required with RejectOffer",
+        },
+    }
+    action, route = PolicyRouter().decide_with_routing(game)
+    assert route.selected_policy == "NEGOTIATION_COMPLETE_UNLIMITED_MIDPOINT"
+    assert route.execution_fallback_reason is None
+    assert action == {"decision": "WalkAway"}
+
+
 def test_underdetermined_bayes_eligible_with_artifact_selects_bayes() -> None:
     game = negotiation_game(complete=False, rounds=10)
     key = route_key(game)

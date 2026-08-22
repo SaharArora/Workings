@@ -344,7 +344,47 @@ def _negotiation_decision(
     if counter_policy is None:
         raise PolicyInputsUnavailable("counteroffer policy inputs are unavailable")
     counter = counter_policy({**game, "valid_actions": {"type": "offer", "fields": fields}})
-    return {"decision": "RejectOffer", "product_price": counter["product_price"]}
+    counter_price = float(counter["product_price"])
+    if _negotiation_repeated_no_progress(
+        game,
+        me=str(state["current_player"]),
+        offered=offered,
+        counter=counter_price,
+    ):
+        return {"decision": "WalkAway"}
+    return {"decision": "RejectOffer", "product_price": counter_price}
+
+
+def _negotiation_repeated_no_progress(
+    game: Mapping[str, Any], *, me: str, offered: float, counter: float
+) -> bool:
+    """Return true on a third identical pair for non-ROBUST negotiation incumbents."""
+    state = game["game_state"]
+    if state.get("horizon_known") is not False:
+        return False
+    fields = str(game.get("valid_actions", {}).get("fields", {})).lower()
+    if "walkaway" not in fields:
+        return False
+    history = state.get("history", [])
+    if not isinstance(history, Sequence):
+        return False
+    responses = [
+        item
+        for item in history
+        if isinstance(item, Mapping) and str(item.get("decided_by", "")) == me
+    ]
+    if len(responses) < 2:
+        return False
+    for item in responses[-2:]:
+        offer = item.get("offer")
+        if (
+            str(item.get("decision")) != "RejectOffer"
+            or not isinstance(offer, Mapping)
+            or float(offer.get("price", float("nan"))) != offered
+            or float(item.get("counteroffer", float("nan"))) != counter
+        ):
+            return False
+    return True
 
 
 def bargaining_theory_action(game: dict[str, Any]) -> dict[str, Any]:

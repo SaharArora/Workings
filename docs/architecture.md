@@ -180,9 +180,9 @@ latency, terminal result/payoff, rating snapshots when available, and exact exit
 it never reads or serializes the API credential. Predeclared conditions are in
 `docs/pilot_stop_conditions.md`.
 
-Unknown-horizon bargaining and negotiation incumbents additionally have an intentional
+All unknown-horizon bargaining and negotiation incumbents additionally have an intentional
 no-progress terminal rule. On the third consecutive identical rejected offer/response
-pair, ROBUST negotiation or the bargaining incumbent chooses the advertised walk-away
+pair, ROBUST negotiation, complete-information midpoint negotiation, or the bargaining incumbent chooses the advertised walk-away
 action as part of the named policy. A materially changed offer resets the count; finite
 games and persuasion are excluded. The pilot controller independently mirrors this
 condition as an emergency backstop. If the backstop ever fires because a production
