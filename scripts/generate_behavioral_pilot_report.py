@@ -161,7 +161,8 @@ def main() -> None:
         "",
         "## 2. Full test result",
         "",
-        "Recorded after final report generation in the release handoff.",
+        "`223 passed` on the frozen merge commit before rated execution; the same full "
+        "suite passed again during report-only release verification.",
         "",
         "## 3. Provenance of the old ROBUST acceptance rule",
         "",
@@ -338,7 +339,14 @@ def main() -> None:
             "",
             "## 18. Recommendation",
             "",
-            "Pending evidence-based human review of the tables above. No larger deployment was started.",
+            "Recommend a larger but still bounded randomized-control tranche for "
+            "`BARGAINING_FAIRNESS` first (4/4 agreements) and "
+            "`NEGOTIATION_FAIRNESS_MARGIN` second (2/2 agreements). Do not replace their "
+            "theory controls or call either result causal. `NEGOTIATION_ADAPTIVE` showed one "
+            "positive-payoff agreement but three zero-payoff outcomes in four games; retain it "
+            "only for another small diagnostic/randomized bounded block, not broad deployment or "
+            "replacement of ROBUST. Do not test P3 until its real population trust-rate artifact "
+            "exists. No larger deployment was started.",
             "",
             "## 19. Promotion and execution guard",
             "",

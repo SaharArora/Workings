@@ -35,3 +35,16 @@ experiment row with all required fields records promotion and same-cell confirma
 | Negotiation/incomplete multi-round | ROBUST (current data gate) | NEGOTIATION_ADAPTIVE | HUMAN_AUTHORIZED_EXPERIMENTAL for bounded 6-game family pilot; not promoted |
 | Negotiation/incomplete multi-round | ROBUST (current data gate) | BAYES / EMPIRICAL | BLOCKED + RESEARCH_BLOCKED: no supported artifact |
 | Persuasion/repeated | P0 babbling | P3 reputation | P3_EXPERIMENT_INPUT_UNAVAILABLE + RESEARCH_BLOCKED: historical cell trust rate unavailable; P0 remains selected |
+
+## Human-authorized bounded pilot record (not promotion evidence)
+
+Frozen commit: `c4e68a569376c178b8844db6594c5ced92fd9f3b`. Assignment came from
+ordinary family matchmaking, not randomized theory/challenger assignment within exact
+cells. These rows are descriptive operational/policy evidence and must not enter an
+e-process or authorize promotion.
+
+| Family | Requested/completed | Experimental selections | Outcomes/payoffs | Raw rating | Operational status | Promotion status |
+|---|---:|---|---|---|---|---|
+| Negotiation | 6/6 | ADAPTIVE 4; FAIRNESS_MARGIN 2 | ADAPTIVE: 1 agreement (55.24), 2 no-deals (0), 1 walkaway (0); fairness: 2 agreements (3, 1960) | 974.79 -> 976.73 | zero hard stops/fallbacks/invalid/timeouts/strategic events | HUMAN_AUTHORIZED_EXPERIMENTAL; NOT PROMOTED |
+| Bargaining | 4/4 | FAIRNESS 4 | 4 agreements; payoffs 5156.4, 5000, 580943.09, 95 | 1670.46 -> 1693.53 | zero hard stops/fallbacks/invalid/timeouts/strategic events | HUMAN_AUTHORIZED_EXPERIMENTAL; NOT PROMOTED |
+| Persuasion | 4/4 | P3 selected 0; P0 control 4 | P0 seller payoffs 0, 2000, 20000000; buyer payoff 0 | 1402.31 -> 1406.98 | P3 input unavailable on all 60 seller turns; zero operational/strategic events | P3_EXPERIMENT_INPUT_UNAVAILABLE; NOT PROMOTED |
