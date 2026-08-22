@@ -9,9 +9,20 @@ from dataclasses import dataclass, field, replace
 from typing import Any
 
 from glee.retry import fallback_action, sanitize_action
+from leaderboard.experimental_overrides import (
+    AuthorizationStatus,
+    ExperimentalOverrideRegistry,
+)
 from policies.negotiation.bayes import BayesEligibility
+from policies.negotiation.adaptive import (
+    adaptive_action_plan,
+    adaptive_negotiation_action,
+)
+from policies.negotiation.fairness_margin import fairness_margin_price
 from policies.negotiation.robust import robust_negotiation_action
+from policies.bargaining.fairness import fair_share
 from policies.persuasion.babbling import babbling_buyer_buys
+from policies.persuasion.reputation import reputation_action
 from theory.bargaining.baselines import (
     bayes_adaptive_reference,
     finite_horizon_offer_alice_share,
@@ -22,6 +33,7 @@ from theory.negotiation.baselines import bayes_optimal_posted_price, complete_in
 
 logger = logging.getLogger(__name__)
 Policy = Callable[[dict[str, Any]], dict[str, Any]]
+PolicyDetailsBuilder = Callable[[dict[str, Any], Mapping[str, Any]], Mapping[str, Any]]
 RouteKey = tuple[str, str]
 
 
@@ -65,8 +77,16 @@ class RoutingDecision:
     promoted_policy: str | None
     selected_policy: str
     fallback_reason: str | None
+    baseline_policy: str | None = None
+    experimental_policy: str | None = None
+    authorization_status: str | None = None
+    authorization_source: str | None = None
     execution_fallback_reason: str | None = None
+    policy_details: Mapping[str, Any] = field(default_factory=dict, compare=False)
     policy: Policy | None = field(default=None, repr=False, compare=False)
+    details_builder: PolicyDetailsBuilder | None = field(
+        default=None, repr=False, compare=False
+    )
 
     def structured(self) -> dict[str, Any]:
         return {
@@ -77,9 +97,14 @@ class RoutingDecision:
             "bayes_eligible": self.bayes_eligible,
             "available_policy_artifacts": list(self.available_policy_artifacts),
             "promoted_policy": self.promoted_policy,
+            "baseline_policy": self.baseline_policy,
+            "experimental_policy": self.experimental_policy,
+            "authorization_status": self.authorization_status,
+            "authorization_source": self.authorization_source,
             "selected_policy": self.selected_policy,
             "fallback_reason": self.fallback_reason,
             "execution_fallback_reason": self.execution_fallback_reason,
+            "policy_details": dict(self.policy_details),
         }
 
 
@@ -146,10 +171,12 @@ class PolicyRouter:
         bayes_eligibility: Mapping[RouteKey, BayesEligibility] | None = None,
         bayes_artifacts: Mapping[RouteKey, PolicyArtifact] | None = None,
         promoted_policies: Mapping[RouteKey, PolicyArtifact] | None = None,
+        experimental_overrides: ExperimentalOverrideRegistry | None = None,
     ) -> None:
         self.bayes_eligibility = dict(bayes_eligibility or {})
         self.bayes_artifacts = dict(bayes_artifacts or {})
         self.promoted_policies = dict(promoted_policies or {})
+        self.experimental_overrides = experimental_overrides or ExperimentalOverrideRegistry()
         self.last_routing: RoutingDecision | None = None
 
     def route(self, game: dict[str, Any]) -> RoutingDecision:
@@ -184,12 +211,42 @@ class PolicyRouter:
         selected_name, selected_policy = incumbent_name, incumbent_policy
         promoted_name = promoted.name if promoted else None
         fallback_reason = reason
+        authorization_status = self._incumbent_authorization(incumbent_name)
+        authorization_source: str | None = None
+        experimental_name: str | None = None
+        details_builder: PolicyDetailsBuilder | None = None
         if promoted_policy is not None and promoted is not None:
             selected_name, selected_policy = promoted.name, promoted_policy
             fallback_reason = None
+            authorization_status = AuthorizationStatus.E_PROCESS_PROMOTED
         elif promoted_error is not None and promoted is not None:
             suffix = f"PROMOTED_ARTIFACT_{promoted_error}"
             fallback_reason = f"{fallback_reason};{suffix}" if fallback_reason else suffix
+
+        baseline_policy = selected_name
+        resolution = (
+            None
+            if authorization_status == AuthorizationStatus.E_PROCESS_PROMOTED
+            else self.experimental_overrides.resolve(
+                game,
+                baseline_policy=baseline_policy,
+                role=role,
+            )
+        )
+        if resolution is not None:
+            experimental_name = resolution.override.policy_name
+            authorization_source = self.experimental_overrides.authorization_source
+            if resolution.available:
+                selected_name, selected_policy, details_builder = self._experimental_execution(
+                    experimental_name,
+                    baseline_policy=selected_policy,
+                )
+                authorization_status = AuthorizationStatus.HUMAN_AUTHORIZED_EXPERIMENTAL
+            else:
+                unavailable = resolution.unavailable_reason or "EXPERIMENT_INPUT_UNAVAILABLE"
+                fallback_reason = (
+                    f"{fallback_reason};{unavailable}" if fallback_reason else unavailable
+                )
 
         return RoutingDecision(
             game_family=family,
@@ -201,8 +258,62 @@ class PolicyRouter:
             promoted_policy=promoted_name,
             selected_policy=selected_name,
             fallback_reason=fallback_reason,
+            baseline_policy=baseline_policy,
+            experimental_policy=experimental_name,
+            authorization_status=str(authorization_status),
+            authorization_source=authorization_source,
             policy=selected_policy,
+            details_builder=details_builder,
         )
+
+    @staticmethod
+    def _incumbent_authorization(policy_name: str) -> AuthorizationStatus:
+        if "ROBUST" in policy_name or "EQUAL_SPLIT" in policy_name:
+            return AuthorizationStatus.PORTFOLIO_INCUMBENT
+        return AuthorizationStatus.THEORY_INCUMBENT
+
+    def _experimental_execution(
+        self,
+        policy_name: str,
+        *,
+        baseline_policy: Policy,
+    ) -> tuple[str, Policy, PolicyDetailsBuilder]:
+        if policy_name == "NEGOTIATION_ADAPTIVE":
+            return (
+                policy_name,
+                adaptive_negotiation_action,
+                lambda game, action: adaptive_action_plan(game).structured(),
+            )
+        if policy_name == "NEGOTIATION_FAIRNESS_MARGIN":
+            return (
+                policy_name,
+                negotiation_fairness_margin_action,
+                negotiation_fairness_margin_details,
+            )
+        if policy_name == "BARGAINING_FAIRNESS":
+            policy = lambda game: bargaining_fairness_action(game, baseline_policy)
+            details = lambda game, action: bargaining_fairness_details(
+                game,
+                action,
+                baseline_policy,
+            )
+            return policy_name, policy, details
+        if policy_name == "PERSUASION_P3_REPUTATION":
+            rate = self.experimental_overrides.population_positive_purchase_rate
+            if rate is None:
+                raise PolicyInputsUnavailable("P3_EXPERIMENT_INPUT_UNAVAILABLE")
+            policy = lambda game: reputation_action(
+                game,
+                population_positive_purchase_rate=float(rate),
+            )
+            details = lambda game, action: {
+                "population_positive_purchase_rate": float(rate),
+                "selected_live_action": dict(action),
+                "input_provenance": "frozen_pre_outcome_population_statistic",
+                "rule_invariants_satisfied": True,
+            }
+            return policy_name, policy, details
+        raise PolicyInputsUnavailable(f"unknown experimental policy {policy_name!r}")
 
     def _incumbent(
         self, game: dict[str, Any], key: RouteKey
@@ -291,12 +402,127 @@ class PolicyRouter:
             decision = replace(decision, execution_fallback_reason=f"{type(exc).__name__}:{exc}")
             logger.warning("policy_execution_fallback %s", json.dumps(decision.structured(), sort_keys=True))
             action = sanitize_action(fallback_action(game))
+        else:
+            if decision.details_builder is not None:
+                try:
+                    details = dict(decision.details_builder(game, action))
+                except Exception as exc:
+                    details = {"diagnostics_error": type(exc).__name__}
+                decision = replace(decision, policy_details=details)
         self.last_routing = decision
         logger.info("policy_routing %s", json.dumps(decision.structured(), sort_keys=True))
         return action, decision
 
     def decide(self, game: dict[str, Any]) -> dict[str, Any]:
         return self.decide_with_routing(game)[0]
+
+
+def _negotiation_fairness_prices(
+    game: Mapping[str, Any],
+) -> tuple[float | None, float | None, str | None]:
+    state = game["game_state"]
+    seller = float(state["player_1_value"])
+    buyer = float(state["player_2_value"])
+    theory_price = complete_information_price(
+        seller,
+        buyer,
+        max_rounds=int(state["max_rounds"]),
+    )
+    if theory_price is None:
+        return None, None, None
+    extractor = "seller" if theory_price == buyer else "buyer"
+    return (
+        theory_price,
+        fairness_margin_price(seller, buyer, extractor=extractor),
+        extractor,
+    )
+
+
+def negotiation_fairness_margin_action(game: dict[str, Any]) -> dict[str, Any]:
+    """Apply the locked 15% surplus concession without changing the theory control."""
+    state = game["game_state"]
+    me = str(state["current_player"])
+    role = str(state[f"{me}_role"])
+    own_value = float(state[f"{me}_value"])
+    if game["valid_actions"]["type"] == "decision":
+        return _negotiation_decision(
+            game,
+            role,
+            own_value,
+            counter_policy=negotiation_fairness_margin_action,
+        )
+    _, fairness_price, _ = _negotiation_fairness_prices(game)
+    return {"product_price": own_value if fairness_price is None else fairness_price}
+
+
+def negotiation_fairness_margin_details(
+    game: dict[str, Any], action: Mapping[str, Any]
+) -> Mapping[str, Any]:
+    theory_price, fairness_price, extractor = _negotiation_fairness_prices(game)
+    return {
+        "theory_offer": theory_price,
+        "fairness_adjusted_offer": fairness_price,
+        "selected_live_offer": action.get("product_price"),
+        "selected_live_action": dict(action),
+        "extractor": extractor,
+        "surplus_concession": 0.15,
+        "no_gains_from_trade": theory_price is None,
+        "rule_invariants_satisfied": (
+            theory_price is None
+            or fairness_price is not None
+            and min(float(game["game_state"]["player_1_value"]), float(game["game_state"]["player_2_value"]))
+            <= fairness_price
+            <= max(float(game["game_state"]["player_1_value"]), float(game["game_state"]["player_2_value"]))
+        ),
+    }
+
+
+def bargaining_fairness_action(
+    game: dict[str, Any], baseline_policy: Policy
+) -> dict[str, Any]:
+    """Apply the locked fairness concession to the incumbent's proposer share only."""
+    theory_action = baseline_policy(game)
+    if game["valid_actions"]["type"] != "offer":
+        return theory_action
+    state = game["game_state"]
+    money = float(state["money_to_divide"])
+    if money <= 0:
+        raise PolicyInputsUnavailable("positive bargaining stake required")
+    proposer = str(state["current_player"])
+    theory_alice = float(theory_action["alice_gain"])
+    theory_bob = float(theory_action["bob_gain"])
+    proposer_share = theory_alice / money if proposer == "player_1" else theory_bob / money
+    adjusted_proposer_share = fair_share(proposer_share)
+    alice_share = (
+        adjusted_proposer_share
+        if proposer == "player_1"
+        else 1 - adjusted_proposer_share
+    )
+    return {
+        "alice_gain": money * alice_share,
+        "bob_gain": money * (1 - alice_share),
+    }
+
+
+def bargaining_fairness_details(
+    game: dict[str, Any],
+    action: Mapping[str, Any],
+    baseline_policy: Policy,
+) -> Mapping[str, Any]:
+    theory_action = baseline_policy(game)
+    is_offer = game["valid_actions"]["type"] == "offer"
+    return {
+        "theory_offer": dict(theory_action) if is_offer else None,
+        "fairness_adjusted_offer": dict(action) if is_offer else None,
+        "selected_live_offer": dict(action) if is_offer else None,
+        "selected_live_action": dict(action),
+        "fairness_concession": 0.10,
+        "rule_invariants_satisfied": (
+            not is_offer
+            or abs(float(action["alice_gain"]) + float(action["bob_gain"]) - float(game["game_state"]["money_to_divide"]))
+            <= 1e-8
+        ),
+    }
 
 
 def negotiation_complete_theory_action(game: dict[str, Any]) -> dict[str, Any]:

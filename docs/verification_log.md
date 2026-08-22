@@ -388,3 +388,59 @@ is unavailable.
   non-default policy map, and real leaderboard deployment claims.
 - **action taken:** The canary was not entered as experimental evidence. The auditable
   harness retains default incumbents and no candidate is represented as promoted.
+
+## ROBUST current-offer acceptance-rule provenance
+
+- **item:** Whether `accept iff IR and at least as favorable as the fixed ROBUST quote`
+  was locked by `docs/BUILD_SPEC.md`.
+- **source inspected:** Complete `BUILD_SPEC.md` ROBUST definition (§5.1), Git history,
+  commit `7ced172`, `policies/negotiation/robust.py`, `docs/theory_baselines.md`, and
+  `docs/architecture.md`.
+- **result:** `CONFIRMED` as an implementation-introduced v1 rule, not a build-spec
+  theorem or locked requirement.
+- **evidence:** `BUILD_SPEC.md` locks the static ambiguity grid, hypothetical-opponent
+  reservation response, minimax-regret proposal, and absence of within-game reweighting.
+  It does not prescribe our response threshold for a current offer. Git history first
+  introduces the threshold and its `ACCEPT_IF_IR_AND_AT_LEAST_ROBUST_PROPOSAL` label in
+  commit `7ced172`; the architecture/theory documents recorded it afterward as an
+  explicit simplified continuation reference.
+- **dependent components:** Static `NEGOTIATION_ROBUST` and the new adaptive challenger.
+- **action taken:** Static ROBUST remains unchanged as the conservative control. The new
+  `NEGOTIATION_ADAPTIVE` uses its separately named 90%-of-adaptive-continuation-target
+  acceptance rule and makes no theoretical/Bayesian claim.
+
+## Adaptive concession comparative-static audit
+
+- **item:** Direction of the task's displayed adaptive-price expressions versus its
+  locked monotonic invariants/tests.
+- **source inspected:** Behavioral-challenger task §§4 and 12 and both role payoff sign
+  conventions.
+- **result:** `CONTRADICTED` for the displayed literal expressions.
+- **evidence:** In the displayed seller expression, a higher (improved) buyer offer raises
+  the seller counter; in the displayed buyer expression, a lower (improved) seller offer
+  lowers the buyer counter. Both are the opposite of the task's explicit requirements
+  that improving buyer offers move seller counters downward and improving seller offers
+  move buyer counters upward.
+- **dependent components:** `policies/negotiation/adaptive.py`.
+- **action taken:** Used the task-authorized algebraic correction. With ROBUST reference
+  `p_0`, rate `a=.35`, own value `V`, and best observed offer `b`, seller uses
+  `max(V,p_0-a*max(0,b-V))`; buyer uses `min(V,p_0+a*max(0,V-b))`. This is reciprocal
+  concession against revealed individually-rational surplus: it has the required signs,
+  never crosses own reservation, never treats `b` as the opponent's valuation, and never
+  changes the locked coefficient.
+
+## Persuasion P3 production-input audit
+
+- **item:** Availability of a valid pre-outcome
+  `population_positive_purchase_rate` for bounded P3 activation.
+- **source inspected:** All tracked/untracked data and artifact directories, historical
+  ingestion outputs, configuration coverage, experiment registry, policy code, and
+  repository-wide references to the required statistic.
+- **result:** `BLOCKED + RESEARCH_BLOCKED` (`P3_EXPERIMENT_INPUT_UNAVAILABLE`).
+- **evidence:** No ingested persuasion population dataset, frozen trust-rate artifact, or
+  configuration/population statistic exists. The only numeric example is a unit-test
+  fixture and is not evidence.
+- **dependent components:** Seller-side P3 activation.
+- **action taken:** The bounded registry records P3's intended scope but refuses to select
+  it without a validated rate. Seller P0 remains the control; no `0.5` or other value is
+  fabricated.

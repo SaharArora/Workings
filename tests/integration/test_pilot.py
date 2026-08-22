@@ -132,6 +132,56 @@ def test_three_same_cell_floor_results_trigger_strategic_review(tmp_path: Path) 
     assert any(item["event"] == "STRATEGIC_REVIEW_REQUIRED" for item in records(path))
 
 
+def test_two_zero_payoffs_in_structural_policy_class_trigger_review_not_hard_stop(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "pilot.jsonl"
+    recorder = PilotRecorder(
+        client=StatsClient(),  # type: ignore[arg-type]
+        family="negotiation",
+        output_path=path,
+        frozen_commit="abc123",
+    )
+    structural = (
+        "negotiation/incomplete-info/unknown-horizon/buyer/NEGOTIATION_ADAPTIVE"
+    )
+    for index, value in enumerate((100, 1_000_000)):
+        game_id = f"structural-{index}"
+        recorder.game_metadata[game_id] = {
+            "cell": f"exact-cell-value-{value}",
+            "role": "buyer",
+            "your_player": "player_2",
+            "opponent": {"type": "hidden", "name": None},
+            "configuration": {"player_2_value": value},
+            "rating_before": 1000,
+            "selected_incumbent": "NEGOTIATION_ADAPTIVE",
+            "selected_policy": "NEGOTIATION_ADAPTIVE",
+            "baseline_policy": "NEGOTIATION_ROBUST",
+            "experimental_policy": "NEGOTIATION_ADAPTIVE",
+            "authorization_status": "HUMAN_AUTHORIZED_EXPERIMENTAL",
+            "authorization_source": "human_authorized_bounded_pilot",
+            "structural_policy_class": structural,
+            "own_value": value,
+        }
+        recorder.supervisor_event(
+            {
+                "event": "game_completed",
+                "game_id": game_id,
+                "terminal": {
+                    "result": {"outcome": "walked_away", "player_2_payoff": 0}
+                },
+            }
+        )
+    recorder.close()
+    assert recorder.strategic_review_classes == [structural]
+    assert not recorder.stop_requested()
+    events = records(path)
+    assert any(
+        item.get("reason") == "TWO_OR_MORE_STRUCTURAL_POLICY_CLASS_ZERO_PAYOFFS"
+        for item in events
+    )
+
+
 def test_three_identical_unknown_horizon_exchanges_stop_and_walk_away(tmp_path: Path) -> None:
     path = tmp_path / "pilot.jsonl"
     recorder = PilotRecorder(

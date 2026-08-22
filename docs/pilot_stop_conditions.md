@@ -23,14 +23,23 @@ safe legal action boundary if necessary, leaves all queues, and reports
 An operational stop ends that family pilot. A policy/runtime fix requires a new frozen
 commit and restarts that family pilot count from zero.
 
-## Strategic stop
+## Strategic review
 
-Results are grouped by exact observable configuration cell and role. After at least three
-observations in the same group, the pilot pauses and emits
+Results remain grouped by exact observable configuration cell and role. After at least
+three observations in the same exact group, the recorder emits
 `STRATEGIC_REVIEW_REQUIRED` if every observation ended at the no-deal/walk-away payoff
-floor. The report also reviews action traces for repeated avoidable failure despite
-materially improving offers and for an action strictly dominated under the incumbent's
-own rule. Neither signal automatically rewrites the policy.
+floor.
 
-The strategic rule never combines heterogeneous cells and never uses a universal payoff
-or rating threshold.
+The behavioral pilot additionally aggregates structural policy classes that omit nuisance
+scale fields. A class with at least two observations emits `STRATEGIC_REVIEW_REQUIRED` if
+every raw payoff is zero. The recorder also checks whether adaptive negotiation ignored a
+materially improving opponent offer and whether an experimental action is dominated under
+its own locked rule.
+
+Strategic events are reported immediately after the bounded family finishes. They do not
+stop queue top-up, rewrite the frozen policy, or authorize tuning during the pilot. Only a
+hard operational event stops a family.
+
+The exact-cell rule never combines heterogeneous cells. Structural aggregation combines
+only states with the same family/information/horizon/role/selected-policy logic and never
+uses a universal rating threshold.

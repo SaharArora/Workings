@@ -141,3 +141,36 @@ input, never in-game retraining.
 
 Buyer belief logic must respect purchase-censored quality. P3 is seller-side and uses only
 the seller's observed quality plus public buy/no-buy outcomes.
+
+## Behavioral bounded-pilot challengers (not theory or promotion)
+
+Complete-information negotiation theory remains exact: in T=1, `p=V_B` under the
+accept-at-indifference convention. `NEGOTIATION_FAIRNESS_MARGIN` is a visibly separate
+human-authorized experimental action that gives the responder 15% of gains from trade in
+the finite full-extraction cells. It does not change the theorem and is not e-process
+promoted.
+
+Static `NEGOTIATION_ROBUST` remains exactly the fixed ambiguity/minimax-regret control
+above. `NEGOTIATION_ADAPTIVE` is a new deterministic behavioral challenger. Its first
+quote and fixed reference are ROBUST's quote. It never reweights ROBUST's ambiguity set;
+instead it conditions a separately named action rule on mechanically observed opponent
+offers. The task's literal displayed expressions had signs opposite to its required
+monotonic tests, so v1 uses the documented reciprocal-concession correction:
+
+```text
+seller: max(V_S, p_robust - .35 * max(0, best_buyer_offer - V_S))
+buyer:  min(V_B, p_robust + .35 * max(0, V_B - best_seller_offer))
+```
+
+Thus a materially improving opponent offer produces a weakly more agreement-favorable
+counter, a worsening offer cannot erase the best observed signal, and neither role crosses
+its reservation. An observed offer is a feasible negotiating signal, never an inferred
+true valuation. With continuation, an IR offer is accepted when current payoff is at least
+`.90` times payoff from the adaptive counter; without continuation, every IR offer is
+accepted. This is a deterministic v1 continuation approximation, not equilibrium theory
+or Bayesian inference.
+
+Bargaining fairness remains `x_fair=x_theory-.10(x_theory-.5)` and preserves exact theory
+as its logged control. P3 remains the seller-side challenger defined above but is not
+executable without a real pre-outcome population positive-purchase rate; none is currently
+available, so bounded pilot persuasion retains P0.

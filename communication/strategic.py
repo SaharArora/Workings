@@ -14,6 +14,13 @@ def render(action: Mapping[str, Any], game: Mapping[str, Any]) -> dict[str, Any]
     fields = game.get("valid_actions", {}).get("fields", {})
     if "message" not in fields:
         return rendered
+    # In persuasion a seller message is the policy action itself, not an optional
+    # communication decoration. Preserve any policy-supplied text and only enforce the
+    # shared length ceiling. Numeric/decision policies without text still receive the
+    # deterministic renderer below.
+    if "message" in rendered:
+        rendered["message"] = str(rendered["message"])[:INTERNAL_MESSAGE_LIMIT]
+        return rendered
     if "product_price" in rendered:
         message = f"I propose the stated price of {rendered['product_price']}."
     elif "alice_gain" in rendered:

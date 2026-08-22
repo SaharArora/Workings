@@ -1,11 +1,19 @@
 import random
 
+import pytest
+
 from policies.bargaining.fairness import fair_share
 from policies.persuasion.reputation import recommend_buy
 
 
 def test_bargaining_fairness() -> None:
     assert fair_share(0.8) == 0.77
+
+
+def test_bargaining_fairness_locked_hand_computed_shares() -> None:
+    assert fair_share(1.0) == 0.95
+    assert fair_share(0.5) == 0.5
+    assert fair_share(0.4) == pytest.approx(0.41)
 
 
 def test_reputation_is_truthful_early() -> None:

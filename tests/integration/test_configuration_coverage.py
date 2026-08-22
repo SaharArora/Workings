@@ -9,6 +9,8 @@ import pytest
 from glee.actions import validate_action
 from leaderboard.agent import LeaderboardAgent
 from leaderboard.coverage import ConfigurationCoverage, configuration_coverage
+from leaderboard.experimental_overrides import ExperimentalOverrideRegistry
+from leaderboard.policy_router import PolicyRouter
 
 
 def _messages(signature: str) -> bool:
@@ -188,6 +190,23 @@ def test_every_reachable_configuration_has_an_executable_named_incumbent(
     assert diagnostics.routing.selected_policy == row.selected_incumbent
     assert diagnostics.routing.execution_fallback_reason is None
     assert diagnostics.routing.selected_policy != "SAFE_LEGAL_FALLBACK"
+    assert validate_action(action, game) == action
+
+
+@pytest.mark.parametrize("row", ROWS, ids=lambda row: f"pilot-{row.family}-{row.role}-{row.configuration_signature}")
+def test_bounded_pilot_registry_keeps_every_reachable_configuration_legal(
+    row: ConfigurationCoverage,
+) -> None:
+    game = representative_game(row)
+    agent = LeaderboardAgent(
+        PolicyRouter(
+            experimental_overrides=ExperimentalOverrideRegistry.human_authorized_bounded_pilot()
+        )
+    )
+    action, diagnostics = agent.decide_with_diagnostics(game)
+    assert diagnostics.routing.execution_fallback_reason is None
+    assert diagnostics.routing.selected_policy != "SAFE_LEGAL_FALLBACK"
+    assert diagnostics.routing.authorization_status != "E_PROCESS_PROMOTED"
     assert validate_action(action, game) == action
 
 
