@@ -179,3 +179,10 @@ with `STOP_REQUESTED`. `glee/pilot.py` records the frozen commit, every state/ac
 latency, terminal result/payoff, rating snapshots when available, and exact exit reason;
 it never reads or serializes the API credential. Predeclared conditions are in
 `docs/pilot_stop_conditions.md`.
+
+Unknown-horizon bargaining/negotiation additionally has an operational no-progress
+guard. Three consecutive repetitions of the same observed offer and economic response
+request a hard stop and replace the third repeated response with the advertised legal
+fallback (normally walk-away), so a deterministic opponent pair cannot consume the
+overall supervisor deadline. A materially changed offer resets the count; finite games
+and persuasion are excluded.

@@ -25,11 +25,12 @@ def fallback_action(game: Mapping[str, Any]) -> dict[str, Any]:
     action_type = game["valid_actions"]["type"]
     state = game.get("game_state", {})
     fields = _field_text(game)
+    family = game.get("game_family")
     if action_type == "decision":
         if "rejectoffer" in fields and "product_price" not in fields:
             return {"decision": "RejectOffer"}
         if "walkaway" in fields:
-            return {"decision": "WalkAway"}
+            return {"decision": "walkaway" if family == "bargaining" else "WalkAway"}
         if "rejectoffer" in fields:
             own_key = f"{state.get('current_player')}_value"
             price = state.get(own_key, state.get("last_offer", {}).get("price", 0))
@@ -45,7 +46,6 @@ def fallback_action(game: Mapping[str, Any]) -> dict[str, Any]:
     if action_type == "seller_message":
         return {"message": "No recommendation."}
     if action_type == "offer":
-        family = game.get("game_family")
         if family == "bargaining":
             money = float(state["money_to_divide"])
             return {"alice_gain": money / 2, "bob_gain": money / 2}

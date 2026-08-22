@@ -25,6 +25,18 @@ def test_bargaining_fallback_is_even_split() -> None:
     assert fallback_action(game) == {"alice_gain": 500, "bob_gain": 500}
 
 
+def test_bargaining_decision_fallback_uses_lowercase_walkaway() -> None:
+    game = {
+        "game_family": "bargaining",
+        "game_state": {"current_player": "player_2"},
+        "valid_actions": {
+            "type": "decision",
+            "fields": {"decision": "'accept', 'reject', or 'walkaway'"},
+        },
+    }
+    assert fallback_action(game) == {"decision": "walkaway"}
+
+
 def test_message_is_kept_below_server_limit() -> None:
     game = {
         "game_family": "persuasion",

@@ -39,6 +39,26 @@ def negotiation_game() -> dict[str, Any]:
     }
 
 
+def negotiation_decision_game(price: float = 20) -> dict[str, Any]:
+    game = negotiation_game()
+    game["game_state"].update(
+        {
+            "phase": "decision",
+            "current_player": "player_1",
+            "last_offer": {"price": price, "from_player": "player_2", "round": 2},
+            "round": 2,
+        }
+    )
+    game["valid_actions"] = {
+        "type": "decision",
+        "fields": {
+            "decision": "'AcceptOffer', 'RejectOffer', or 'WalkAway'",
+            "product_price": "number (required if RejectOffer)",
+        },
+    }
+    return game
+
+
 def records(path: Path) -> list[dict[str, Any]]:
     return [json.loads(line) for line in path.read_text().splitlines()]
 
@@ -110,3 +130,34 @@ def test_three_same_cell_floor_results_trigger_strategic_review(tmp_path: Path) 
     recorder.close()
     assert recorder.strategic_review_cells == ["cell-a"]
     assert any(item["event"] == "STRATEGIC_REVIEW_REQUIRED" for item in records(path))
+
+
+def test_three_identical_unknown_horizon_exchanges_stop_and_walk_away(tmp_path: Path) -> None:
+    path = tmp_path / "pilot.jsonl"
+    recorder = PilotRecorder(
+        client=StatsClient(),  # type: ignore[arg-type]
+        family="negotiation",
+        output_path=path,
+        frozen_commit="abc123",
+    )
+    game = negotiation_decision_game(price=5)
+    assert recorder.strategy(game)["decision"] == "RejectOffer"
+    assert recorder.strategy(game)["decision"] == "RejectOffer"
+    assert recorder.strategy(game) == {"decision": "WalkAway"}
+    recorder.close()
+    assert recorder.hard_stop_reasons == ["DETERMINISTIC_NO_PROGRESS_CYCLE"]
+    assert any(item["event"] == "pilot_safety_action" for item in records(path))
+
+
+def test_materially_changed_unknown_horizon_offer_resets_cycle_count(tmp_path: Path) -> None:
+    path = tmp_path / "pilot.jsonl"
+    recorder = PilotRecorder(
+        client=StatsClient(),  # type: ignore[arg-type]
+        family="negotiation",
+        output_path=path,
+        frozen_commit="abc123",
+    )
+    for price in (5, 5, 6, 6):
+        assert recorder.strategy(negotiation_decision_game(price=price))["decision"] == "RejectOffer"
+    recorder.close()
+    assert recorder.hard_stop_reasons == []

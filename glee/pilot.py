@@ -27,6 +27,7 @@ PAYOFF_FLOOR_OUTCOMES = {
     "timeout",
     "invalid_moves",
 }
+NO_PROGRESS_REPEAT_LIMIT = 3
 
 
 @dataclass(frozen=True, slots=True)
@@ -100,6 +101,7 @@ class PilotRecorder:
         self.strategic_review_cells: list[str] = []
         self.game_metadata: dict[str, dict[str, Any]] = {}
         self.floor_history: dict[tuple[str, str], list[bool]] = {}
+        self.no_progress: dict[str, tuple[str, int]] = {}
         self.latest_stats: Mapping[str, Any] = {}
 
     def close(self) -> None:
@@ -181,7 +183,60 @@ class PilotRecorder:
                 game_id=game_id,
                 total_seconds=diagnostics.total_seconds,
             )
+        cycle = self._no_progress_cycle(game_id, game, action)
+        if cycle is not None:
+            self.request_hard_stop(
+                "DETERMINISTIC_NO_PROGRESS_CYCLE",
+                game_id=game_id,
+                repeated_signature=cycle,
+                repeat_count=NO_PROGRESS_REPEAT_LIMIT,
+            )
+            safe_action = validate_action(fallback_action(game), game)
+            self.write(
+                "pilot_safety_action",
+                game_id=game_id,
+                replaces_action=action,
+                action=safe_action,
+                reason="DETERMINISTIC_NO_PROGRESS_CYCLE",
+            )
+            return safe_action
         return action
+
+    def _no_progress_cycle(
+        self,
+        game_id: str,
+        game: Mapping[str, Any],
+        action: Mapping[str, Any],
+    ) -> str | None:
+        """Detect a repeating offer/response pair only in mechanisms without a cap."""
+        state = game.get("game_state", {})
+        if (
+            self.family not in {"bargaining", "negotiation"}
+            or state.get("horizon_known") is not False
+            or game.get("valid_actions", {}).get("type") != "decision"
+        ):
+            return None
+        last_offer = state.get("last_offer")
+        if not isinstance(last_offer, Mapping):
+            return None
+        if self.family == "negotiation":
+            observed = {"price": last_offer.get("price")}
+        else:
+            observed = {
+                "player_1_gain": last_offer.get("player_1_gain"),
+                "player_2_gain": last_offer.get("player_2_gain"),
+            }
+        economic_action = {key: value for key, value in action.items() if key != "message"}
+        signature = json.dumps(
+            {"observed_offer": observed, "economic_action": economic_action},
+            sort_keys=True,
+            default=str,
+            separators=(",", ":"),
+        )
+        previous, count = self.no_progress.get(game_id, ("", 0))
+        count = count + 1 if signature == previous else 1
+        self.no_progress[game_id] = (signature, count)
+        return signature if count >= NO_PROGRESS_REPEAT_LIMIT else None
 
     def supervisor_event(self, event: dict[str, Any]) -> None:
         kind = str(event.get("event"))
