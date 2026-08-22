@@ -59,6 +59,25 @@ is unavailable.
 - **action taken:** No history rewrite was needed or performed. Pilot logging records
   states, actions, results, and commit metadata only; it never reads the credential.
 
+## Aborted first MVL negotiation pilot — deterministic no-progress cycle
+
+- **item:** Frozen 10-game negotiation pilot attempt on commit
+  `023d8f4b5ae1966498be9241b06cb7f6a2df7e2b`.
+- **result:** `CONTRADICTED` — `DEPLOYMENT_BLOCKER`; pilot count invalidated at game 1.
+- **evidence:** The first matched game was incomplete-information, unknown-horizon,
+  buyer role against disclosed agent `OpenProgram`. ROBUST repeatedly countered 60 while
+  the opponent repeatedly countered 156. With no mechanism horizon, neither policy had a
+  terminal condition and the bounded family run could consume its overall deadline.
+- **action taken:** Queueing was stopped. The already-active game was ended with the
+  predefined advertised `WalkAway` legal fallback; the server accepted it and post-drain
+  state was zero active and zero pending. No second game was queued. The aborted transcript
+  is retained as `research/evaluation/pilot_negotiation_aborted_023d8f4.jsonl`.
+  A generic pilot-layer no-progress detector now treats three consecutive identical
+  observed-offer/economic-response pairs in unknown-horizon bargaining or negotiation as
+  a hard stop, substitutes the advertised legal fallback, and drains without requeueing.
+  Changed offers reset the count; finite games and persuasion are unaffected. The full
+  negotiation pilot must restart from zero on the new frozen commit.
+
 ## 1. Negotiation finite-horizon parity mechanics
 
 - **item:** Alice proposes odd stages, Bob even stages, numbering begins at 1, and Bob

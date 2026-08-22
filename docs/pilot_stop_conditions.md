@@ -15,6 +15,8 @@ safe legal action boundary if necessary, leaves all queues, and reports
   outside the declared bound;
 - a reachable state routes to `UNSUPPORTED_CELL` / `SAFE_LEGAL_FALLBACK`;
 - a known cell uses a policy-execution emergency fallback as its normal action;
+- an unknown-horizon bargaining/negotiation game repeats the same observed offer and
+  economic response three consecutive times, demonstrating deterministic no progress;
 - end-to-end local policy latency exceeds the 30-second maximum safety budget;
 - a credential appears in a runtime artifact.
 
