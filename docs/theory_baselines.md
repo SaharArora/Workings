@@ -27,6 +27,10 @@ Accordingly, the two Bayes-adaptive rows remain theoretical references while the
 production incumbent is `BARGAINING_INCOMPLETE_EQUAL_SPLIT`. This input limitation is
 `RESEARCH_BLOCKED`; execution does not enter the emergency fallback.
 
+Every unknown-horizon bargaining incumbent walks away on the third consecutive identical
+rejected offer it receives. This is an operational terminal convention for deterministic
+cycles, not a claim about equilibrium or a payoff-optimization refinement.
+
 ## Negotiation
 
 No-trade (`V_B<V_A`) is checked first in every cell.
@@ -92,6 +96,11 @@ as favorable as the chosen ROBUST proposal; otherwise counter with that proposal
 counteroffer is legal, accept any individually rational offer and reject otherwise. A
 zero-value player without a verified positive scale fails closed as
 `ROBUST_SCALE_UNAVAILABLE`.
+
+For an unknown horizon, ROBUST chooses `WalkAway` on the third consecutive identical
+observed-offer/chosen-counter pair. This is part of the named production policy and keeps
+two deterministic policies from cycling indefinitely. Any changed offer resets the
+sequence; finite games retain their mechanism deadline.
 
 ### Negotiation bounded statistical payoff transform
 

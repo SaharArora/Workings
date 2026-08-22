@@ -78,6 +78,26 @@ is unavailable.
   Changed offers reset the count; finite games and persuasion are unaffected. The full
   negotiation pilot must restart from zero on the new frozen commit.
 
+## Stopped second MVL negotiation pilot — emergency guard exercised
+
+- **item:** Restarted frozen negotiation pilot on commit
+  `be442310dbd89aac65b8ec459cd4e76614801846`.
+- **result:** `CONTRADICTED` — hard stop at 2/10; qualification count invalidated.
+- **evidence:** Game 1 was incomplete finite-horizon buyer ROBUST and ended no-deal with
+  payoff 0. Game 2 was incomplete unknown-horizon seller ROBUST. The opponent improved
+  from 996000 toward 1199999.99, then repeated 1199999.99 while ROBUST repeated 1800000.
+  On the third identical plateau pair, the pilot safety layer selected the advertised
+  `WalkAway`; the action was valid, the game ended at (0,0), the supervisor returned
+  `STOP_REQUESTED`, and postflight was zero active/zero pending.
+- **action taken:** Because the emergency pilot backstop was invoked, the family is not
+  ready and the transcript is retained as
+  `research/evaluation/pilot_negotiation_aborted_be44231.jsonl`. The same generic rule is
+  now inside each relevant named incumbent: negotiation ROBUST and both unknown-horizon
+  bargaining paths choose walk-away on the third identical rejected pair. Offline replay
+  of the exact live terminal state selects ROBUST `WalkAway` with no execution fallback.
+  The independent pilot guard remains only as a hard-stop backstop. The negotiation pilot
+  must restart from zero on the next frozen commit.
+
 ## 1. Negotiation finite-horizon parity mechanics
 
 - **item:** Alice proposes odd stages, Bob even stages, numbering begins at 1, and Bob

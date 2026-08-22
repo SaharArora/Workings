@@ -21,6 +21,7 @@ NEGOTIATION_ROBUST_BUYER_PRICE_FRACTIONS = (0.00, 0.25, 0.50, 0.75, 1.00)
 NEGOTIATION_ROBUST_BUYER_VALUE_MULTIPLIERS = (1.00, 1.25, 1.50, 2.00)
 NEGOTIATION_ROBUST_SELLER_VALUE_FRACTIONS = (0.00, 0.25, 0.50, 0.75, 1.00)
 ROBUST_TIE_BREAK = "agreement_favorable:lower_seller_price,higher_buyer_price"
+ROBUST_NO_PROGRESS_REPEAT_LIMIT = 3
 
 
 class RobustScaleUnavailable(ValueError):
@@ -317,6 +318,36 @@ def _field_description(game: Mapping[str, Any]) -> str:
     return " ".join(f"{key} {value}" for key, value in fields.items()).lower()
 
 
+def _repeated_no_progress_pair(
+    game: Mapping[str, Any], *, me: str, offered: float, counter: float
+) -> bool:
+    """Whether two previous own responses match the current offer/counter pair."""
+    state = game["game_state"]
+    if state.get("horizon_known") is not False:
+        return False
+    history = state.get("history", [])
+    if not isinstance(history, Sequence):
+        return False
+    own_responses = [
+        item
+        for item in history
+        if isinstance(item, Mapping) and str(item.get("decided_by", "")) == me
+    ]
+    needed = ROBUST_NO_PROGRESS_REPEAT_LIMIT - 1
+    if len(own_responses) < needed:
+        return False
+    for item in own_responses[-needed:]:
+        offer = item.get("offer")
+        if (
+            str(item.get("decision")) != "RejectOffer"
+            or not isinstance(offer, Mapping)
+            or float(offer.get("price", math.nan)) != offered
+            or float(item.get("counteroffer", math.nan)) != counter
+        ):
+            return False
+    return True
+
+
 def robust_action_plan(game: Mapping[str, Any]) -> RobustActionPlan:
     """Build an action plus auditable deterministic regret diagnostics.
 
@@ -364,6 +395,17 @@ def robust_action_plan(game: Mapping[str, Any]) -> RobustActionPlan:
                 "product_price": price_decision.chosen_price,
             }
             rule = "REJECT_AND_COUNTER_WITH_ROBUST_PROPOSAL"
+            if (
+                "walkaway" in _field_description(game)
+                and _repeated_no_progress_pair(
+                    game,
+                    me=me,
+                    offered=offered,
+                    counter=price_decision.chosen_price,
+                )
+            ):
+                action = {"decision": "WalkAway"}
+                rule = "WALK_AWAY_AFTER_THREE_IDENTICAL_OFFER_COUNTER_PAIRS"
     elif individually_rational:
         action = {"decision": "AcceptOffer"}
         rule = "TERMINAL_ACCEPT_IF_INDIVIDUALLY_RATIONAL"
