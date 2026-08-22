@@ -21,7 +21,7 @@ from policies.negotiation.adaptive import (
 from policies.negotiation.fairness_margin import fairness_margin_price
 from policies.negotiation.robust import robust_negotiation_action
 from policies.bargaining.fairness import fair_share
-from policies.persuasion.babbling import babbling_buyer_buys
+from policies.persuasion.babbling import production_buyer_buys
 from policies.persuasion.reputation import reputation_action
 from theory.bargaining.baselines import (
     bayes_adaptive_reference,
@@ -750,6 +750,10 @@ def persuasion_p0_action(game: dict[str, Any]) -> dict[str, Any]:
             1 - float(state["p"])
         ) * float(state["u"])
         return {
-            "decision": "yes" if expected_value >= float(state["product_price"]) else "no"
+            "decision": (
+                "yes"
+                if production_buyer_buys(expected_value, float(state["product_price"]))
+                else "no"
+            )
         }
     raise UnsupportedCellError(f"unknown persuasion action {action_type!r}")

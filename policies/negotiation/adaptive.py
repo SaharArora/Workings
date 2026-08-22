@@ -38,6 +38,7 @@ class AdaptiveActionPlan:
     own_value: float
     robust_reference_price: float
     opponent_offers: tuple[float, ...]
+    first_opponent_offer: float | None
     best_offer_seen: float | None
     previous_best_offer: float | None
     observed_offer: float | None
@@ -76,6 +77,7 @@ class AdaptiveActionPlan:
             "own_value": self.own_value,
             "robust_reference_price": self.robust_reference_price,
             "opponent_offers": list(self.opponent_offers),
+            "first_opponent_offer": self.first_opponent_offer,
             "best_offer_seen": self.best_offer_seen,
             "previous_best_offer": self.previous_best_offer,
             "observed_offer": self.observed_offer,
@@ -167,26 +169,24 @@ def _improved(role: str, current: float, previous_best: float | None) -> bool:
 
 
 def adaptive_counter_price(
-    *, role: str, own_value: float, robust_reference_price: float, best_offer_seen: float
+    *,
+    role: str,
+    own_value: float,
+    robust_reference_price: float,
+    first_opponent_offer: float,
+    best_offer_seen: float,
 ) -> float:
-    """Return the locked v1 reciprocal concession.
-
-    The task's literal target-minus-gap expressions have the opposite comparative
-    static from its required invariant: a higher buyer offer would raise the seller's
-    counter, and a lower seller offer would lower the buyer's counter. The equivalent
-    reciprocal-concession convention below measures the revealed individually-rational
-    surplus in the improving opponent offer. It therefore has the required sign while
-    retaining the locked 0.35 coefficient and moving from the ROBUST reference only.
-    """
+    """Match 35% of the opponent's concession from its observed first anchor."""
     own = float(own_value)
     target = float(robust_reference_price)
+    first = float(first_opponent_offer)
     best = float(best_offer_seen)
     if role == "seller":
-        revealed_surplus = max(0.0, best - own)
-        result = max(own, target - ADAPTIVE_CONCESSION_RATE * revealed_surplus)
+        opponent_concession = max(0.0, best - first)
+        result = max(own, target - ADAPTIVE_CONCESSION_RATE * opponent_concession)
     elif role == "buyer":
-        revealed_surplus = max(0.0, own - best)
-        result = min(own, target + ADAPTIVE_CONCESSION_RATE * revealed_surplus)
+        opponent_concession = max(0.0, first - best)
+        result = min(own, target + ADAPTIVE_CONCESSION_RATE * opponent_concession)
     else:
         raise ValueError(f"unknown negotiation role {role!r}")
     if not math.isfinite(result):
@@ -265,6 +265,7 @@ def adaptive_action_plan(game: Mapping[str, Any]) -> AdaptiveActionPlan:
             own_value=own_value,
             robust_reference_price=target,
             opponent_offers=history_offers,
+            first_opponent_offer=history_offers[0] if history_offers else None,
             best_offer_seen=_best(role, history_offers),
             previous_best_offer=_best(role, history_offers),
             observed_offer=None,
@@ -285,11 +286,13 @@ def adaptive_action_plan(game: Mapping[str, Any]) -> AdaptiveActionPlan:
     all_offers = (*prior_offers, offered)
     best_seen = _best(role, all_offers)
     assert best_seen is not None
+    first_offer = all_offers[0]
     previous_best = _best(role, prior_offers)
     counter = adaptive_counter_price(
         role=role,
         own_value=own_value,
         robust_reference_price=target,
+        first_opponent_offer=first_offer,
         best_offer_seen=best_seen,
     )
     fields = game["valid_actions"].get("fields", {})
@@ -338,6 +341,7 @@ def adaptive_action_plan(game: Mapping[str, Any]) -> AdaptiveActionPlan:
         own_value=own_value,
         robust_reference_price=target,
         opponent_offers=all_offers,
+        first_opponent_offer=first_offer,
         best_offer_seen=best_seen,
         previous_best_offer=previous_best,
         observed_offer=offered,

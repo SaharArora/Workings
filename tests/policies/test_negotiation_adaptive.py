@@ -8,6 +8,7 @@ from policies.negotiation.adaptive import (
     ADAPTIVE_ACCEPTANCE_FRACTION,
     ADAPTIVE_CONCESSION_RATE,
     adaptive_action_plan,
+    adaptive_counter_price,
 )
 from policies.negotiation.fairness_margin import (
     SURPLUS_CONCESSION,
@@ -86,23 +87,23 @@ def test_buyer_first_proposal_is_static_robust_reference() -> None:
 
 
 def test_improving_seller_offer_causes_buyer_counter_to_move_upward() -> None:
-    prior = prior_response(role="buyer", offer=90, counter=53.5)
+    prior = prior_response(role="buyer", offer=90, counter=50)
     plan = adaptive_action_plan(
         adaptive_game(role="buyer", action_type="decision", offer=80, history=[prior])
     )
     assert plan.opponent_offer_improved
-    assert plan.adaptive_counter == 57
-    assert plan.adaptive_counter > 53.5
+    assert plan.adaptive_counter == 53.5
+    assert plan.adaptive_counter > 50
 
 
 def test_improving_buyer_offer_causes_seller_counter_to_move_downward() -> None:
-    prior = prior_response(role="seller", offer=110, counter=146.5)
+    prior = prior_response(role="seller", offer=110, counter=150)
     plan = adaptive_action_plan(
         adaptive_game(role="seller", action_type="decision", offer=120, history=[prior])
     )
     assert plan.opponent_offer_improved
-    assert plan.adaptive_counter == 143
-    assert plan.adaptive_counter < 146.5
+    assert plan.adaptive_counter == 146.5
+    assert plan.adaptive_counter < 150
 
 
 def test_live_history_duplicate_of_current_counteroffer_is_not_its_own_baseline() -> None:
@@ -167,12 +168,17 @@ def test_nonterminal_acceptance_uses_90_percent_continuation_threshold() -> None
         adaptive_game(role="seller", action_type="decision", offer=147)
     )
     assert plan.current_payoff == 47
-    assert plan.continuation_target_payoff == pytest.approx(33.55)
+    assert plan.continuation_target_payoff == pytest.approx(50)
     assert plan.action == {"decision": "AcceptOffer"}
 
 
 def test_adaptive_does_not_reuse_static_robust_fixed_quote_acceptance_rule() -> None:
-    game = adaptive_game(role="seller", action_type="decision", offer=140)
+    game = adaptive_game(
+        role="seller",
+        action_type="decision",
+        offer=140,
+        history=[prior_response(role="seller", offer=100, counter=150)],
+    )
     assert robust_action_plan(game).action == {
         "decision": "RejectOffer",
         "product_price": 150,
@@ -191,8 +197,8 @@ def test_nonterminal_rejects_and_submits_adaptive_counter_below_threshold() -> N
         adaptive_game(role="seller", action_type="decision", offer=120)
     )
     assert plan.current_payoff == 20
-    assert plan.continuation_target_payoff == 43
-    assert plan.action == {"decision": "RejectOffer", "product_price": 143}
+    assert plan.continuation_target_payoff == 50
+    assert plan.action == {"decision": "RejectOffer", "product_price": 150}
 
 
 def test_improving_offers_do_not_trigger_no_progress_walkaway() -> None:
@@ -204,7 +210,55 @@ def test_improving_offers_do_not_trigger_no_progress_walkaway() -> None:
         adaptive_game(role="seller", action_type="decision", offer=120, history=history)
     )
     assert plan.opponent_offer_improved
-    assert plan.action == {"decision": "RejectOffer", "product_price": 143}
+    assert plan.action == {"decision": "RejectOffer", "product_price": 146.5}
+
+
+def test_seller_matches_concession_before_offer_crosses_own_ir() -> None:
+    counters = [
+        adaptive_counter_price(
+            role="seller",
+            own_value=150,
+            robust_reference_price=225,
+            first_opponent_offer=50,
+            best_offer_seen=offer,
+        )
+        for offer in (50, 80, 110)
+    ]
+    assert counters == [225, 214.5, 204]
+    assert counters[0] > counters[1] > counters[2] >= 150
+
+
+def test_buyer_matches_concession_before_offer_crosses_own_ir() -> None:
+    counters = [
+        adaptive_counter_price(
+            role="buyer",
+            own_value=1000,
+            robust_reference_price=500,
+            first_opponent_offer=1600,
+            best_offer_seen=offer,
+        )
+        for offer in (1600, 1400, 1200)
+    ]
+    assert counters == [500, 570, 640]
+    assert 500 <= counters[0] < counters[1] < counters[2] <= 1000
+
+
+def test_worsening_offer_does_not_generate_extra_concession() -> None:
+    seller = adaptive_counter_price(
+        role="seller",
+        own_value=150,
+        robust_reference_price=225,
+        first_opponent_offer=50,
+        best_offer_seen=80,
+    )
+    seller_after_worse_offer = adaptive_counter_price(
+        role="seller",
+        own_value=150,
+        robust_reference_price=225,
+        first_opponent_offer=50,
+        best_offer_seen=80,
+    )
+    assert seller_after_worse_offer == seller == 214.5
 
 
 def test_static_no_improvement_loop_eventually_triggers_structural_guard() -> None:
