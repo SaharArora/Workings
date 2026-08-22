@@ -444,3 +444,28 @@ is unavailable.
 - **action taken:** The bounded registry records P3's intended scope but refuses to select
   it without a validated rate. Seller P0 remains the control; no `0.5` or other value is
   fabricated.
+
+## Frozen behavioral-challenger bounded pilot
+
+- **item:** Operational execution and descriptive behavior of the human-authorized
+  fairness/adaptive challengers without e-process promotion.
+- **source inspected:** Complete structured JSONL transcripts for the six-game
+  negotiation, four-game bargaining, and four-game persuasion family pilots.
+- **result:** `VERIFIED` for bounded execution and route authorization; no promotion claim.
+- **evidence:** Every row records frozen commit
+  `c4e68a569376c178b8844db6594c5ced92fd9f3b`. All 14 requested games completed with
+  `MAX_GAMES_COMPLETED`; there were zero hard stops, execution/outer fallbacks, invalid
+  actions, timeouts, rule-invariant failures, or strategic-review events. No route was
+  labeled `E_PROCESS_PROMOTED`. Six materially improving negotiation observations were
+  identified and none was ignored by ADAPTIVE. All 60 seller persuasion turns exposed
+  the intended P3 scope, logged `P3_EXPERIMENT_INPUT_UNAVAILABLE`, and selected P0; P3 was
+  selected zero times.
+- **dependent components:** Bounded behavioral pilot routing, monitoring, and postmortem.
+- **action taken:** Negotiation selected ADAPTIVE in four matches (one agreement/payoff
+  55.24, two no-deals/0, one intended guarded walkaway/0) and FAIRNESS_MARGIN in two
+  matches (two agreements/payoffs 3 and 1960). Bargaining fairness reached agreement in
+  all four matches. P3 did not execute. Family rating changes were reported descriptively
+  only: negotiation `974.79 -> 976.73`, bargaining `1670.46 -> 1693.53`, persuasion
+  `1402.31 -> 1406.98`. Every family postflight and the final explicit cleanup returned
+  `active_games=0`, `pending_games=0`; default experimental overrides were disabled.
+  No larger or sustained deployment was started.
