@@ -171,11 +171,13 @@ class PolicyRouter:
         bayes_eligibility: Mapping[RouteKey, BayesEligibility] | None = None,
         bayes_artifacts: Mapping[RouteKey, PolicyArtifact] | None = None,
         promoted_policies: Mapping[RouteKey, PolicyArtifact] | None = None,
+        pooled_negotiation_artifact: PolicyArtifact | None = None,
         experimental_overrides: ExperimentalOverrideRegistry | None = None,
     ) -> None:
         self.bayes_eligibility = dict(bayes_eligibility or {})
         self.bayes_artifacts = dict(bayes_artifacts or {})
         self.promoted_policies = dict(promoted_policies or {})
+        self.pooled_negotiation_artifact = pooled_negotiation_artifact
         self.experimental_overrides = experimental_overrides or ExperimentalOverrideRegistry()
         self.last_routing: RoutingDecision | None = None
 
@@ -237,11 +239,30 @@ class PolicyRouter:
             experimental_name = resolution.override.policy_name
             authorization_source = self.experimental_overrides.authorization_source
             if resolution.available:
-                selected_name, selected_policy, details_builder = self._experimental_execution(
-                    experimental_name,
-                    baseline_policy=selected_policy,
-                )
-                authorization_status = resolution.authorization_status
+                pooled_policy: Policy | None = None
+                if experimental_name == "NEGOTIATION_POOLED_EMPIRICAL":
+                    pooled_policy, artifact_error = _artifact_status(
+                        self.pooled_negotiation_artifact
+                    )
+                    if pooled_policy is None:
+                        unavailable = f"POOLED_ARTIFACT_{artifact_error}"
+                        fallback_reason = (
+                            f"{fallback_reason};{unavailable}"
+                            if fallback_reason
+                            else unavailable
+                        )
+                    elif self.pooled_negotiation_artifact is not None:
+                        available.append(self.pooled_negotiation_artifact.name)
+                if (
+                    experimental_name != "NEGOTIATION_POOLED_EMPIRICAL"
+                    or pooled_policy is not None
+                ):
+                    selected_name, selected_policy, details_builder = self._experimental_execution(
+                        experimental_name,
+                        baseline_policy=selected_policy,
+                        pooled_policy=pooled_policy,
+                    )
+                    authorization_status = resolution.authorization_status
             else:
                 unavailable = resolution.unavailable_reason or "EXPERIMENT_INPUT_UNAVAILABLE"
                 fallback_reason = (
@@ -277,6 +298,7 @@ class PolicyRouter:
         policy_name: str,
         *,
         baseline_policy: Policy,
+        pooled_policy: Policy | None = None,
     ) -> tuple[str, Policy, PolicyDetailsBuilder]:
         if policy_name == "NEGOTIATION_ADAPTIVE":
             return (
@@ -290,6 +312,22 @@ class PolicyRouter:
                 negotiation_fairness_margin_action,
                 negotiation_fairness_margin_details,
             )
+        if policy_name == "NEGOTIATION_POOLED_EMPIRICAL":
+            if pooled_policy is None:
+                raise PolicyInputsUnavailable("POOLED_ARTIFACT_UNAVAILABLE")
+
+            def details(game: dict[str, Any], action: Mapping[str, Any]) -> Mapping[str, Any]:
+                plan = getattr(pooled_policy, "last_plan", None)
+                if plan is not None and hasattr(plan, "structured"):
+                    return plan.structured()
+                return {
+                    "policy": policy_name,
+                    "selected_live_action": dict(action),
+                    "diagnostics": "artifact_callable_did_not_expose_last_plan",
+                    "rule_invariants_satisfied": True,
+                }
+
+            return policy_name, pooled_policy, details
         if policy_name == "BARGAINING_FAIRNESS":
             policy = lambda game: bargaining_fairness_action(game, baseline_policy)
             details = lambda game, action: bargaining_fairness_details(

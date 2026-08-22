@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+import hashlib
 from dataclasses import dataclass
 from enum import StrEnum
 from typing import Any, Mapping
 
 HUMAN_AUTHORIZATION_SOURCE = "human_authorized_bounded_pilot"
 HUMAN_TRANCHE_AUTHORIZATION_SOURCE = "human_authorized_time_constrained_tranche"
+HUMAN_POOLED_VALIDATION_SOURCE = "human_authorized_pooled_model_validation"
 
 
 class AuthorizationStatus(StrEnum):
@@ -121,6 +123,18 @@ TRANCHE_OVERRIDES = (
 )
 
 
+POOLED_VALIDATION_OVERRIDES = (
+    ExperimentalOverride(
+        policy_name="NEGOTIATION_POOLED_EMPIRICAL",
+        game_family="negotiation",
+        baseline_policies=frozenset({"NEGOTIATION_ROBUST"}),
+        configuration_scope=(
+            "incomplete_information_multi_round_or_unknown_horizon_without_exact_cell_gate"
+        ),
+    ),
+)
+
+
 def tranche_structural_class(
     game: Mapping[str, Any], policy_name: str, role: str | None
 ) -> str:
@@ -164,14 +178,17 @@ class ExperimentalOverrideRegistry:
         population_positive_purchase_rate: float | None = None,
         overrides: tuple[ExperimentalOverride, ...] = PILOT_OVERRIDES,
         adaptive_diagnostic_limit: int | None = None,
+        pooled_randomized: bool = False,
     ) -> None:
         self.enabled = bool(enabled)
         self.authorization_source = authorization_source
         self.population_positive_purchase_rate = population_positive_purchase_rate
         self.overrides = overrides
         self.adaptive_diagnostic_limit = adaptive_diagnostic_limit
+        self.pooled_randomized = bool(pooled_randomized)
         self.adaptive_diagnostic_game_ids: set[str] = set()
         self._adaptive_assignment: dict[str, bool] = {}
+        self._pooled_assignment: dict[str, bool] = {}
         self.paused_structural_classes: dict[str, str] = {}
 
     @classmethod
@@ -197,6 +214,16 @@ class ExperimentalOverrideRegistry:
             adaptive_diagnostic_limit=adaptive_diagnostic_limit,
         )
 
+    @classmethod
+    def human_authorized_pooled_validation(cls) -> "ExperimentalOverrideRegistry":
+        """Authorize deterministic 50/50 assignment in eligible ROBUST cells only."""
+        return cls(
+            enabled=True,
+            authorization_source=HUMAN_POOLED_VALIDATION_SOURCE,
+            overrides=POOLED_VALIDATION_OVERRIDES,
+            pooled_randomized=True,
+        )
+
     def contents(self) -> dict[str, Any]:
         return {
             "enabled": self.enabled,
@@ -209,6 +236,12 @@ class ExperimentalOverrideRegistry:
             "adaptive_assignment_method": (
                 "first_eligible_distinct_games_not_randomized"
                 if self.adaptive_diagnostic_limit is not None
+                else None
+            ),
+            "pooled_randomized": self.pooled_randomized,
+            "pooled_assignment_method": (
+                "sha256(game_id) parity; frozen for the full game"
+                if self.pooled_randomized
                 else None
             ),
             "paused_structural_classes": dict(self.paused_structural_classes),
@@ -294,6 +327,47 @@ class ExperimentalOverrideRegistry:
                     authorization_status=(
                         AuthorizationStatus.HUMAN_AUTHORIZED_EXPERIMENTAL_DIAGNOSTIC
                     ),
+                )
+            if override.policy_name == "NEGOTIATION_POOLED_EMPIRICAL":
+                state = game.get("game_state", {})
+                eligible_cell = (
+                    state.get("complete_information") is False
+                    and (
+                        state.get("horizon_known") is False
+                        or (
+                            isinstance(state.get("max_rounds"), int)
+                            and int(state["max_rounds"]) > 1
+                        )
+                    )
+                )
+                if not eligible_cell:
+                    continue
+                if structural_class in self.paused_structural_classes:
+                    return OverrideResolution(
+                        override=override,
+                        available=False,
+                        unavailable_reason=self.paused_structural_classes[structural_class],
+                    )
+                assigned = self._pooled_assignment.get(game_id)
+                if assigned is None:
+                    assigned = (
+                        int(hashlib.sha256(game_id.encode("utf-8")).hexdigest()[-1], 16)
+                        % 2
+                        == 0
+                        if self.pooled_randomized
+                        else True
+                    )
+                    self._pooled_assignment[game_id] = assigned
+                if not assigned:
+                    return OverrideResolution(
+                        override=override,
+                        available=False,
+                        unavailable_reason="RANDOMIZED_TO_CURRENT_INCUMBENT",
+                    )
+                return OverrideResolution(
+                    override=override,
+                    available=True,
+                    unavailable_reason=None,
                 )
             if structural_class in self.paused_structural_classes:
                 return OverrideResolution(
