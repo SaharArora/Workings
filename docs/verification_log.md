@@ -75,7 +75,8 @@ dependent implementation.
   validates the transform before betting; raw utility, transform metadata, and clipping
   status remain in the append-only record. `delta_min=.01` now estimates improvement in
   expected clipped scale-adjusted utility and corresponds locally, only before clipping,
-  to `.04S` raw utility.
+  to `.04S` raw utility. The full suite passes 69 tests, and the third controlled canary
+  verified live execution without any missing-price-bound fallback.
 
 ## 3. SDK transport interface and credential variable
 
@@ -167,8 +168,38 @@ dependent implementation.
   cleanup, and returned automatically after 8.64 seconds. Postflight returned
   `active_games=0`, no pending games, and negotiation games played increased from 108 to
   109. No second queue/run, randomized experiment, or persistent leaderboard process was
-  started. Live ROBUST *routing* is verified; ROBUST v1 action execution remains blocked
-  pending an authorized formulation compatible with an unbounded price domain.
+  started. Live ROBUST *routing* was verified; at that point action execution remained
+  blocked pending an authorized formulation compatible with an unbounded price domain.
+  That historical blocker is resolved by the policy redesign and third canary below.
+
+## Third controlled rated canary — unbounded-domain ROBUST execution
+
+- **item:** Exactly one post-redesign negotiation canary validating normal ROBUST
+  execution, payoff transformation, and automatic bounded completion.
+- **source inspected:** Structured state/route/ROBUST/action/supervisor stream and
+  terminal `game_state()` for game `10df5ea0-5290-4ba1-b8c1-8544aacde6ba` on 2026-08-21.
+- **result:** `CONFIRMED`
+- **evidence:** Preflight returned `active_games=0` and no pending games. The match was
+  incomplete-information negotiation, known finite horizon `T=10`, messages disabled;
+  our role was buyer (`player_2`) with private value `V_B=8000`, against disclosed agent
+  `champion`. BAYES eligibility/artifacts were unavailable, so the route selected
+  `NEGOTIATION_ROBUST` with no execution fallback. The buyer policy candidates were
+  `[0,2000,4000,6000,8000]` and seller-value scenarios were the same. Maximum regrets by
+  candidate were respectively `[6000,4000,4000,6000,8000]`; the fixed higher-buyer-offer
+  tie-break selected 4000 over 2000. The seller offered 14290, 8426.56, 8415.04, 8403.52,
+  and 8392 on our five decision turns. Every offer exceeded `V_B` and was non-IR, so each
+  deterministic response was `RejectOffer` with a 4000 counteroffer. All five actions
+  were valid. The seller rejected the round-10 offer and the terminal outcome was
+  `no_deal`, with both payoffs zero.
+- **dependent components:** Policy-generated action/scenario grids, regret diagnostics,
+  current-offer response rule, routing, clipped payoff transform, and bounded supervisor.
+- **action taken:** Raw own payoff `U=0` with `S=8000` gave `C=16000` and transformed
+  `Y=.5`; clipping did not occur. Policy-execution and outer never-raise fallback counts
+  were both zero. `run_bounded(max_games=1, concurrency=1, requeue=False)` made one queue
+  call, returned automatically with `MAX_GAMES_COMPLETED` after 20.99 seconds, and cleaned
+  the queue. Postflight returned `active_games=0`, no pending games, and negotiation games
+  played increased from 109 to 110. No second game, experiment, or persistent execution
+  was started.
 
 ## Generic policy routing audit
 
