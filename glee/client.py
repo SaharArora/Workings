@@ -97,6 +97,7 @@ class CompetitionClient:
         poll_interval: float = 2.0,
         safety_timeout: float = 600.0,
         event_sink: Callable[[dict[str, Any]], None] | None = None,
+        stop_requested: Callable[[], bool] | None = None,
     ) -> Any:
         """Use authoritative state tracking for finite runs instead of SDK counters."""
         from glee.supervisor import run_bounded
@@ -111,4 +112,5 @@ class CompetitionClient:
             poll_interval=poll_interval,
             safety_timeout=safety_timeout,
             event_sink=event_sink,
+            stop_requested=stop_requested,
         )

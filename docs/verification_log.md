@@ -5,7 +5,59 @@ dependent implementation.
 
 ## Status vocabulary
 
-`CONFIRMED`, `CONTRADICTED`, or `BLOCKED`.
+Verification findings use `CONFIRMED`, `CONTRADICTED`, or `BLOCKED`; build reporting
+retains `IMPLEMENTED`, `VERIFIED`, `BLOCKED`, and `NOT_YET_BUILT`. Incomplete/problematic
+items additionally receive exactly one operational class when relevant:
+`DEPLOYMENT_BLOCKER` if they can make live execution invalid, undefined, uncontrolled, or
+unsafe in time; otherwise `RESEARCH_BLOCKED` when only an advanced strategy/evidence path
+is unavailable.
+
+## MVL configuration and input audit
+
+- **item:** Intentional executable incumbents for every policy-distinct current API
+  configuration class and role, including incomplete-information T=1 negotiation.
+- **source inspected:** Current official competition `llms.txt` retrieved 2026-08-21,
+  installed `glee-sdk==0.0.5`, original GLEE parameter generator, `BUILD_SPEC.md`, and all
+  production routers/policies.
+- **result:** `CONFIRMED` — 52/52 classes offline executable; 0 deployment blockers.
+- **evidence:** Current incomplete negotiation payloads expose only own value and no prior;
+  the historical grid is not a trusted distribution announced to the live agent. The
+  trusted-prior T=1 formula is therefore non-executable (Case C), and current T=1 selects
+  one-shot unbounded ROBUST without using learned BAYES eligibility. Current incomplete
+  bargaining likewise exposes own discount only and no opponent prior; it now selects the
+  intentional equal-split incumbent instead of raising into the emergency wrapper.
+  Complete bargaining uses proposer/remaining-round-correct continuation logic, and P0
+  persuasion consumes all actual expected-value fields on the buyer path.
+- **classification:** Missing priors, BAYES/EMPIRICAL/P3 evidence, and unpromoted fixed
+  deviations are `BLOCKED` or `NOT_YET_BUILT` + `RESEARCH_BLOCKED`; none removes the safe
+  incumbent.
+- **dependent artifacts:** `docs/configuration_coverage.json` and
+  `docs/configuration_coverage.md`.
+
+## Turn-time compliance
+
+- **item:** End-to-end local latency of every production incumbent path.
+- **source inspected:** Current official docs (120-second per-turn limit) and a 1,000-call
+  benchmark per representative path including parsing, routing/policy computation,
+  communication rendering, and action validation.
+- **result:** `CONFIRMED`
+- **evidence:** All 14 production paths pass p95 <= 10 seconds and maximum <= 30 seconds;
+  observed values are in `docs/latency_benchmark.md` / `.json`. Network/API time is
+  excluded and separately bounded by the SDK's 30-second request timeout/retry behavior.
+- **classification:** No latency `DEPLOYMENT_BLOCKER`.
+
+## Credential and repository hygiene
+
+- **item:** Rotated live credential and runtime-artifact hygiene before increasing rated
+  volume.
+- **source inspected:** Git ignore/index/current tree/all refs and every current runtime
+  artifact, compared locally without printing or serializing the secret.
+- **result:** `CONFIRMED`
+- **evidence:** `.env` is ignored and untracked; `.env.example` contains only an empty
+  placeholder; the current rotated credential occurs in zero tracked files, zero runtime
+  artifacts, and zero commits on current refs. No transcript contains it.
+- **action taken:** No history rewrite was needed or performed. Pilot logging records
+  states, actions, results, and commit metadata only; it never reads the credential.
 
 ## 1. Negotiation finite-horizon parity mechanics
 

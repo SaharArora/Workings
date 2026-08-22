@@ -227,3 +227,38 @@ def test_repeated_terminal_polling_never_double_counts() -> None:
     completed_ids = [event["game_id"] for event in events if event["event"] == "game_completed"]
     assert completed_ids == ["g1", "g2"]
     assert fake.submit_calls.count("g1") == 1
+
+
+def test_stop_request_leaves_queue_and_drains_without_requeue() -> None:
+    events: list[dict[str, Any]] = []
+    fake = FakeClient(
+        pending=[[], [game("g1")]],
+        stats=[{"active_games": 0}, {"active_games": 0}],
+        submits={"g1": [{"valid": True, "game_over": True, "result": {}}]},
+    )
+    timer = FakeTime()
+    stop = False
+
+    def event_sink(event: dict[str, Any]) -> None:
+        nonlocal stop
+        events.append(event)
+        if event["event"] == "game_completed":
+            stop = True
+
+    result = run_bounded(
+        fake,
+        lambda _: {"product_price": 10},
+        game_family="negotiation",
+        max_games=3,
+        requeue=True,
+        poll_interval=1,
+        safety_timeout=20,
+        event_sink=event_sink,
+        stop_requested=lambda: stop,
+        clock=timer.clock,
+        sleep=timer.sleep,
+    )
+    assert result.completed_game_ids == ("g1",)
+    assert result.exit_reason == "STOP_REQUESTED"
+    assert fake.queue_calls == ["negotiation"]
+    assert any(event["event"] == "stop_requested" for event in events)

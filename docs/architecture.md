@@ -1,5 +1,21 @@
 # Architecture
 
+## Readiness classifications
+
+Implementation status remains `IMPLEMENTED`, `VERIFIED`, `BLOCKED`, or
+`NOT_YET_BUILT`. A separate operational classification applies to incomplete or
+problematic work:
+
+- `DEPLOYMENT_BLOCKER` means the gap can produce an invalid action, crash, timeout,
+  hang, uncontrolled run, missing incumbent for a reachable cell, normal reliance on an
+  unavailable input/artifact, a recurring catastrophic choice when a safer incumbent
+  already exists, or policy latency that risks the turn limit.
+- `RESEARCH_BLOCKED` means an advanced strategy or its validation is unavailable while
+  the deployed incumbent remains intentional, legal, executable, and bounded in time.
+
+The labels are orthogonal: for example, an unavailable BAYES artifact is
+`BLOCKED + RESEARCH_BLOCKED` while its cell continues safely under ROBUST.
+
 One transport process queues all selected game families through the official SDK. Each
 arriving server-assigned game is classified by exact configuration and disclosed opponent
 category (`human`, `agent`, or `hidden`). `leaderboard/policy_router.py` reads the policy
@@ -31,11 +47,16 @@ loadable artifacts, promoted policy, selected policy, and fallback reason.
 
 The family rules are:
 
-- Bargaining selects one of the four configuration-specific theory incumbents
-  (complete/incomplete crossed with finite/unlimited). An unavailable challenger does not
-  change that incumbent. If required theory inputs such as the incomplete-information
-  prior are absent, execution fails closed to the advertised legal fallback while the
-  selected incumbent remains visible in the route record.
+- Complete-information bargaining selects its finite backward-induction or unlimited
+  Rubinstein incumbent using the **current proposer** and, for finite games, the rounds
+  remaining. A decision compares the offered share with the correct discounted
+  continuation share. When both discount factors are one in an unlimited game, equal
+  split is the explicit symmetric operational convention for the non-unique stationary
+  split. The current API hides the opponent's discount factor in incomplete information
+  and supplies no prior, so the Bayes-adaptive theory reference is not executable there.
+  Those cells deliberately select `BARGAINING_INCOMPLETE_EQUAL_SPLIT`; this is a named
+  conservative incumbent, not an emergency wrapper action. The missing prior is
+  `RESEARCH_BLOCKED`, not a deployment blocker.
 - Complete-information negotiation selects its T=1, finite-odd, finite-even, or
   unlimited-midpoint theory incumbent. Incomplete T=1 uses the trusted-prior posted-price
   baseline only when that prior is explicitly supplied; otherwise it uses its ROBUST
@@ -48,7 +69,10 @@ The family rules are:
   select ROBUST. Missing or corrupt BAYES artifacts also select ROBUST, never a generic
   reservation-value strategy.
 - Every no-commitment persuasion cell keeps P0 babbling as theory incumbent unless a
-  registered population challenger is promoted.
+  registered population challenger is promoted. Buyer P0 evaluates the actual visible
+  `p`, `v`, `u`, and `product_price`, which reduces to the normalized build-spec threshold
+  in the canonical price-one/low-value-zero case. Seller P0 remains quality-independent
+  in both text and binary modes and therefore executes even when buyer values are hidden.
 
 The negotiation mechanism remains unbounded above. ROBUST bounds only its own action and
 scenario sets: seller candidates are reservation-value multiples
@@ -67,6 +91,27 @@ offer. This proposal threshold is an explicit deterministic continuation referen
 a probabilistic continuation-value estimate. A zero private value without a verified
 positive configuration scale fails closed as `ROBUST_SCALE_UNAVAILABLE`. Unrecognized
 families/configurations remain `UNSUPPORTED_CELL` and fail closed.
+
+The current API exposes no buyer-value prior in incomplete-information T=1 negotiation.
+The trusted-prior posted-price formula is therefore not executable live and is not routed
+through learned multi-round BAYES eligibility. Both roles intentionally use the existing
+unbounded-domain one-shot ROBUST incumbent. The full audit is in
+`docs/configuration_coverage.md`.
+
+## Action validation and turn budget
+
+After state-envelope parsing, configuration routing, economic policy execution, and
+communication rendering, `glee/actions.py` validates the exact action against the turn's
+advertised field names and family invariants before submission. It rejects non-finite
+numbers, invalid decisions, unadvertised keys, bargaining splits that do not sum to the
+pot, and messages outside the internal 1,800-character limit. The outermost never-raise
+boundary remains emergency protection around this whole path.
+
+Current official competition documentation (retrieved 2026-08-21) confirms a 120-second
+turn limit. Production budgets are p95 <= 10 seconds and maximum <= 30 seconds for local
+policy work. Benchmarks include parsing, routing/policy computation, communication, and
+validation but exclude network time; results are recorded in
+`docs/latency_benchmark.md`.
 
 ## Layer boundaries
 
@@ -125,3 +170,12 @@ type. Transient polling errors are logged and retried; identical pending states 
 submitted twice; and a hard overall safety deadline prevents indefinite idling. Cleanup
 calls `leave_queue()` on every exit path and logs the exact exit reason. With
 `requeue=False`, the supervisor makes one queue call only.
+
+Finite MVL pilots use bounded `requeue=True` only to top up one sequential slot until the
+declared maximum has been tracked. The supervisor leaves the family queue as soon as that
+count is reached, so top-up cannot create game N+1. A stop callback closes queueing in the
+same iteration as a hard/strategic event and drains already-tracked play before returning
+with `STOP_REQUESTED`. `glee/pilot.py` records the frozen commit, every state/action/route,
+latency, terminal result/payoff, rating snapshots when available, and exact exit reason;
+it never reads or serializes the API credential. Predeclared conditions are in
+`docs/pilot_stop_conditions.md`.

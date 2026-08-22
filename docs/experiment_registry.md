@@ -17,14 +17,18 @@ as a diagnostic; it is not the bounded e-process input. The locked transform ver
 
 ## Candidate inventory (not promotion records)
 
+Every incomplete candidate below is `RESEARCH_BLOCKED`, not a
+`DEPLOYMENT_BLOCKER`: the coverage matrix records a separate intentional executable
+incumbent for every reachable cell. These statuses do not authorize promotion.
+
 The following implemented candidates remain **not leaderboard-eligible** until a completed
 experiment row with all required fields records promotion and same-cell confirmation:
 
 | Family/cell | Incumbent | Candidate | Status |
 |---|---|---|---|
-| Bargaining/all | cell theory | fairness-0.10 | NOT TESTED |
-| Negotiation/complete finite | cell theory | fairness-margin-0.15 | NOT TESTED |
-| Negotiation/complete unlimited | midpoint | own-favorable-0.65 | NOT TESTED |
-| Negotiation/incomplete T=1 | BAYES/ROBUST theory | empirical correction | NOT TESTED |
-| Negotiation/incomplete multi-round | ROBUST (current data gate) | EMPIRICAL | BLOCKED: no supported artifact |
-| Persuasion/repeated | P0 babbling | P3 reputation | BLOCKED: historical cell trust rate unavailable |
+| Bargaining/all | cell incumbent | fairness-0.10 | NOT_YET_BUILT + RESEARCH_BLOCKED: not tested/promoted |
+| Negotiation/complete finite | cell theory | fairness-margin-0.15 | NOT_YET_BUILT + RESEARCH_BLOCKED: not tested/promoted |
+| Negotiation/complete unlimited | midpoint | own-favorable-0.65 | NOT_YET_BUILT + RESEARCH_BLOCKED: not tested/promoted |
+| Negotiation/incomplete T=1 | current ROBUST | empirical correction | NOT_YET_BUILT + RESEARCH_BLOCKED: no trusted prior/promotion |
+| Negotiation/incomplete multi-round | ROBUST (current data gate) | BAYES / EMPIRICAL | BLOCKED + RESEARCH_BLOCKED: no supported artifact |
+| Persuasion/repeated | P0 babbling | P3 reputation | BLOCKED + RESEARCH_BLOCKED: historical cell trust rate unavailable |
