@@ -11,7 +11,7 @@ from typing import Any
 
 from glee.retry import fallback_action, sanitize_action
 from policies.negotiation.bayes import BayesEligibility
-from policies.negotiation.robust import evenly_spaced_grid, minimax_regret_price
+from policies.negotiation.robust import robust_negotiation_action
 from policies.persuasion.babbling import babbling_buyer_buys
 from theory.bargaining.baselines import (
     bayes_adaptive_reference,
@@ -345,45 +345,24 @@ def _explicit_legal_price_grid(game: Mapping[str, Any]) -> tuple[float, ...]:
                 return result
         bounds = _range_values(field)
         if bounds:
-            return evenly_spaced_grid(*bounds)
+            return _evenly_spaced_grid(*bounds)
     state = game["game_state"]
     bounds = _range_values(state.get("legal_price_range"))
     if bounds:
-        return evenly_spaced_grid(*bounds)
+        return _evenly_spaced_grid(*bounds)
     if isinstance(state.get("price_min"), (int, float)) and isinstance(state.get("price_max"), (int, float)):
         bounds = _range_values({"min": state["price_min"], "max": state["price_max"]})
         if bounds:
-            return evenly_spaced_grid(*bounds)
+            return _evenly_spaced_grid(*bounds)
     raise PolicyInputsUnavailable("verified legal price grid is not exposed")
 
 
-def _explicit_opponent_value_grid(game: Mapping[str, Any]) -> tuple[float, ...]:
-    state = game["game_state"]
-    bounds = _range_values(state.get("opponent_valuation_range"))
-    if not bounds:
-        me = str(state.get("current_player", ""))
-        opponent = "player_2" if me == "player_1" else "player_1"
-        bounds = _range_values(state.get(f"{opponent}_value_range"))
-    if not bounds:
-        raise PolicyInputsUnavailable("verified opponent valuation range is not exposed")
-    return evenly_spaced_grid(*bounds)
-
-
-def robust_negotiation_action(game: dict[str, Any]) -> dict[str, Any]:
-    """Execute static minimax regret only from explicitly exposed mechanism grids."""
-    state = game["game_state"]
-    me = str(state["current_player"])
-    role = str(state[f"{me}_role"])
-    own_value = float(state[f"{me}_value"])
-    if game["valid_actions"]["type"] == "decision":
-        return _negotiation_decision(game, role, own_value, counter_policy=robust_negotiation_action)
-    price = minimax_regret_price(
-        role=role,
-        own_value=own_value,
-        legal_prices=_explicit_legal_price_grid(game),
-        opponent_values=_explicit_opponent_value_grid(game),
-    )
-    return {"product_price": price}
+def _evenly_spaced_grid(minimum: float, maximum: float, points: int = 5) -> tuple[float, ...]:
+    """Finite grid used only by the trusted-prior T=1 numerical optimizer."""
+    if points < 2 or maximum <= minimum:
+        raise ValueError("a nondegenerate grid needs at least two points")
+    step = (maximum - minimum) / (points - 1)
+    return tuple(minimum + index * step for index in range(points))
 
 
 def bargaining_theory_action(game: dict[str, Any]) -> dict[str, Any]:

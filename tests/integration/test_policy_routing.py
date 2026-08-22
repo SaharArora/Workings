@@ -114,12 +114,21 @@ def test_missing_eligibility_record_selects_robust_without_claiming_ineligible()
     assert route.fallback_reason == "BAYES_ELIGIBILITY_UNAVAILABLE"
 
 
-def test_robust_without_verified_grids_fails_closed_without_changing_route() -> None:
+def test_robust_runs_without_finite_legal_price_maximum() -> None:
     game = negotiation_game(complete=False, rounds=None)
     action, route = PolicyRouter().decide_with_routing(game)
     assert route.selected_policy == "NEGOTIATION_ROBUST"
-    assert route.execution_fallback_reason.startswith("PolicyInputsUnavailable")
-    assert action == {"product_price": 10.0}
+    assert route.execution_fallback_reason is None
+    assert action == {"product_price": 15.0}
+
+
+def test_robust_zero_value_logs_scale_unavailable_and_fails_closed() -> None:
+    game = negotiation_game(complete=False, rounds=None)
+    game["game_state"]["player_1_value"] = 0
+    action, route = PolicyRouter().decide_with_routing(game)
+    assert route.selected_policy == "NEGOTIATION_ROBUST"
+    assert "ROBUST_SCALE_UNAVAILABLE" in route.execution_fallback_reason
+    assert action == {"product_price": 0}
 
 
 def test_empirical_unavailable_does_not_displace_robust() -> None:
