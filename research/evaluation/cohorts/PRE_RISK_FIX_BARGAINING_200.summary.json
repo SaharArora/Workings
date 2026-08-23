@@ -1,0 +1,55 @@
+{
+  "cohort_id": "PRE_RISK_FIX_BARGAINING_200",
+  "end_time": "2026-08-23T02:34:05.924066+00:00",
+  "evidence_class": "OBSERVATIONAL_LIVE_EVIDENCE",
+  "experiment_assignments": {},
+  "family": "bargaining",
+  "frozen_commits": [
+    "ea14b494a0f491f91dce2d05451b0bc90ea3313f",
+    "fa6a60ea6b80f54e422376edeb38c31de8954f0a"
+  ],
+  "game_count": 200,
+  "manifest_path": "research/evaluation/cohorts/PRE_RISK_FIX_BARGAINING_200.jsonl",
+  "manifest_sha256": "7c98e02e7dbf60e56c304a472087ef3b54759c9c22c97df4fbc9f306e0b09dd9",
+  "policy_map": {
+    "BARGAINING_FAIRNESS": 111,
+    "BARGAINING_INCOMPLETE_EQUAL_SPLIT": 89
+  },
+  "promotion_eprocess_eligible_games": 0,
+  "randomized_game_count": 0,
+  "reason": "NO_PRETREATMENT_RANDOMIZED_ASSIGNMENT",
+  "source_logs": [
+    {
+      "end_time": "2026-08-23T01:09:02.293996+00:00",
+      "frozen_commits": [
+        "fa6a60ea6b80f54e422376edeb38c31de8954f0a"
+      ],
+      "path": "research/evaluation/leaderboard_live_bargaining_200_20260822.jsonl",
+      "sha256": "e118a85652de98827081c74520b51b7380fff9ba70abb63f904782c04661597d",
+      "start_time": "2026-08-23T01:02:32.216533+00:00"
+    },
+    {
+      "end_time": "2026-08-23T01:14:40.582516+00:00",
+      "frozen_commits": [
+        "ea14b494a0f491f91dce2d05451b0bc90ea3313f"
+      ],
+      "path": "research/evaluation/leaderboard_live_bargaining_200_20260822_part2.jsonl",
+      "sha256": "149b080f972ace9becc56dc948db931d4870c0637fbf254e6c67b9956b5daefe",
+      "start_time": "2026-08-23T01:12:15.862092+00:00"
+    },
+    {
+      "end_time": "2026-08-23T02:34:05.924066+00:00",
+      "frozen_commits": [
+        "ea14b494a0f491f91dce2d05451b0bc90ea3313f"
+      ],
+      "path": "research/evaluation/leaderboard_live_bargaining_200_20260822_part3.jsonl",
+      "sha256": "abe603b5bd4aaf20ca385cb0c01f30bbb9d18e1ec1424ff90968e43543c3862d",
+      "start_time": "2026-08-23T01:20:11.273221+00:00"
+    }
+  ],
+  "start_time": "2026-08-23T01:02:32.216533+00:00",
+  "trace_status_counts": {
+    "COMPLETE_TERMINAL_TRACE": 199,
+    "MISSING_TERMINAL_TRACE": 1
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "cohort_id": "PRE_RISK_FIX_NEGOTIATION_INTERRUPT_4",
+  "end_time": "2026-08-23T01:19:52.216364+00:00",
+  "evidence_class": "OBSERVATIONAL_LIVE_EVIDENCE",
+  "experiment_assignments": {},
+  "family": "negotiation",
+  "frozen_commits": [
+    "ea14b494a0f491f91dce2d05451b0bc90ea3313f"
+  ],
+  "game_count": 4,
+  "manifest_path": "research/evaluation/cohorts/PRE_RISK_FIX_NEGOTIATION_INTERRUPT_4.jsonl",
+  "manifest_sha256": "d75c348526ca138cc1dd1ea73fb12baad7865e681c2a77b40be0d2bd6bdea08e",
+  "policy_map": {
+    "NEGOTIATION_FAIRNESS_MARGIN": 2,
+    "NEGOTIATION_INCOMPLETE_T1_ROBUST": 1,
+    "NEGOTIATION_ROBUST": 1
+  },
+  "promotion_eprocess_eligible_games": 0,
+  "randomized_game_count": 0,
+  "reason": "NO_PRETREATMENT_RANDOMIZED_ASSIGNMENT",
+  "source_logs": [
+    {
+      "end_time": "2026-08-23T01:16:52.222534+00:00",
+      "frozen_commits": [
+        "ea14b494a0f491f91dce2d05451b0bc90ea3313f"
+      ],
+      "path": "research/evaluation/leaderboard_live_negotiation_200_20260822.jsonl",
+      "sha256": "a15b9e7c71f17899965c643c7c9c9623c896a6ebd5fefa1dfaa6ce94a1af1a1f",
+      "start_time": "2026-08-23T01:15:01.993225+00:00"
+    },
+    {
+      "end_time": "2026-08-23T01:19:52.216364+00:00",
+      "frozen_commits": [
+        "ea14b494a0f491f91dce2d05451b0bc90ea3313f"
+      ],
+      "path": "research/evaluation/leaderboard_live_negotiation_interrupted_drain_20260822.jsonl",
+      "sha256": "efc21c35a97eb3a3d6fcfaca7a8a06fb7aa336592e6c4ad6d1ed7e227e4c6bc0",
+      "start_time": "2026-08-23T01:17:22.012467+00:00"
+    }
+  ],
+  "start_time": "2026-08-23T01:15:01.993225+00:00",
+  "trace_status_counts": {
+    "COMPLETE_TERMINAL_TRACE": 4
+  }
+}
