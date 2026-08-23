@@ -609,6 +609,7 @@ def run_pilot(
     poll_interval: float = 4.0,
     safety_timeout: float = 3_600.0,
     agent: LeaderboardAgent | None = None,
+    resume_existing: bool = False,
 ) -> PilotResult:
     recorder = PilotRecorder(
         client=client,
@@ -636,7 +637,9 @@ def run_pilot(
             safety_timeout=safety_timeout,
             experimental_override_registry=recorder.agent.router.experimental_overrides.contents(),
         )
-        if int(preflight_stats.get("active_games", 0)) != 0 or preflight_pending:
+        if (
+            int(preflight_stats.get("active_games", 0)) != 0 or preflight_pending
+        ) and not resume_existing:
             recorder.request_hard_stop("NON_IDLE_PREFLIGHT")
             raise RuntimeError("pilot requires no active or pending games")
         bounded = client.run_bounded(
@@ -649,6 +652,7 @@ def run_pilot(
             safety_timeout=safety_timeout,
             event_sink=recorder.supervisor_event,
             stop_requested=recorder.stop_requested,
+            resume_existing=resume_existing,
         )
     except BoundedRunTimeout:
         recorder.request_hard_stop("BOUNDED_SUPERVISOR_TIMEOUT")

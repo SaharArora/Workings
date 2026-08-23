@@ -58,6 +58,7 @@ def run_bounded(
     safety_timeout: float = 600.0,
     event_sink: EventSink | None = None,
     stop_requested: Callable[[], bool] | None = None,
+    resume_existing: bool = False,
     clock: Callable[[], float] = time.monotonic,
     sleep: Callable[[float], None] = time.sleep,
 ) -> BoundedRunResult:
@@ -118,9 +119,23 @@ def run_bounded(
     try:
         initial_pending = client.pending_games()
         initial_stats = client.stats()
-        if initial_pending or int(initial_stats.get("active_games", 0)) != 0:
+        initial_active = int(initial_stats.get("active_games", 0))
+        if (initial_pending or initial_active != 0) and not resume_existing:
             raise RuntimeError("bounded run requires an idle account with no pending games")
-        queue_once("initial")
+        if resume_existing:
+            if initial_active != len(initial_pending):
+                raise RuntimeError(
+                    "cannot safely resume games that are active but not currently actionable"
+                )
+            if len(initial_pending) > max_games:
+                raise RuntimeError("existing games exceed the bounded run limit")
+            for item in initial_pending:
+                payload = _payload(item)
+                if str(payload.get("game_family")) != family:
+                    raise RuntimeError("cannot resume a game from another family")
+            event("existing_games_adopted", game_ids=[str(_payload(item)["game_id"]) for item in initial_pending])
+        else:
+            queue_once("initial")
         event(
             "run_started",
             max_games=max_games,
@@ -159,9 +174,20 @@ def run_bounded(
             for game in pending_payloads:
                 game_id = str(game["game_id"])
                 if game_id not in tracked:
-                    if len(tracked) >= max_games or len(open_tracked) >= concurrency:
+                    if len(tracked) >= max_games:
                         event("unexpected_extra_game", game_id=game_id)
                         raise RuntimeError("server assigned a game beyond the bounded run limits")
+                    if len(open_tracked) >= concurrency:
+                        # The server may deliver a just-matched game before an older
+                        # terminal game has disappeared from local pending state.  The
+                        # match already exists, so refusing to adopt it strands a live
+                        # game.  Drain it safely, but do not issue an extra queue call.
+                        event(
+                            "server_concurrency_overshoot_adopted",
+                            game_id=game_id,
+                            open_tracked_games=len(open_tracked),
+                            concurrency=concurrency,
+                        )
                     tracked[game_id] = game
                     open_tracked.add(game_id)
                     # A match consumes the server-side queue entry. Keep this state

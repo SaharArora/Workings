@@ -229,6 +229,52 @@ def test_repeated_terminal_polling_never_double_counts() -> None:
     assert fake.submit_calls.count("g1") == 1
 
 
+def test_server_assigned_overlap_is_adopted_and_not_requeued() -> None:
+    g1, g2 = game("g1"), game("g2")
+    events: list[dict[str, Any]] = []
+    fake = FakeClient(
+        pending=[[], [g1], [g2]],
+        stats=[{"active_games": 0}, {"active_games": 1}, {"active_games": 0}],
+        submits={
+            "g1": [{"valid": True, "game_over": False}],
+            "g2": [{"valid": True, "game_over": True, "result": {}}],
+        },
+    )
+    result = run(fake, max_games=2, concurrency=1, events=events)
+    assert result.completed_game_ids == ("g1", "g2")
+    assert fake.queue_calls == ["negotiation"]
+    assert any(
+        event["event"] == "server_concurrency_overshoot_adopted"
+        for event in events
+    )
+
+
+def test_resume_adopts_existing_actionable_game_without_initial_queue() -> None:
+    existing = game("existing")
+    fake = FakeClient(
+        pending=[[existing], [existing]],
+        stats=[{"active_games": 1}, {"active_games": 0}],
+        submits={
+            "existing": [{"valid": True, "game_over": True, "result": {}}]
+        },
+    )
+    timer = FakeTime()
+    result = run_bounded(
+        fake,
+        lambda _: {"product_price": 10},
+        game_family="negotiation",
+        max_games=1,
+        requeue=True,
+        poll_interval=1,
+        safety_timeout=20,
+        resume_existing=True,
+        clock=timer.clock,
+        sleep=timer.sleep,
+    )
+    assert result.completed_game_ids == ("existing",)
+    assert fake.queue_calls == []
+
+
 def test_stop_request_leaves_queue_and_drains_without_requeue() -> None:
     events: list[dict[str, Any]] = []
     fake = FakeClient(
