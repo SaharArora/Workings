@@ -8,7 +8,13 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Mapping
 
-from eprocess.cohort import COHORT_ID, FAMILY_CAP, family_subcohort_id
+from eprocess.cohort import (
+    COHORT_ID,
+    FAMILY_CAP,
+    REPORTING_CHECKPOINTS,
+    family_subcohort_id,
+)
+from eprocess.reporting import write_family_dashboard
 from eprocess.store import CohortStore
 from glee.client import CompetitionClient
 from glee.normalization import (
@@ -40,6 +46,98 @@ def _terminal_result(terminal: Mapping[str, Any] | None) -> Mapping[str, Any]:
         return {}
     result = terminal.get("result")
     return result if isinstance(result, Mapping) else terminal
+
+
+def _price(value: Any) -> float | None:
+    if isinstance(value, (int, float)):
+        return float(value)
+    return None
+
+
+def negotiation_state_diagnostics(
+    game: Mapping[str, Any], action: Mapping[str, Any], *, role: str
+) -> dict[str, Any]:
+    """Extract treatment-neutral negotiation trajectory/support diagnostics."""
+    state = game.get("game_state", {})
+    me = str(game.get("your_player") or state.get("current_player") or "")
+    own_value = _price(state.get(f"{me}_value"))
+    own_offers: list[float] = []
+    opponent_offers: list[float] = []
+    history = state.get("history", [])
+    if isinstance(history, list):
+        for item in history:
+            if not isinstance(item, Mapping):
+                continue
+            offer = item.get("offer")
+            if isinstance(offer, Mapping):
+                price = _price(offer.get("price"))
+                if price is not None:
+                    (own_offers if str(offer.get("from_player")) == me else opponent_offers).append(price)
+            counter = _price(item.get("counteroffer"))
+            if counter is not None:
+                (own_offers if str(item.get("decided_by")) == me else opponent_offers).append(counter)
+    last = state.get("last_offer")
+    if isinstance(last, Mapping):
+        price = _price(last.get("price"))
+        if price is not None:
+            target = own_offers if str(last.get("from_player")) == me else opponent_offers
+            if not target or target[-1] != price:
+                target.append(price)
+    action_price = _price(action.get("product_price", action.get("counteroffer")))
+    scale = max(abs(own_value), 1.0) if own_value is not None else None
+    normalized_coordinate = None
+    if action_price is not None and own_value is not None and scale is not None:
+        normalized_coordinate = (
+            (action_price - own_value) / scale
+            if role == "seller"
+            else (own_value - action_price) / scale
+        )
+    concession = []
+    if own_offers:
+        first = own_offers[0]
+        concession = [
+            (first - value if role == "seller" else value - first)
+            for value in own_offers
+        ]
+    monotone = all(value >= 0 for value in concession) and all(
+        left <= right for left, right in zip(concession, concession[1:])
+    )
+    return {
+        "complete_information": state.get("complete_information"),
+        "role": role,
+        "horizon_known": state.get("horizon_known"),
+        "max_rounds": state.get("max_rounds"),
+        "messages_allowed": state.get("messages_allowed"),
+        "own_value": own_value,
+        "round": state.get("round"),
+        "own_offers": own_offers,
+        "opponent_offers": opponent_offers,
+        "first_opponent_offer": opponent_offers[0] if opponent_offers else None,
+        "best_opponent_offer": (
+            (max(opponent_offers) if role == "seller" else min(opponent_offers))
+            if opponent_offers else None
+        ),
+        "concession_trajectory": concession,
+        "asks_monotonically_conceded": monotone if own_offers else None,
+        "action_price": action_price,
+        "normalized_action_coordinate": normalized_coordinate,
+        "action_markup_over_own_value": (
+            action_price - own_value
+            if action_price is not None and own_value is not None and role == "seller"
+            else None
+        ),
+        "offer_fraction_of_own_value": (
+            action_price / own_value
+            if action_price is not None and own_value not in {None, 0} and role == "buyer"
+            else None
+        ),
+        "nearby_historical_support_count": None,
+        "effective_support_density": None,
+        "empirical_local_acceptance_rate": None,
+        "pooled_model_predicted_acceptance": None,
+        "support_diagnostic_reason": "POOLED_NEGOTIATION_POLICY_PAUSED_NOT_EVALUATED_ON_LIVE_ACTION",
+        "mechanism_price_domain": "UNBOUNDED_ABOVE",
+    }
 
 
 def bounded_payoff(
@@ -123,6 +221,7 @@ class CohortRecorder:
         self.agent = agent
         self.game_metadata: dict[str, dict[str, Any]] = {}
         self.invalid_games: dict[str, str] = {}
+        self.emitted_checkpoints = store.emitted_checkpoints(family)
 
     def close(self) -> None:
         self._stream.close()
@@ -187,6 +286,11 @@ class CohortRecorder:
         if route.selected_policy == "SAFE_LEGAL_FALLBACK":
             self._invalidate(game_id, "UNSUPPORTED_CELL", routing=route.structured())
         current_assignment = self.store.assignment(game_id)
+        negotiation_diagnostics = (
+            negotiation_state_diagnostics(game, action, role=assignment.role)
+            if self.family == "negotiation"
+            else None
+        )
         self.write(
             "policy_decision",
             game_id=game_id,
@@ -203,6 +307,7 @@ class CohortRecorder:
             valid_actions=game.get("valid_actions"),
             routing=route.structured(),
             action=action,
+            negotiation_diagnostics=negotiation_diagnostics,
             latency_seconds={
                 "parsing": diagnostics.parsing_seconds,
                 "routing_policy": diagnostics.routing_policy_seconds,
@@ -239,6 +344,43 @@ class CohortRecorder:
                 reason=str(event.get("completion_reason", "UNKNOWN")),
             )
             self._record_completion(event)
+            self._maybe_checkpoint()
+
+    def _maybe_checkpoint(self) -> None:
+        completed = self.store.family_counts(self.family)["completed"]
+        for checkpoint in REPORTING_CHECKPOINTS:
+            if completed < checkpoint or checkpoint in self.emitted_checkpoints:
+                continue
+            try:
+                stats = dict(self.client.stats())
+                stats["pending_games"] = len(self.client.pending_games())
+                self.store.record_family_checkpoint(
+                    self.family, checkpoint=checkpoint, stats=stats
+                )
+                path = write_family_dashboard(
+                    self.store,
+                    family=self.family,
+                    output_dir=self.output_path.parent,
+                    stats=stats,
+                    log_path=self.output_path,
+                    checkpoint=checkpoint,
+                )
+                self.emitted_checkpoints.add(checkpoint)
+                self.write(
+                    "reporting_checkpoint",
+                    checkpoint=checkpoint,
+                    completed_games=completed,
+                    dashboard_path=str(path),
+                    inspection_is_read_only=True,
+                )
+            except Exception as exc:
+                # Reporting must never change allocation or interrupt a safe family run.
+                self.write(
+                    "reporting_checkpoint_error",
+                    checkpoint=checkpoint,
+                    completed_games=completed,
+                    error_type=type(exc).__name__,
+                )
 
     def _record_completion(self, event: Mapping[str, Any]) -> None:
         game_id = str(event.get("game_id"))
@@ -299,6 +441,31 @@ class CohortRecorder:
             valid_trace=valid,
             exclusion_reason=exclusion,
             evidence_update=evidence_update,
+            negotiation_terminal_diagnostics=(
+                {
+                    "agreed_price": result.get(
+                        "agreed_price", result.get("product_price", result.get("price"))
+                    ),
+                    "rounds_played": result.get(
+                        "rounds_played", result.get("round", terminal.get("round"))
+                    ),
+                    "agreement": outcome in {"agreement", "accepted", "deal"},
+                    "no_deal": outcome in {"no_deal", "no-deal", "timeout"},
+                    "walkaway": "walk" in outcome,
+                    "final_agreement_margin": (
+                        float(result.get("agreed_price", result.get("product_price", result.get("price"))))
+                        - float(assignment.exact_configuration.get("player_1_value"))
+                        if self.family == "negotiation"
+                        and assignment is not None
+                        and assignment.role == "seller"
+                        and isinstance(result.get("agreed_price", result.get("product_price", result.get("price"))), (int, float))
+                        and isinstance(assignment.exact_configuration.get("player_1_value"), (int, float))
+                        else None
+                    ),
+                }
+                if self.family == "negotiation"
+                else None
+            ),
         )
 
 
@@ -331,6 +498,9 @@ def run_cohort_family(
         )
     if counts["tracked"] and not resume:
         raise RuntimeError("existing family cohort state requires --resume")
+    preflight_stats = dict(client.stats())
+    preflight_stats["pending_games"] = len(preflight_pending)
+    store.start_family_run(family, family_cap=FAMILY_CAP, stats=preflight_stats)
     remaining_completions = FAMILY_CAP - counts["completed"]
     if remaining_completions == 0:
         store.close_running_experiments(family)
@@ -369,6 +539,7 @@ def run_cohort_family(
             requeue=True,
             poll_interval=poll_interval,
             safety_timeout=safety_timeout,
+            stats=preflight_stats,
         )
         bounded = client.run_bounded(
             recorder.strategy,
@@ -382,6 +553,51 @@ def run_cohort_family(
             resume_existing=bool(preflight_pending),
             allow_other_active_families=True,
         )
+        final_counts = store.family_counts(family)
+        if final_counts["tracked"] > FAMILY_CAP:
+            raise RuntimeError("family live-game cap was exceeded")
+        if final_counts["completed"] != FAMILY_CAP:
+            raise RuntimeError(
+                f"family executor exited without exact completion: {final_counts['completed']}/{FAMILY_CAP}"
+            )
+        store.close_running_experiments(family)
+        final_stats = dict(client.stats())
+        final_stats["pending_games"] = len(client.pending_games())
+        store.complete_family_run(family, status="COMPLETED_EXACT_CAP", stats=final_stats)
+        final_dashboard = write_family_dashboard(
+            store,
+            family=family,
+            output_dir=output_path.parent,
+            stats=final_stats,
+            log_path=output_path,
+            checkpoint=None,
+        )
+        recorder.write(
+            "family_completed",
+            family_counts=final_counts,
+            exit_reason=bounded.exit_reason,
+            dashboard_path=str(final_dashboard),
+            stats=final_stats,
+        )
+    except Exception as exc:
+        failure_stats: dict[str, Any] = {}
+        try:
+            failure_stats = dict(client.stats())
+            failure_stats["pending_games"] = len(client.pending_games())
+        except Exception:
+            pass
+        store.complete_family_run(
+            family,
+            status=f"OPERATIONAL_FAILURE:{type(exc).__name__}",
+            stats=failure_stats,
+        )
+        recorder.write(
+            "family_operational_failure",
+            error_type=type(exc).__name__,
+            family_counts=store.family_counts(family),
+            stats=failure_stats,
+        )
+        raise
     finally:
         try:
             client.leave_queue(family)
@@ -390,10 +606,6 @@ def run_cohort_family(
     if bounded is None:
         raise RuntimeError("family cohort supervisor did not start")
     final_counts = store.family_counts(family)
-    if final_counts["tracked"] > FAMILY_CAP:
-        raise RuntimeError("family live-game cap was exceeded")
-    if final_counts["completed"] >= FAMILY_CAP:
-        store.close_running_experiments(family)
     return CohortFamilyResult(
         COHORT_ID,
         family_subcohort_id(family),

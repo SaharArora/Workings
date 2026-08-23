@@ -676,7 +676,19 @@ is unavailable.
   caps, and experiment-level terminal status. Tests cover concurrent duplicate assignment,
   assignment invariance to later state, double terminal polling, resolved-experiment
   observational reversion, noninformative buyer actions, artifact failure, exact routing,
-  transforms, safety pause, and lifecycle cap.
+  transforms, safety pause, lifecycle cap, concurrent three-family writes, deterministic
+  replay of both e-processes, immutable multiplicity metadata, and explicit 100/150/400
+  experiment-resolution scenarios that still complete exactly 1,000 family games.
+
+- **item:** Exploration confirmation and completed authorization semantics.
+- **result:** `IMPLEMENTED`; `NOT YET RUN LIVE`.
+- **evidence:** Every exploration has a frozen `CONFIRM_...` row using fresh games,
+  `M=1`, threshold 20, and independent e-process state. Exploration crossing both gates
+  becomes `PROMOTION_CANDIDATE`; only confirmation may promote. The safety layer now
+  matches the completed prompt: first five challenger outcomes all bad, or
+  `n_challenger>=8` with bad rate strictly above .75, plus immediate integrity pauses.
+  Read-only checkpoint/final reporting includes effective n, distributions, opponent and
+  structural strata, operational events, and negotiation trajectory diagnostics.
 
 - **item:** Pooled persuasion seller action readiness.
 - **result:** `VERIFIED` for the registered bounded challenger.
@@ -687,8 +699,9 @@ is unavailable.
   on P0 observationally.
 
 - **item:** New live cohort launch gate.
-- **result:** `BLOCKED` pending complete task text; no queues joined.
-- **evidence:** Both supplied attachment paths are byte-identical and terminate in §18 at
-  “Do not retrospectively”. Because the missing tail may contain additional multiplicity,
-  safety, preflight, or reporting requirements, launch under the final cohort ID would be
-  irreversible and is not inferred. All fully available requirements are implemented.
+- **result:** `IMPLEMENTED`; final test/security/API/dry-run preflight remains before queue join.
+- **evidence:** The complete 47-section authorization was supplied. Its sections 19–47
+  resolve the former text blocker and explicitly authorize exactly 1,000 new games in
+  each family concurrently. No live post-risk-fix cohort state exists yet; launch remains
+  contingent on a clean pushed frozen commit, full green suite, idle API state, secret
+  scan, artifact/policy loads, and three executor dry runs.

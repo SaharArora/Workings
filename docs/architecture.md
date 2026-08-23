@@ -363,3 +363,24 @@ The persuasion router now exposes two exact buyer arms (weak EV threshold and lo
 margin) and the frozen non-P3 pooled seller artifact. Missing/corrupt seller artifacts
 leave P0 active and are recorded as evidence failures. Negotiation pooled empirical
 selectors remain paused and are not reachable through this cohort registry.
+
+The completed authorization adds a predeclared fresh-data confirmation row for every
+exploration. Crossing exploration evidence and effect gates sets
+`PROMOTION_CANDIDATE` and activates `CONFIRM_<experiment_id>`; confirmation retains the
+same treatment and eligibility but uses `M=1` and threshold 20. Only confirmation can
+set `PROMOTE`. Retention, safety pause, or inconclusion returns later eligible games to
+the authorized incumbent observationally while lifecycle execution continues.
+
+Safety is independent of statistical promotion: a challenger pauses if its first five
+valid challenger outcomes are all `BAD_OUTCOME`, or after at least eight challenger
+outcomes when its bad rate is strictly above 0.75. Invalid actions, policy/artifact
+failures, unsupported states, cycle-guard failures, action failures, and assignment
+corruption pause immediately. The game still counts toward the exact family lifecycle
+cap but is excluded from e-process evidence.
+
+Checkpoint dashboards at 200/500/750 and family-final reports query the evidence store
+without mutating assignment or policy state. They expose effective n, raw and bounded
+distributions, both e-processes, clipping, structural/opponent strata, ratings, and
+operational events. Negotiation state logs additionally preserve its offer/concession
+trajectory and explicitly mark pooled support fields unavailable when that paused policy
+is not evaluated.
