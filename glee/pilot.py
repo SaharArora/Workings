@@ -610,6 +610,7 @@ def run_pilot(
     safety_timeout: float = 3_600.0,
     agent: LeaderboardAgent | None = None,
     resume_existing: bool = False,
+    allow_other_active_families: bool = False,
 ) -> PilotResult:
     recorder = PilotRecorder(
         client=client,
@@ -637,8 +638,20 @@ def run_pilot(
             safety_timeout=safety_timeout,
             experimental_override_registry=recorder.agent.router.experimental_overrides.contents(),
         )
+        family_pending = [
+            item
+            for item in preflight_pending
+            if item.to_strategy_payload().get("game_family") == family
+        ]
         if (
-            int(preflight_stats.get("active_games", 0)) != 0 or preflight_pending
+            family_pending
+            or (
+                not allow_other_active_families
+                and (
+                    int(preflight_stats.get("active_games", 0)) != 0
+                    or preflight_pending
+                )
+            )
         ) and not resume_existing:
             recorder.request_hard_stop("NON_IDLE_PREFLIGHT")
             raise RuntimeError("pilot requires no active or pending games")
@@ -653,6 +666,7 @@ def run_pilot(
             event_sink=recorder.supervisor_event,
             stop_requested=recorder.stop_requested,
             resume_existing=resume_existing,
+            allow_other_active_families=allow_other_active_families,
         )
     except BoundedRunTimeout:
         recorder.request_hard_stop("BOUNDED_SUPERVISOR_TIMEOUT")
@@ -664,7 +678,7 @@ def run_pilot(
         raise
     finally:
         try:
-            client.leave_queue()
+            client.leave_queue(family)
         except Exception as exc:
             recorder.request_hard_stop("QUEUE_CLEANUP_FAILED", error_type=type(exc).__name__)
         try:

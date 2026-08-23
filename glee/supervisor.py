@@ -59,6 +59,7 @@ def run_bounded(
     event_sink: EventSink | None = None,
     stop_requested: Callable[[], bool] | None = None,
     resume_existing: bool = False,
+    allow_other_active_families: bool = False,
     clock: Callable[[], float] = time.monotonic,
     sleep: Callable[[float], None] = time.sleep,
 ) -> BoundedRunResult:
@@ -117,13 +118,30 @@ def run_bounded(
         event("queue_joined", reason=reason, queue_calls=queue_calls)
 
     try:
-        initial_pending = client.pending_games()
+        initial_pending_all = client.pending_games()
+        initial_pending = [
+            item
+            for item in initial_pending_all
+            if str(_payload(item).get("game_family")) == family
+        ]
         initial_stats = client.stats()
         initial_active = int(initial_stats.get("active_games", 0))
-        if (initial_pending or initial_active != 0) and not resume_existing:
+        initial_family_games = int(
+            initial_stats.get("scores", {}).get(family, {}).get("games_played", 0)
+        )
+        if (
+            initial_pending
+            or (
+                not allow_other_active_families
+                and (initial_active != 0 or len(initial_pending_all) != 0)
+            )
+        ) and not resume_existing:
             raise RuntimeError("bounded run requires an idle account with no pending games")
         if resume_existing:
-            if initial_active != len(initial_pending):
+            if (
+                not allow_other_active_families
+                and initial_active != len(initial_pending)
+            ):
                 raise RuntimeError(
                     "cannot safely resume games that are active but not currently actionable"
                 )
@@ -161,7 +179,11 @@ def run_bounded(
 
             try:
                 pending_items = client.pending_games()
-                pending_payloads = [_payload(item) for item in pending_items]
+                pending_payloads = [
+                    _payload(item)
+                    for item in pending_items
+                    if str(_payload(item).get("game_family")) == family
+                ]
             except Exception as exc:
                 event("poll_error", operation="pending_games", error_type=type(exc).__name__)
                 sleep(poll_interval)
@@ -237,14 +259,26 @@ def run_bounded(
             try:
                 stats = client.stats()
                 active_games = int(stats.get("active_games", 0))
+                family_games = int(
+                    stats.get("scores", {}).get(family, {}).get("games_played", 0)
+                )
             except Exception as exc:
                 event("poll_error", operation="stats", error_type=type(exc).__name__)
                 sleep(poll_interval)
                 continue
 
-            if active_games == 0:
-                for game_id in tracked:
-                    if game_id not in completed and game_id not in pending_last_poll:
+            authoritative_family_completions = max(
+                0, family_games - initial_family_games
+            )
+            for game_id in tracked:
+                if (
+                    game_id not in completed
+                    and game_id not in pending_last_poll
+                    and (
+                        active_games == 0
+                        or authoritative_family_completions > len(completed)
+                    )
+                ):
                         mark_completed(game_id, "DISAPPEARED_AFTER_TRACKING")
 
             # A stop may be requested by an action-result or game-completion event in
@@ -260,18 +294,27 @@ def run_bounded(
                 event("run_exiting", reason=exit_reason, completed_games=len(completed))
                 break
 
-            if stopping and active_games == 0 and all(game_id in completed for game_id in tracked):
+            if stopping and all(game_id in completed for game_id in tracked):
                 exit_reason = "STOP_REQUESTED"
                 event("run_exiting", reason=exit_reason, completed_games=len(completed))
                 break
 
-            if requeue and not stopping and not queue_open and len(tracked) < max_games and active_games < concurrency:
+            open_tracked_now = {
+                game_id for game_id in tracked if game_id not in completed
+            }
+            if (
+                requeue
+                and not stopping
+                and not queue_open
+                and len(tracked) < max_games
+                and len(open_tracked_now) < concurrency
+            ):
                 queue_once("bounded_top_up")
 
             sleep(poll_interval)
     finally:
         try:
-            client.leave_queue()
+            client.leave_queue(family)
             event("queue_cleanup", success=True)
         except Exception as exc:
             event("queue_cleanup", success=False, error_type=type(exc).__name__)

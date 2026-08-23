@@ -208,7 +208,7 @@ def test_cleanup_always_leaves_queue_on_timeout() -> None:
             requeue=False, poll_interval=1, safety_timeout=2,
             clock=timer.clock, sleep=timer.sleep,
         )
-    assert fake.leave_calls[-1] is None
+    assert fake.leave_calls[-1] == "negotiation"
 
 
 def test_repeated_terminal_polling_never_double_counts() -> None:
@@ -273,6 +273,44 @@ def test_resume_adopts_existing_actionable_game_without_initial_queue() -> None:
     )
     assert result.completed_game_ids == ("existing",)
     assert fake.queue_calls == []
+
+
+def test_parallel_family_pending_is_ignored_and_cleanup_is_family_scoped() -> None:
+    other = game("other")
+    other["game_family"] = "bargaining"
+    target = game("target")
+    fake = FakeClient(
+        pending=[[other], [other, target]],
+        stats=[
+            {
+                "active_games": 1,
+                "scores": {"negotiation": {"games_played": 10}},
+            },
+            {
+                "active_games": 1,
+                "scores": {"negotiation": {"games_played": 11}},
+            },
+        ],
+        submits={
+            "target": [{"valid": True, "game_over": True, "result": {}}]
+        },
+    )
+    timer = FakeTime()
+    result = run_bounded(
+        fake,
+        lambda _: {"product_price": 10},
+        game_family="negotiation",
+        max_games=1,
+        requeue=True,
+        poll_interval=1,
+        safety_timeout=20,
+        allow_other_active_families=True,
+        clock=timer.clock,
+        sleep=timer.sleep,
+    )
+    assert result.completed_game_ids == ("target",)
+    assert fake.submit_calls == ["target"]
+    assert fake.leave_calls[-1] == "negotiation"
 
 
 def test_stop_request_leaves_queue_and_drains_without_requeue() -> None:

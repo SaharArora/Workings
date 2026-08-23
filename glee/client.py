@@ -99,6 +99,7 @@ class CompetitionClient:
         event_sink: Callable[[dict[str, Any]], None] | None = None,
         stop_requested: Callable[[], bool] | None = None,
         resume_existing: bool = False,
+        allow_other_active_families: bool = False,
     ) -> Any:
         """Use authoritative state tracking for finite runs instead of SDK counters."""
         from glee.supervisor import run_bounded
@@ -115,4 +116,5 @@ class CompetitionClient:
             event_sink=event_sink,
             stop_requested=stop_requested,
             resume_existing=resume_existing,
+            allow_other_active_families=allow_other_active_families,
         )
