@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 
 from eprocess.store import CohortStore
-from eprocess.reporting import family_dashboard, preflight_payload
+from eprocess.reporting import combined_final_payload, family_dashboard, preflight_payload
 from glee.cohort_runtime import CohortRecorder, bounded_payoff
 from leaderboard.agent import LeaderboardAgent
 from leaderboard.cohort_overrides import CohortOverrideRegistry
@@ -206,6 +206,11 @@ def test_dashboard_is_read_only_and_exposes_effective_n_and_distributions(
         valid_trace=True,
     )
     store.record_completed_game("dashboard", reason="TEST")
+    store.complete_family_run(
+        "bargaining",
+        status="TRUNCATED_BY_USER_AT_1",
+        stats={"scores": {"bargaining": {"rating": 1501}}},
+    )
     before = store.snapshot()
     report = family_dashboard(
         store,
@@ -221,6 +226,9 @@ def test_dashboard_is_read_only_and_exposes_effective_n_and_distributions(
     assert after == before
     assert report["inspection_is_read_only"] is True
     assert report["completed_games"] == 1
+    assert report["target_completed"] == 1000
+    assert report["target_met"] is False
+    assert report["family_run_status"] == "TRUNCATED_BY_USER_AT_1"
     assert report["rating_change"] == pytest.approx(1)
     experiment = next(
         item
@@ -246,3 +254,37 @@ def test_preflight_report_declares_every_experiment_and_prior_evidence() -> None
         "confirmation",
     }
     assert all("bad_outcome_definition" in item for item in payload["experiments"])
+
+
+def test_combined_report_labels_user_truncation_and_shortfall(tmp_path: Path) -> None:
+    store = CohortStore(tmp_path / "partial.sqlite3", frozen_commit="frozen")
+    store.initialize()
+    stats = {
+        "active_games": 0,
+        "pending_games": 0,
+        "scores": {
+            family: {"rating": 1500, "games_played": 1}
+            for family in ("bargaining", "negotiation", "persuasion")
+        },
+    }
+    for family in ("bargaining", "negotiation", "persuasion"):
+        store.start_family_run(family, family_cap=1, stats=stats)
+    for family in ("bargaining", "negotiation"):
+        store.record_tracked_game(f"{family}-1", family=family, family_cap=1)
+        store.record_completed_game(f"{family}-1", reason="TEST")
+        store.complete_family_run(family, status="COMPLETED_EXACT_CAP", stats=stats)
+    store.complete_family_run(
+        "persuasion", status="TRUNCATED_BY_USER_AT_0", stats=stats
+    )
+
+    payload = combined_final_payload(store, stats=stats, log_paths={})
+
+    assert payload["cohort_completion_status"] == "TRUNCATED_BY_USER"
+    assert payload["frozen_cohort_commit"] == "frozen"
+    assert payload["total_target_games"] == 3
+    assert payload["total_completed_new_games"] == 2
+    assert payload["completion_shortfall_by_family"] == {
+        "bargaining": 0,
+        "negotiation": 0,
+        "persuasion": 1,
+    }

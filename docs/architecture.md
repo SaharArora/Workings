@@ -384,3 +384,12 @@ distributions, both e-processes, clipping, structural/opponent strata, ratings, 
 operational events. Negotiation state logs additionally preserve its offer/concession
 trajectory and explicitly mark pooled support fields unavailable when that paused policy
 is not evaluated.
+
+Final reporting reads the persisted `family_runs.final_status` rather than inferring
+completion from the report filename. It records the original per-family target, actual
+completion, target-met flag, run timestamps, and any per-family shortfall. A human-requested
+early stop is therefore rendered as `TRUNCATED_BY_USER`; unresolved experiment rows keep
+their last statistical state and are not silently converted to `INCONCLUSIVE` or
+`PROMOTE`. Live report generation augments `stats()` with an authoritative
+`pending_games()` count so shutdown is reported as explicit zero rather than an absent
+field.
