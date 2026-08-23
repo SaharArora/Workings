@@ -2,10 +2,10 @@
 
 Status: **IMPLEMENTED AND TESTED; LIVE LAUNCH NOT YET STARTED**.
 
-The attached task text available to this build is truncated after §18 at “Do not
-retrospectively”. The fully specified requirements through that point are implemented.
-No queue may be joined until the missing continuation is supplied or the user explicitly
-confirms that the truncated tail adds no further preflight, stopping, or reporting gate.
+The complete 47-section authorization is available. Sections 19–47 are incorporated
+below: fresh-data confirmation, the revised safety rule, read-only checkpoints,
+distribution/opponent diagnostics, exact family completion, final reporting, and queue
+shutdown are frozen before launch.
 
 ## Frozen cohort identity and budget
 
@@ -17,7 +17,7 @@ confirms that the truncated tail adds no further preflight, stopping, or reporti
   not a treatment or stratum.
 - Frozen commit: supplied as `--frozen-commit` and checked against `HEAD` by every
   executor before queueing. Tracked changes cause launch failure.
-- Registry hash: `f3b89f5b9566b9d9e48663c1dbf5004f379131c73f525905106a3cd7cc8dff82`.
+- Registry hash: `fd045b13c86e9071bfd0ee1fbfb458e7d6594b0bca4053022a3169e4fb383a52`.
 - Assignment: `system_csprng_bernoulli_half_atomic_sqlite_v1`, a fresh draw with
   `P(control)=P(challenger)=0.5` inside the assignment transaction.
 - Payoff transform registry version: `family_bounded_payoff_v1`.
@@ -38,6 +38,11 @@ versions, and game 1,001 even if strategy execution fails before an evidence row
 | `PERS_BUY_MARGIN_VS_THEORY` | weak EV threshold | 2% EV margin | 2 | .05/.025 | 40 |
 | `PERS_SELL_EMPIRICAL_VS_P0` | P0 | pooled empirical v1 | 2 | .05/.025 | 40 |
 
+Each exploration row has a separately predeclared `CONFIRM_<experiment_id>` row. A
+confirmation starts only after exploration reaches `PROMOTION_CANDIDATE`, consumes
+strictly fresh games, uses `M=1`, `alpha_test=.05`, and threshold 20, and retains the
+same control, challenger, eligibility, payoff transform, and practical-effect threshold.
+
 For every row, `delta_min=.01`. Multiplicity is fixed before launch and cannot be changed
 inside the cohort. The negotiation pooled/risk-sensitive selectors remain paused. P3
 remains blocked and is not the pooled persuasion seller experiment. Incomplete T=1
@@ -56,18 +61,40 @@ game. Eligibility uses only the exact configuration, structural cell, role, and 
 predeclared visible opponent category. Offers, messages, quality, history, current payoff,
 and future/terminal data cannot select an experiment or arm.
 
-An experiment has one of `RUNNING`, `PROMOTE`, `RETAIN`, `INCONCLUSIVE`, or
-`SAFETY_PAUSED`. `PROMOTE`, `RETAIN`, and `SAFETY_PAUSED` stop future randomized
+An experiment has one of `NOT_STARTED`, `RUNNING`, `PROMOTION_CANDIDATE`, `PROMOTE`,
+`RETAIN`, `INCONCLUSIVE`, `SAFETY_PAUSED`, or
+`RESOLVED_OBSERVATIONAL_FALLBACK`. `PROMOTE`, `RETAIN`, and `SAFETY_PAUSED` stop future randomized
 allocation immediately; future eligible games use another running experiment or the
 production incumbent observationally. Active games never switch arms. At the family cap,
 remaining running experiments become `INCONCLUSIVE`.
 
-Promotion requires `E_t >= 1/alpha_test` and transformed mean effect greater than .01.
+Exploration evidence meeting `E_t >= 1/alpha_test` and transformed mean effect greater
+than .01 creates `PROMOTION_CANDIDATE`; only a fresh confirmation satisfying both rules
+becomes `PROMOTE`.
 Retention requires the mirror e-process to cross the same threshold. Predeclared safety
-pauses are: a fallback/invalid/incomplete randomized trace; the first three valid
-challenger outcomes all bad; or, after at least three challenger outcomes, challenger
-bad-outcome rate above one half. A safety pause affects its experiment, not unrelated
-family execution.
+pauses are: a fallback/invalid/incomplete randomized trace; the first five valid
+challenger outcomes all bad; or, once at least eight challenger outcomes exist,
+challenger bad-outcome rate strictly above 0.75. A safety pause affects its experiment,
+not unrelated family execution.
+
+## Family completion, dashboards, and reporting
+
+Experiment resolution never ends a family run. Each supervisor tops up one sequential
+slot until exactly 1,000 distinct games have been tracked, leaves the family queue before
+game 1,001 can be matched, drains its final tracked game, and requires exactly 1,000
+terminal lifecycle records. Resolved/paused cells become observational incumbent play;
+the next unresolved eligible experiment has priority, with lower effective randomized n
+as the payoff-blind tie-breaker at equal priority.
+
+At family completions 200, 500, and 750, the executor writes a read-only JSON dashboard
+and continues automatically. It includes ratings, randomized/observational/excluded
+counts, effective n, both e-values, both effects, clipping, bad-outcome rates,
+structural-cell and opponent strata, operational events, and projected eligibility by
+game 1,000. The dashboard cannot change assignment, policies, thresholds, or statistical
+state. Family-final and combined reports include payoff distributions and family-specific
+agreement/purchase/tail diagnostics. After 3,000 total completions, all queues are left,
+active/pending state is verified zero, reports are persisted, and no further cohort or
+sustained deployment begins automatically.
 
 ## Payoffs and evidence exclusions
 

@@ -112,3 +112,21 @@ The risk-sensitive negotiation selector uses a separate downside calculation:
 `BAD_OUTCOME` from raw negotiation payoff (`U<=0`) rather than from a universal threshold
 on `Y`. This corrected selector remains offline and paused; it is not an arm in the new
 cohort.
+
+## Exploration and fresh confirmation
+
+The same betting construction is used twice without sharing observations. Exploration
+uses its frozen within-family multiplicity (`M=1` or `M=2`). If and only if its main
+e-process crosses the exploration threshold and its transformed effect exceeds .01, it
+becomes `PROMOTION_CANDIDATE`; it does not promote directly. A separately predeclared
+`CONFIRM_<experiment_id>` then begins on subsequent fresh games with `M=1`,
+`alpha_test=.05`, and threshold 20. Confirmation reuses neither component wealth nor
+sample sums. Only confirmation crossing both statistical and practical gates produces
+`PROMOTE`. If the 1,000-game family window closes first, the candidate is recorded
+`PROMOTION_PENDING_CONFIRMATION` and the confirmation is `INCONCLUSIVE`.
+
+The safety process does not feed or redesign either e-process. It stops new challenger
+assignments when the first five valid challenger outcomes are all bad, or when
+`n_challenger>=8` and the raw-payoff bad-outcome rate is strictly greater than .75.
+Integrity failures pause immediately. Already completed rated games still count toward
+the family cap, while invalid/noninformative traces remain excluded from evidence.

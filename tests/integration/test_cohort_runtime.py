@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 
 from eprocess.store import CohortStore
+from eprocess.reporting import family_dashboard, preflight_payload
 from glee.cohort_runtime import CohortRecorder, bounded_payoff
 from leaderboard.agent import LeaderboardAgent
 from leaderboard.cohort_overrides import CohortOverrideRegistry
@@ -180,3 +181,68 @@ def test_lifecycle_cap_rejects_an_extra_tracked_game(tmp_path: Path) -> None:
     with pytest.raises(RuntimeError, match="cap"):
         store.record_tracked_game("two", family="bargaining", family_cap=1)
 
+
+def test_dashboard_is_read_only_and_exposes_effective_n_and_distributions(
+    tmp_path: Path,
+) -> None:
+    store = CohortStore(tmp_path / "dashboard.sqlite3", frozen_commit="frozen")
+    store.initialize()
+    store.start_family_run(
+        "bargaining",
+        family_cap=1000,
+        stats={"scores": {"bargaining": {"rating": 1500, "games_played": 10}}},
+    )
+    game = bargaining_game("dashboard")
+    store.record_tracked_game("dashboard", family="bargaining", family_cap=1000)
+    assignment = store.assign_game(
+        game, baseline_policy="BARGAINING_COMPLETE_FINITE"
+    )
+    store.record_outcome(
+        assignment.game_id,
+        raw_payoff=50,
+        bounded_payoff=0.5,
+        payoff_transform={"name": "test"},
+        terminal_outcome="agreement",
+        valid_trace=True,
+    )
+    store.record_completed_game("dashboard", reason="TEST")
+    before = store.snapshot()
+    report = family_dashboard(
+        store,
+        family="bargaining",
+        stats={
+            "active_games": 0,
+            "pending_games": 0,
+            "scores": {"bargaining": {"rating": 1501, "games_played": 11}},
+        },
+        checkpoint=200,
+    )
+    after = store.snapshot()
+    assert after == before
+    assert report["inspection_is_read_only"] is True
+    assert report["completed_games"] == 1
+    assert report["rating_change"] == pytest.approx(1)
+    experiment = next(
+        item
+        for item in report["experiments"]
+        if item["experiment_id"] == "BARG_COMPLETE_FAIRNESS_VS_THEORY"
+    )
+    assert experiment["randomized_games"] == 1
+    assert experiment["arm_distributions"][assignment.assigned_arm]["raw_payoff"]["n"] == 1
+
+
+def test_preflight_report_declares_every_experiment_and_prior_evidence() -> None:
+    payload = preflight_payload(
+        frozen_commit="frozen",
+        prior_bargaining={
+            "cohort_id": "PRE_RISK_FIX_BARGAINING_200",
+            "game_count": 200,
+        },
+    )
+    assert len(payload["experiments"]) == 10
+    assert payload["prior_bargaining_200"]["randomized_eligible_count"] == 0
+    assert {item["stage"] for item in payload["experiments"]} == {
+        "exploration",
+        "confirmation",
+    }
+    assert all("bad_outcome_definition" in item for item in payload["experiments"])

@@ -120,11 +120,14 @@ The samples remain descriptive. No challenger or incumbent is relabeled
 ## Post-risk-fix cohort registry (registered, not yet launched)
 
 The frozen precommitment is `docs/post_risk_fix_cohort_plan.md`; its registry hash is
-`f3b89f5b9566b9d9e48663c1dbf5004f379131c73f525905106a3cd7cc8dff82` and is persisted
+`fd045b13c86e9071bfd0ee1fbfb458e7d6594b0bca4053022a3169e4fb383a52` and is persisted
 before the first assignment.
-All five experiments are `RUNNING` only inside a newly initialized
+All five exploration experiments are `RUNNING` only inside a newly initialized
 `POST_RISK_FIX_RANDOMIZED_3000` evidence store. At repository freeze they are
 `REGISTERED_PENDING_LAUNCH`, with zero assignments and zero e-process observations.
+Five matching `CONFIRM_...` rows are predeclared `NOT_STARTED`, use fresh data with
+`M=1`/threshold 20, and activate only when the corresponding exploration becomes a
+`PROMOTION_CANDIDATE`. Exploration observations are never copied into confirmation.
 
 | Experiment | Eligible structural regime | Incumbent | Challenger | alpha test / threshold | Status |
 |---|---|---|---|---:|---|
@@ -133,6 +136,13 @@ All five experiments are `RUNNING` only inside a newly initialized
 | `BARG_COMPLETE_FAIRNESS_VS_THEORY` | complete bargaining with verified inputs | exact cell theory | fairness 0.10 | .05 / 20 | REGISTERED_PENDING_LAUNCH |
 | `PERS_BUY_MARGIN_VS_THEORY` | buyer states with EV inputs | exact weak EV threshold | 2% margin | .025 / 40 | REGISTERED_PENDING_LAUNCH |
 | `PERS_SELL_EMPIRICAL_VS_P0` | seller states with all pooled features | P0 | pooled empirical v1, not P3 | .025 / 40 | REGISTERED_PENDING_LAUNCH |
+
+Every exploration row above has a confirmation row named
+`CONFIRM_<exploration experiment ID>`, with identical eligibility/control/challenger,
+`alpha_test=.05`, and promotion threshold 20. A promotion record requires the
+confirmation row—not exploration alone—to reach its statistical and practical-effect
+gates. If the family cap arrives first, the exploration remains
+`PROMOTION_PENDING_CONFIRMATION` and no policy is promoted.
 
 `NEG_INCOMPLETE_T1` and `BARG_INCOMPLETE_IBO_VS_STATIC` remain observational because no
 valid challenger was implemented before freeze. Negotiation pooled/risk-sensitive

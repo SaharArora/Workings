@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import subprocess
+import tempfile
 from dataclasses import asdict
 from pathlib import Path
 
@@ -29,6 +30,19 @@ def _git(*args: str) -> str:
     ).stdout.strip()
 
 
+def _agent(store: CohortStore) -> LeaderboardAgent:
+    pooled_persuasion = PooledPersuasionPolicy(PERSUASION_ARTIFACT)
+    artifact = PolicyArtifact.from_policy(
+        "persuasion-pooled-empirical-v1", pooled_persuasion
+    )
+    return LeaderboardAgent(
+        PolicyRouter(
+            experimental_overrides=CohortOverrideRegistry(store),
+            pooled_persuasion_artifact=artifact,
+        )
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--family", choices=FAMILIES, required=True)
@@ -38,6 +52,7 @@ def main() -> None:
     parser.add_argument("--poll-interval", type=float, default=12.0)
     parser.add_argument("--safety-timeout", type=float, default=172_800.0)
     parser.add_argument("--resume", action="store_true")
+    parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
 
     current = _git("rev-parse", "HEAD")
@@ -46,21 +61,32 @@ def main() -> None:
     if _git("diff", "--name-only") or _git("diff", "--cached", "--name-only"):
         parser.error("tracked files changed after the cohort commit was frozen")
 
+    if args.dry_run:
+        with tempfile.TemporaryDirectory(prefix=f"glee-{args.family}-dry-run-") as temp:
+            store = CohortStore(
+                Path(temp) / "evidence.sqlite3", frozen_commit=args.frozen_commit
+            )
+            store.initialize()
+            agent = _agent(store)
+            print(
+                json.dumps(
+                    {
+                        "dry_run": "PASS",
+                        "family": args.family,
+                        "frozen_commit": args.frozen_commit,
+                        "registry": agent.router.experimental_overrides.contents(),
+                    },
+                    sort_keys=True,
+                ),
+                flush=True,
+            )
+        return
+
     # Loading is part of preflight even for non-persuasion executors, so every process
     # verifies the same frozen artifact before any of the three queues is joined.
-    pooled_persuasion = PooledPersuasionPolicy(PERSUASION_ARTIFACT)
-    artifact = PolicyArtifact.from_policy(
-        "persuasion-pooled-empirical-v1", pooled_persuasion
-    )
     store = CohortStore(args.store, frozen_commit=args.frozen_commit)
     store.initialize()
-    registry = CohortOverrideRegistry(store)
-    agent = LeaderboardAgent(
-        PolicyRouter(
-            experimental_overrides=registry,
-            pooled_persuasion_artifact=artifact,
-        )
-    )
+    agent = _agent(store)
     output = args.output or (
         Path("research/evaluation/cohorts")
         / COHORT_ID
