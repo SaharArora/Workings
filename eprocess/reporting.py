@@ -191,6 +191,12 @@ def family_dashboard(
     score = (stats or {}).get("scores", {}).get(family, {})
     run = snapshot.get("family_runs", {}).get(family, {})
     start_rating = run.get("start_rating") if isinstance(run, Mapping) else None
+    target_completed = (
+        int(run.get("target_completed", FAMILY_CAP))
+        if isinstance(run, Mapping)
+        else FAMILY_CAP
+    )
+    family_run_status = run.get("final_status") if isinstance(run, Mapping) else None
     current_rating = score.get("rating") if isinstance(score, Mapping) else None
     events = _load_events(log_path)
     outcome_counts = Counter(str(row["terminal_outcome"]) for row in outcome_rows)
@@ -276,8 +282,12 @@ def family_dashboard(
         "cohort_id": COHORT_ID,
         "family": family,
         "checkpoint": checkpoint,
-        "target_completed": FAMILY_CAP,
+        "target_completed": target_completed,
         "completed_games": counts["completed"],
+        "target_met": counts["completed"] == target_completed,
+        "family_run_status": family_run_status,
+        "run_started_at": run.get("started_at") if isinstance(run, Mapping) else None,
+        "run_ended_at": run.get("ended_at") if isinstance(run, Mapping) else None,
         "active_games": (stats or {}).get("active_games"),
         "pending_games": (stats or {}).get("pending_games"),
         "randomized_experimental_games": randomized,
@@ -438,6 +448,21 @@ def combined_final_payload(
     total_randomized = sum(item["randomized_experimental_games"] for item in families.values())
     total_observational = sum(item["observational_games"] for item in families.values())
     total_excluded = sum(item["excluded_experimental_observations"] for item in families.values())
+    total_target = sum(item["target_completed"] for item in families.values())
+    total_completed = sum(item["completed_games"] for item in families.values())
+    shortfall = {
+        family: max(0, int(item["target_completed"]) - int(item["completed_games"]))
+        for family, item in families.items()
+    }
+    statuses = {
+        family: item.get("family_run_status") for family, item in families.items()
+    }
+    if all(value == 0 for value in shortfall.values()):
+        completion_status = "COMPLETED_EXACT_TARGETS"
+    elif any(str(status).startswith("TRUNCATED_BY_USER") for status in statuses.values()):
+        completion_status = "TRUNCATED_BY_USER"
+    else:
+        completion_status = "INCOMPLETE"
     replays = {
         spec.experiment_id: store.replay_experiment(spec.experiment_id)
         for spec in experiment_registry()
@@ -454,7 +479,13 @@ def combined_final_payload(
     return {
         "generated_at": _now(),
         "cohort_id": COHORT_ID,
-        "total_completed_new_games": sum(item["completed_games"] for item in families.values()),
+        "frozen_cohort_commit": snapshot["metadata"]["frozen_commit"],
+        "experiment_registry_hash": snapshot["metadata"]["registry_hash"],
+        "cohort_completion_status": completion_status,
+        "family_run_statuses": statuses,
+        "total_target_games": total_target,
+        "total_completed_new_games": total_completed,
+        "completion_shortfall_by_family": shortfall,
         "total_randomized_games": total_randomized,
         "total_observational_games": total_observational,
         "excluded_experimental_observations": total_excluded,

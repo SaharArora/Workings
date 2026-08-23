@@ -705,3 +705,49 @@ is unavailable.
   each family concurrently. No live post-risk-fix cohort state exists yet; launch remains
   contingent on a clean pushed frozen commit, full green suite, idle API state, secret
   scan, artifact/policy loads, and three executor dry runs.
+
+## Post-risk-fix live cohort endpoint
+
+- **item:** Frozen live execution and exact family accounting.
+- **result:** `VERIFIED` for bargaining and negotiation; `TRUNCATED_BY_USER` for persuasion.
+- **evidence:** Frozen commit
+  `5229b9b771ef6702af63e61e214fcaeaf7a13176` produced exactly 1,000 bargaining,
+  1,000 negotiation, and 312 persuasion completions. Bargaining and negotiation exited
+  automatically with `MAX_GAMES_COMPLETED`, exit code 0, and no game 1,001. Persuasion
+  was stopped at the user's request; its one already-started game was drained with
+  `requeue=false`, producing game 312 and no replacement game.
+
+- **item:** Final queue and API shutdown.
+- **result:** `VERIFIED`.
+- **evidence:** All three family queues were explicitly left after execution. Final live
+  API state was `active_games=0`, `pending_games=0`. No further cohort was launched.
+
+- **item:** Evidence-store integrity and operational action safety.
+- **result:** `VERIFIED`.
+- **evidence:** The final combined report replays every exploration and confirmation
+  E-process in both directions and reports `all_replays_match=true`. Final logs contain
+  zero invalid actions, zero outermost fallbacks, zero supervisor hard timeouts, zero
+  clipping, and zero assignment/trace-integrity violations. One transient transport
+  disconnect retried successfully, and one bargaining matchmaking stall recovered after
+  a family-scoped leave/rejoin.
+
+- **item:** Final experimental decisions.
+- **result:** `VERIFIED`; no challenger promoted.
+- **evidence:** Bargaining FAIRNESS and complete-negotiation FAIRNESS_MARGIN ended
+  `INCONCLUSIVE`; negotiation IBO and persuasion buyer margin were `SAFETY_PAUSED`; the
+  persuasion seller empirical comparison remained `RUNNING` at the user-requested early
+  stop. All confirmation experiments remained `NOT_STARTED`. The control/incumbent policy
+  map remains active.
+
+- **item:** Final reports and recent-100 strategy audit.
+- **result:** `IMPLEMENTED`.
+- **evidence:** Machine-readable family/combined reports, checkpoint snapshots, raw JSONL,
+  and SQLite evidence are under
+  `research/evaluation/cohorts/POST_RISK_FIX_RANDOMIZED_3000/`. The human endpoint is
+  `docs/post_risk_fix_cohort_final.md`. The separate
+  `docs/recent_100_strategy_conformance.md` distinguishes live-history observation,
+  independent code replay, and formula/specification concordance; its 2,715/2,715 action
+  match is a code-conformance result, not a theorem proof for every operational policy.
+  Post-shutdown verification completed with 332 tests passed; SQLite integrity returned
+  `ok`, WAL checkpoint state was empty, duplicate assignments were zero, and the local
+  credential-value scan found no match outside the ignored `.env`.

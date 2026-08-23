@@ -160,3 +160,24 @@ used the incomplete equal-split incumbent. Per-game records and source hashes ar
 The four negotiation games started during the interrupted pre-fix launch are separately
 identified as `PRE_RISK_FIX_NEGOTIATION_INTERRUPT_4`. They are observational, have four
 complete traces, and do not count toward the new 1,000-game negotiation cap.
+
+## Post-risk-fix randomized cohort final record
+
+The live cohort ran from frozen commit
+`5229b9b771ef6702af63e61e214fcaeaf7a13176` with registry hash
+`fd045b13c86e9071bfd0ee1fbfb458e7d6594b0bca4053022a3169e4fb383a52`.
+Bargaining and negotiation each completed their exact 1,000-game cap. At the user's later
+request, persuasion was drained and stopped at 312/1,000 with no requeue. The cohort is
+therefore `TRUNCATED_BY_USER`, total completed=2,312, not a completed 3,000-game cohort.
+
+| Exploration experiment | Final state | Valid control/challenger n | Promotion consequence |
+|---|---|---:|---|
+| `BARG_COMPLETE_FAIRNESS_VS_THEORY` | `INCONCLUSIVE` | 246 / 240 | retain theory; confirmation not started |
+| `NEG_COMPLETE_FAIRNESS_MARGIN_VS_THEORY` | `INCONCLUSIVE` | 82 / 85 | retain theory; confirmation not started |
+| `NEG_INCOMPLETE_IBO_VS_ROBUST` | `SAFETY_PAUSED` | 10 / 5 | retain ROBUST |
+| `PERS_BUY_MARGIN_VS_THEORY` | `SAFETY_PAUSED` | 2 / 5 | retain theory control |
+| `PERS_SELL_EMPIRICAL_VS_P0` | `RUNNING` at early stop | 38 / 44 | unresolved; retain P0 |
+
+No confirmation experiment started and no challenger is `E_PROCESS_PROMOTED`. The full
+endpoint and shutdown record is in
+[`post_risk_fix_cohort_final.md`](post_risk_fix_cohort_final.md).

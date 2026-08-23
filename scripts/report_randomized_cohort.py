@@ -30,6 +30,9 @@ def _head() -> str:
 
 
 def _write_final_markdown(payload: dict[str, Any], path: Path) -> None:
+    def number(value: Any) -> str:
+        return "N/A" if value is None else f"{float(value):.2f}"
+
     families = payload["families"]
     first = (
         f"TOTAL COMPLETED NEW GAMES = {payload['total_completed_new_games']} | "
@@ -38,13 +41,28 @@ def _write_final_markdown(payload: dict[str, Any], path: Path) -> None:
         f"PERSUASION = {families['persuasion']['completed_games']}"
     )
     lines = [first, "", "# Final randomized cohort report", ""]
+    lines.extend(
+        [
+            f"Cohort status: **{payload['cohort_completion_status']}**.",
+            f"Frozen cohort commit: `{payload['frozen_cohort_commit']}`. Registry hash: `{payload['experiment_registry_hash']}`.",
+            f"Original target: {payload['total_target_games']}. Completion shortfall: "
+            + ", ".join(
+                f"{family}={shortfall}"
+                for family, shortfall in payload["completion_shortfall_by_family"].items()
+            )
+            + ".",
+            "A family below target is not presented as a completed 1,000-game tranche; its unresolved experiment states are frozen at shutdown.",
+            "",
+        ]
+    )
     for family, report in families.items():
         lines.extend(
             [
                 f"## {family.title()}",
                 "",
-                f"Completed: {report['completed_games']}/1000. Randomized: {report['randomized_experimental_games']}. Observational: {report['observational_games']}. Excluded: {report['excluded_experimental_observations']}.",
-                f"Rating: {report['start_rating']} -> {report['current_rating']} (change {report['rating_change']}).",
+                f"Completed: {report['completed_games']}/{report['target_completed']}. Randomized: {report['randomized_experimental_games']}. Observational: {report['observational_games']}. Excluded: {report['excluded_experimental_observations']}.",
+                f"Run status: `{report['family_run_status']}`. Target met: {report['target_met']}.",
+                f"Rating: {number(report['start_rating'])} -> {number(report['current_rating'])} (change {number(report['rating_change'])}).",
                 "",
                 "| Experiment | Status | n control | n challenger | E | E mirror | Y effect | Raw effect |",
                 "|---|---|---:|---:|---:|---:|---:|---:|",
@@ -101,7 +119,12 @@ def main() -> None:
         parser.error(f"evidence store does not exist: {args.store}")
     store = CohortStore(args.store, frozen_commit=frozen)
     store.initialize()
-    stats = {} if args.offline else CompetitionClient().stats()
+    if args.offline:
+        stats = {}
+    else:
+        client = CompetitionClient()
+        stats = dict(client.stats())
+        stats["pending_games"] = len(client.pending_games())
     log_paths = {
         family: args.output_dir / f"{family}.jsonl"
         for family in ("bargaining", "negotiation", "persuasion")
