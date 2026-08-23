@@ -336,3 +336,30 @@ incumbent with no defined alternative, the family run drains and stops rather th
 inventing a replacement. Every pause, reason, and whether incumbent reversion is possible
 is structured in the JSONL log. The exact map and thresholds are frozen in
 `docs/leaderboard_tranche_plan.md`.
+
+## Concurrent randomized cohort runtime
+
+`scripts/run_randomized_cohort.py` starts one bounded family executor. Three invocations
+may run concurrently, but they share `eprocess/store.py` and the same registry hash,
+commit, transform version, and assignment algorithm. `leaderboard/cohort_overrides.py`
+performs transactional pre-treatment assignment during routing. The normal incumbent is
+first resolved from the configuration; the assigned control/challenger is then executed;
+the communication renderer runs last. A whole game retains one database assignment.
+
+`glee/cohort_runtime.py` logs every received state, legal schema, routing derivation,
+assignment, submitted action, terminal payload, raw/bounded payoff, exclusion, and
+e-process update without reading or serializing credentials. The existing authoritative
+bounded supervisor still handles opponent-initiated endings and cleanup. A separate
+SQLite lifecycle row is created on `game_tracked`, so the 1,000-game cap does not depend
+on the SDK counter or even on successful strategy execution.
+
+Experiment-level decisions do not stop unrelated family volume. Resolved or unsafe
+experiments receive no future randomized assignments; eligible games revert to another
+running registered experiment or to the production incumbent as explicitly observational.
+Fallbacks, invalid actions, missing artifacts, incomplete terminal traces, and policy-arm
+mismatches pause only the affected experiment and cannot enter its e-process.
+
+The persuasion router now exposes two exact buyer arms (weak EV threshold and locked 2%
+margin) and the frozen non-P3 pooled seller artifact. Missing/corrupt seller artifacts
+leave P0 active and are recorded as evidence failures. Negotiation pooled empirical
+selectors remain paused and are not reachable through this cohort registry.

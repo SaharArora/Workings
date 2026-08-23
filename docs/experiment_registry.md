@@ -116,3 +116,37 @@ e-process experiment. Its outcomes must not enter promotion evidence.
 
 The samples remain descriptive. No challenger or incumbent is relabeled
 `E_PROCESS_PROMOTED`, and no sustained deployment was started.
+
+## Post-risk-fix cohort registry (registered, not yet launched)
+
+The frozen precommitment is `docs/post_risk_fix_cohort_plan.md`; its registry hash is
+`f3b89f5b9566b9d9e48663c1dbf5004f379131c73f525905106a3cd7cc8dff82` and is persisted
+before the first assignment.
+All five experiments are `RUNNING` only inside a newly initialized
+`POST_RISK_FIX_RANDOMIZED_3000` evidence store. At repository freeze they are
+`REGISTERED_PENDING_LAUNCH`, with zero assignments and zero e-process observations.
+
+| Experiment | Eligible structural regime | Incumbent | Challenger | alpha test / threshold | Status |
+|---|---|---|---|---:|---|
+| `NEG_INCOMPLETE_IBO_VS_ROBUST` | incomplete multi-round/unknown negotiation | ROBUST | ADAPTIVE v1 | .025 / 40 | REGISTERED_PENDING_LAUNCH |
+| `NEG_COMPLETE_FAIRNESS_MARGIN_VS_THEORY` | complete finite gains-from-trade negotiation | exact cell theory | fairness 0.15 | .025 / 40 | REGISTERED_PENDING_LAUNCH |
+| `BARG_COMPLETE_FAIRNESS_VS_THEORY` | complete bargaining with verified inputs | exact cell theory | fairness 0.10 | .05 / 20 | REGISTERED_PENDING_LAUNCH |
+| `PERS_BUY_MARGIN_VS_THEORY` | buyer states with EV inputs | exact weak EV threshold | 2% margin | .025 / 40 | REGISTERED_PENDING_LAUNCH |
+| `PERS_SELL_EMPIRICAL_VS_P0` | seller states with all pooled features | P0 | pooled empirical v1, not P3 | .025 / 40 | REGISTERED_PENDING_LAUNCH |
+
+`NEG_INCOMPLETE_T1` and `BARG_INCOMPLETE_IBO_VS_STATIC` remain observational because no
+valid challenger was implemented before freeze. Negotiation pooled/risk-sensitive
+empirical selectors and persuasion P3 remain inactive. No pre-fix game may update these
+trajectories.
+
+## Preserved pre-fix cohorts
+
+`PRE_RISK_FIX_BARGAINING_200` contains exactly 200 tracked bargaining games from commits
+`fa6a60e...` and `ea14b49...`: 199 complete terminal traces and one missing terminal
+trace. All 200 are `OBSERVATIONAL_LIVE_EVIDENCE`; 111 used bargaining fairness and 89
+used the incomplete equal-split incumbent. Per-game records and source hashes are under
+`research/evaluation/cohorts/`.
+
+The four negotiation games started during the interrupted pre-fix launch are separately
+identified as `PRE_RISK_FIX_NEGOTIATION_INTERRUPT_4`. They are observational, have four
+complete traces, and do not count toward the new 1,000-game negotiation cap.

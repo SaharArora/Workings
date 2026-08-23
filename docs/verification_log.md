@@ -611,13 +611,13 @@ is unavailable.
 - **result:** `IMPLEMENTED` offline; `PAUSED_FOR_COMPETITION_CYCLE` for runtime.
 - **evidence:** `Q` explicitly separates ACCEPT, a conservatively shrunk one-additional-
   opportunity branch, and terminal nonagreement. Branch payoffs are transformed to the
-  locked negotiation Y score; loss is `L=-Y`; discrete CVaR uses the worst `1-alpha`
-  probability mass. All 36 locked combinations were evaluated over 11,591 supported
-  decisions from 4,031 whole games. Own-IR and support violations were zero, and the
-  `P(Y<0.50)` chance constraint never failed because IR/no-deal payoffs are nonnegative.
-  The separate zero constraint left only 2,819 states selectable. Seller endpoint rate
-  remained 0.8192 versus the required <=0.25; buyer endpoint rate was 0.1493. No grid
-  combination achieved full coverage plus endpoint sanity, so no parameters were
+  locked negotiation Y score; corrected loss is `L=1-Y`; discrete CVaR uses the worst
+  `1-alpha` probability mass, and the chance constraint uses raw nonpositive own payoff.
+  All 36 locked combinations were rerun over 11,591 supported decisions from 4,031 whole
+  games. Own-IR and support violations were zero, but only 28 states had any candidate
+  surviving the explicit raw zero/no-deal constraints. Representative selected-state
+  endpoint rates were seller 1.0 and buyer 0.0, still failing the seller <=0.25 ceiling.
+  No grid combination achieved coverage plus endpoint sanity, so no parameters were
   selected and no rated validation ran.
 
 - **item:** Fresh decision-holdout availability.
@@ -642,3 +642,53 @@ is unavailable.
   frequency was 0.0134 versus 0.1025; raw lower-tail CVaR(0.90) was -251,109.43 versus
   -1,434,116.00. Production had more zero outcomes (0.6146 versus 0.4340), an explicit
   cost of declining marginal trades.
+
+## Post-risk-fix randomized cohort readiness
+
+- **item:** Bounded-score CVaR sign convention.
+- **result:** `VERIFIED` and `IMPLEMENTED`.
+- **evidence:** All bounded-score risk code now uses `L=1-Y`; deterministic tests cover
+  `Y={1,.5,0}`, nonnegative CVaR, and monotonic nonincrease of a fixed candidate's score
+  as lambda rises. The full 36-cell offline selector grid was rerun. No parameters passed,
+  so pooled negotiation remains paused rather than being reactivated by the math fix.
+
+- **item:** Family/role bad-outcome semantics.
+- **result:** `VERIFIED` and `IMPLEMENTED`.
+- **evidence:** `glee/payoffs.py` classifies raw negative/zero/positive payoffs. Negotiation
+  uses nonpositive own surplus; bargaining uses nonpositive raw mechanism utility,
+  distinguishing zero no-deal/walkaway from positive agreement; persuasion uses separate
+  buyer negative/zero utility and seller zero/no-sale rules. The negotiation chance
+  constraint now calls this adapter rather than testing a transformed-score threshold.
+
+- **item:** Completed pre-fix live cohort preservation.
+- **result:** `VERIFIED`.
+- **evidence:** `PRE_RISK_FIX_BARGAINING_200` has 200 unique tracked game IDs, 199 complete
+  terminal traces, one missing terminal trace, zero randomized assignments, and zero
+  promotion-eprocess-eligible games. Source-log and manifest SHA-256 values are frozen in
+  `research/evaluation/cohorts/PRE_RISK_FIX_BARGAINING_200.summary.json`. Four interrupted
+  negotiation games are separately quarantined as
+  `PRE_RISK_FIX_NEGOTIATION_INTERRUPT_4`.
+
+- **item:** Concurrent atomic randomized evidence path.
+- **result:** `IMPLEMENTED` and `VERIFIED` by deterministic tests; `NOT YET RUN LIVE`.
+- **evidence:** One WAL-mode SQLite registry enforces cohort/commit/registry versions,
+  unique assignment/outcome/e-process rows, whole-game 50/50 assignment, family lifecycle
+  caps, and experiment-level terminal status. Tests cover concurrent duplicate assignment,
+  assignment invariance to later state, double terminal polling, resolved-experiment
+  observational reversion, noninformative buyer actions, artifact failure, exact routing,
+  transforms, safety pause, and lifecycle cap.
+
+- **item:** Pooled persuasion seller action readiness.
+- **result:** `VERIFIED` for the registered bounded challenger.
+- **evidence:** Frozen artifact `persuasion-pooled-empirical-v1` loads, uses only fields
+  available before the seller action in eligible states, produces locally legal binary
+  actions, exposes structured candidates, has no P3 dependency, and passes repeated route
+  latency under the production maximum budget. States missing any required feature remain
+  on P0 observationally.
+
+- **item:** New live cohort launch gate.
+- **result:** `BLOCKED` pending complete task text; no queues joined.
+- **evidence:** Both supplied attachment paths are byte-identical and terminate in §18 at
+  “Do not retrospectively”. Because the missing tail may contain additional multiplicity,
+  safety, preflight, or reporting requirements, launch under the final cohort ID would be
+  irreversible and is not inferred. All fully available requirements are implemented.

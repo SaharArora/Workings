@@ -280,7 +280,7 @@ Zero combinations passed. The old endpoint rates were seller 0.9959 and buyer 0.
 
 Only 28 of 11591 states had any candidate satisfying the explicit zero/no-deal constraint, an unavailable rate of 0.9976. Among selected states, mean predicted acceptance was 0.9071 and mean terminal-zero proxy was 0.0720.
 
-The negative-payoff chance violation rate was zero for every combination because generated proposals enforce own IR and the verified no-deal payoff is zero (`Y=0.50`). This did not make the policy safe: the separate zero/no-deal constraint exposed the failure. Lambda/alpha/epsilon did not rescue coverage or seller endpoint behavior, so no parameter combination was selected.
+The selected-candidate raw bad-outcome chance violation rate was zero for every combination because infeasible candidates are excluded. This did not make the policy usable: the raw zero/no-deal constraints eliminated almost all candidate sets. Lambda/alpha/epsilon did not rescue coverage or seller endpoint behavior, so no parameter combination was selected.
 
 ## 6. Control rankings and scoring-objective divergence
 

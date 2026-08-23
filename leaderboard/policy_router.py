@@ -172,12 +172,14 @@ class PolicyRouter:
         bayes_artifacts: Mapping[RouteKey, PolicyArtifact] | None = None,
         promoted_policies: Mapping[RouteKey, PolicyArtifact] | None = None,
         pooled_negotiation_artifact: PolicyArtifact | None = None,
+        pooled_persuasion_artifact: PolicyArtifact | None = None,
         experimental_overrides: ExperimentalOverrideRegistry | None = None,
     ) -> None:
         self.bayes_eligibility = dict(bayes_eligibility or {})
         self.bayes_artifacts = dict(bayes_artifacts or {})
         self.promoted_policies = dict(promoted_policies or {})
         self.pooled_negotiation_artifact = pooled_negotiation_artifact
+        self.pooled_persuasion_artifact = pooled_persuasion_artifact
         self.experimental_overrides = experimental_overrides or ExperimentalOverrideRegistry()
         self.last_routing: RoutingDecision | None = None
 
@@ -253,8 +255,25 @@ class PolicyRouter:
                         )
                     elif self.pooled_negotiation_artifact is not None:
                         available.append(self.pooled_negotiation_artifact.name)
+                elif experimental_name == "PERSUASION_POOLED_EMPIRICAL":
+                    pooled_policy, artifact_error = _artifact_status(
+                        self.pooled_persuasion_artifact
+                    )
+                    if pooled_policy is None:
+                        unavailable = f"PERSUASION_POOLED_ARTIFACT_{artifact_error}"
+                        fallback_reason = (
+                            f"{fallback_reason};{unavailable}"
+                            if fallback_reason
+                            else unavailable
+                        )
+                    elif self.pooled_persuasion_artifact is not None:
+                        available.append(self.pooled_persuasion_artifact.name)
                 if (
-                    experimental_name != "NEGOTIATION_POOLED_EMPIRICAL"
+                    experimental_name
+                    not in {
+                        "NEGOTIATION_POOLED_EMPIRICAL",
+                        "PERSUASION_POOLED_EMPIRICAL",
+                    }
                     or pooled_policy is not None
                 ):
                     selected_name, selected_policy, details_builder = self._experimental_execution(
@@ -300,6 +319,20 @@ class PolicyRouter:
         baseline_policy: Policy,
         pooled_policy: Policy | None = None,
     ) -> tuple[str, Policy, PolicyDetailsBuilder]:
+        if policy_name in {
+            "CONFIGURATION_SPECIFIC_THEORY",
+            "NEGOTIATION_ROBUST",
+            "PERSUASION_P0_BABBLING",
+        }:
+            return (
+                policy_name,
+                baseline_policy,
+                lambda game, action: {
+                    "experimental_arm_policy": policy_name,
+                    "selected_live_action": dict(action),
+                    "rule_invariants_satisfied": True,
+                },
+            )
         if policy_name == "NEGOTIATION_ADAPTIVE":
             return (
                 policy_name,
@@ -336,6 +369,36 @@ class PolicyRouter:
                 baseline_policy,
             )
             return policy_name, policy, details
+        if policy_name == "PERSUASION_BUY_THEORY":
+            return (
+                policy_name,
+                persuasion_theory_buyer_action,
+                persuasion_buyer_experiment_details,
+            )
+        if policy_name == "PERSUASION_BUY_MARGIN":
+            return (
+                policy_name,
+                persuasion_margin_buyer_action,
+                persuasion_buyer_experiment_details,
+            )
+        if policy_name == "PERSUASION_POOLED_EMPIRICAL":
+            if pooled_policy is None:
+                raise PolicyInputsUnavailable("PERSUASION_POOLED_ARTIFACT_UNAVAILABLE")
+
+            def persuasion_details(
+                game: dict[str, Any], action: Mapping[str, Any]
+            ) -> Mapping[str, Any]:
+                plan = getattr(pooled_policy, "last_plan", None)
+                if plan is not None and hasattr(plan, "structured"):
+                    return plan.structured()
+                return {
+                    "policy": policy_name,
+                    "selected_live_action": dict(action),
+                    "diagnostics": "artifact_callable_did_not_expose_last_plan",
+                    "rule_invariants_satisfied": True,
+                }
+
+            return policy_name, pooled_policy, persuasion_details
         if policy_name == "PERSUASION_P3_REPUTATION":
             rate = self.experimental_overrides.population_positive_purchase_rate
             if rate is None:
@@ -795,3 +858,51 @@ def persuasion_p0_action(game: dict[str, Any]) -> dict[str, Any]:
             )
         }
     raise UnsupportedCellError(f"unknown persuasion action {action_type!r}")
+
+
+def _persuasion_expected_value(game: Mapping[str, Any]) -> tuple[float, float]:
+    state = game["game_state"]
+    required = ("p", "v", "u", "product_price")
+    if any(key not in state for key in required):
+        raise PolicyInputsUnavailable("buyer expected-value inputs unavailable")
+    prior = float(state["p"])
+    high = float(state["v"])
+    low = float(state["u"])
+    price = float(state["product_price"])
+    return prior * high + (1 - prior) * low, price
+
+
+def persuasion_theory_buyer_action(game: dict[str, Any]) -> dict[str, Any]:
+    """Use the exact weak expected-value threshold as randomized control."""
+    if game["valid_actions"]["type"] != "buyer_decision":
+        raise PolicyInputsUnavailable("buyer theory policy is buyer-side only")
+    expected, price = _persuasion_expected_value(game)
+    return {"decision": "yes" if expected >= price else "no"}
+
+
+def persuasion_margin_buyer_action(game: dict[str, Any]) -> dict[str, Any]:
+    """Use the locked production 2% expected-value margin as challenger."""
+    if game["valid_actions"]["type"] != "buyer_decision":
+        raise PolicyInputsUnavailable("buyer margin policy is buyer-side only")
+    expected, price = _persuasion_expected_value(game)
+    return {
+        "decision": "yes" if production_buyer_buys(expected, price) else "no"
+    }
+
+
+def persuasion_buyer_experiment_details(
+    game: dict[str, Any], action: Mapping[str, Any]
+) -> Mapping[str, Any]:
+    theory = persuasion_theory_buyer_action(game)
+    margin = persuasion_margin_buyer_action(game)
+    expected, price = _persuasion_expected_value(game)
+    return {
+        "expected_value": expected,
+        "product_price": price,
+        "theory_action": theory,
+        "margin_action": margin,
+        "treatment_changes_action": theory != margin,
+        "selected_live_action": dict(action),
+        "margin": 0.02,
+        "rule_invariants_satisfied": dict(action) in (theory, margin),
+    }

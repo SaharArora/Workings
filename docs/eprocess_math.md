@@ -91,3 +91,24 @@ For negotiation, the estimand is improvement in expected clipped scale-adjusted 
 region, `delta Y = delta U/(4S)`, so `delta_min=.01` corresponds locally to
 `delta U_min=.04S`, approximately 4% of own valuation scale. No such raw-scale
 equivalence is claimed for observations in the clipped region.
+
+## Post-risk-fix concurrent cohort implementation
+
+`eprocess/store.py` makes the construction above operational across three concurrent
+family executors. The frozen registry and multiplicity table are recorded in
+`docs/post_risk_fix_cohort_plan.md`. Assignment is an atomic whole-game row written before
+policy execution. Terminal processing writes raw payoff, `Y`, `X_t`, `-X_t`, both
+component vectors and mixture values, arm counts, raw/transformed effects, and clipping
+count/rate in the same transaction. Unique game IDs make repeated terminal polling
+idempotent.
+
+Only randomized, informative, valid traces update an e-process. Observational games,
+invalid/fallback-corrupted traces, missing outcomes, and buyer states in which theory and
+the 2% margin never change an action are excluded. Experiment terminal statuses stop new
+randomization while the family executor can continue observationally to its fixed cap.
+
+The risk-sensitive negotiation selector uses a separate downside calculation:
+`L=1-Y`, hence `L in [0,1]` and `CVaR_alpha(L)>=0`. Its chance constraint obtains
+`BAD_OUTCOME` from raw negotiation payoff (`U<=0`) rather than from a universal threshold
+on `Y`. This corrected selector remains offline and paused; it is not an arm in the new
+cohort.

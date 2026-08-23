@@ -151,7 +151,7 @@ def render(risk: Mapping[str, Any], persuasion: Mapping[str, Any]) -> str:
             "",
             f"Only {first['overall']['selected_n']} of {first['overall']['n']} states had any candidate satisfying the explicit zero/no-deal constraint, an unavailable rate of {_fmt(first['overall']['selection_unavailable_rate'])}. Among selected states, mean predicted acceptance was {_fmt(first['overall']['mean_predicted_acceptance'])} and mean terminal-zero proxy was {_fmt(first['overall']['mean_terminal_zero_probability'])}.",
             "",
-            "The negative-payoff chance violation rate was zero for every combination because generated proposals enforce own IR and the verified no-deal payoff is zero (`Y=0.50`). This did not make the policy safe: the separate zero/no-deal constraint exposed the failure. Lambda/alpha/epsilon did not rescue coverage or seller endpoint behavior, so no parameter combination was selected.",
+            "The selected-candidate raw bad-outcome chance violation rate was zero for every combination because infeasible candidates are excluded. This did not make the policy usable: the raw zero/no-deal constraints eliminated almost all candidate sets. Lambda/alpha/epsilon did not rescue coverage or seller endpoint behavior, so no parameter combination was selected.",
             "",
             "## 6. Control rankings and scoring-objective divergence",
             "",
