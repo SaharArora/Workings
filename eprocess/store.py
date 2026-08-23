@@ -17,7 +17,11 @@ from eprocess.cohort import (
     ASSIGNMENT_ALGORITHM,
     COHORT_ID,
     PAYOFF_TRANSFORM_VERSION,
+    SAFETY_BAD_RATE_LIMIT,
+    SAFETY_FIRST_BAD_COUNT,
+    SAFETY_RATE_MIN_CHALLENGER,
     ExperimentSpec,
+    confirmation_experiment_id,
     eligible_experiment_ids,
     exact_configuration,
     experiment_registry,
@@ -30,11 +34,14 @@ from eprocess.cohort import (
 from glee.payoffs import bad_outcome
 
 EXPERIMENT_STATUSES = {
+    "NOT_STARTED",
     "RUNNING",
+    "PROMOTION_CANDIDATE",
     "PROMOTE",
     "RETAIN",
     "INCONCLUSIVE",
     "SAFETY_PAUSED",
+    "RESOLVED_OBSERVATIONAL_FALLBACK",
 }
 
 
@@ -75,6 +82,7 @@ class AssignmentRecord:
     exact_configuration: Mapping[str, Any]
     role: str
     opponent_category: str
+    opponent_identity: str | None
     experiment_id: str | None
     evidence_class: str
     assigned_arm: str
@@ -155,6 +163,18 @@ class CohortStore:
                     completed_at TEXT,
                     completion_reason TEXT
                 );
+                CREATE TABLE IF NOT EXISTS family_runs (
+                    family TEXT PRIMARY KEY,
+                    subcohort_id TEXT NOT NULL,
+                    target_completed INTEGER NOT NULL,
+                    started_at TEXT NOT NULL,
+                    start_rating REAL,
+                    start_games_played INTEGER,
+                    ended_at TEXT,
+                    end_rating REAL,
+                    final_status TEXT,
+                    checkpoints_json TEXT NOT NULL DEFAULT '{}'
+                );
                 CREATE TABLE IF NOT EXISTS assignments (
                     game_id TEXT PRIMARY KEY,
                     cohort_id TEXT NOT NULL,
@@ -164,6 +184,7 @@ class CohortStore:
                     exact_configuration TEXT NOT NULL,
                     role TEXT NOT NULL,
                     opponent_category TEXT NOT NULL,
+                    opponent_identity TEXT,
                     experiment_id TEXT,
                     evidence_class TEXT NOT NULL,
                     assigned_arm TEXT NOT NULL,
@@ -259,7 +280,7 @@ class CohortStore:
                         spec.experiment_id,
                         spec.family,
                         encoded,
-                        "RUNNING",
+                        spec.initial_status,
                         _json(_components()),
                         _json(_components()),
                         _now(),
@@ -289,6 +310,7 @@ class CohortStore:
             exact_configuration=json.loads(row["exact_configuration"]),
             role=row["role"],
             opponent_category=row["opponent_category"],
+            opponent_identity=row["opponent_identity"],
             experiment_id=row["experiment_id"],
             evidence_class=row["evidence_class"],
             assigned_arm=row["assigned_arm"],
@@ -318,6 +340,13 @@ class CohortStore:
         cell = structural_cell(game)
         role = role_for_game(game)
         opponent = opponent_category(game)
+        disclosed_opponent = game.get("opponent", {})
+        opponent_identity = (
+            str(disclosed_opponent.get("name"))
+            if isinstance(disclosed_opponent, Mapping)
+            and disclosed_opponent.get("name") not in {None, ""}
+            else None
+        )
         with self._connect() as connection:
             connection.execute("BEGIN IMMEDIATE")
             existing = connection.execute(
@@ -326,18 +355,51 @@ class CohortStore:
             if existing is not None:
                 connection.commit()
                 return self._row_to_assignment(existing)
-            chosen: ExperimentSpec | None = None
+            candidates: list[tuple[int, int, ExperimentSpec]] = []
             promoted: ExperimentSpec | None = None
             for experiment_id in eligible_experiment_ids(game):
-                status = connection.execute(
-                    "SELECT status FROM experiments WHERE experiment_id=?",
+                exploration = self.specs[experiment_id]
+                row = connection.execute(
+                    "SELECT status,n_control,n_challenger FROM experiments WHERE experiment_id=?",
                     (experiment_id,),
                 ).fetchone()
-                if status is not None and status["status"] == "RUNNING":
-                    chosen = self.specs[experiment_id]
-                    break
-                if status is not None and status["status"] == "PROMOTE":
-                    promoted = promoted or self.specs[experiment_id]
+                if row is None:
+                    continue
+                if row["status"] == "RUNNING":
+                    candidates.append(
+                        (
+                            exploration.priority,
+                            int(row["n_control"]) + int(row["n_challenger"]),
+                            exploration,
+                        )
+                    )
+                    continue
+                confirmation_id = confirmation_experiment_id(experiment_id)
+                confirmation = self.specs[confirmation_id]
+                confirmation_row = connection.execute(
+                    "SELECT status,n_control,n_challenger FROM experiments WHERE experiment_id=?",
+                    (confirmation_id,),
+                ).fetchone()
+                if (
+                    row["status"] == "PROMOTION_CANDIDATE"
+                    and confirmation_row is not None
+                    and confirmation_row["status"] == "RUNNING"
+                ):
+                    candidates.append(
+                        (
+                            confirmation.priority,
+                            int(confirmation_row["n_control"])
+                            + int(confirmation_row["n_challenger"]),
+                            confirmation,
+                        )
+                    )
+                if row["status"] == "PROMOTE":
+                    promoted = promoted or exploration
+                elif confirmation_row is not None and confirmation_row["status"] == "PROMOTE":
+                    promoted = promoted or confirmation
+            # Priority is frozen. Effective randomized n is a tie-breaker only and
+            # never depends on observed payoffs or current treatment effects.
+            chosen = min(candidates, key=lambda item: (item[0], item[1], item[2].experiment_id))[2] if candidates else None
             if chosen is None:
                 promoted_policy = (
                     promoted.challenger_policy if promoted is not None else baseline_policy
@@ -387,18 +449,21 @@ class CohortStore:
                     "alpha_test": chosen.alpha_test,
                     "delta_min": chosen.delta_min,
                     "assignment_reason": "PRETREATMENT_RANDOMIZED_PAIRWISE_ASSIGNMENT",
-                    "informative": chosen.experiment_id != "PERS_BUY_MARGIN_VS_THEORY",
+                    "informative": chosen.experiment_id not in {
+                        "PERS_BUY_MARGIN_VS_THEORY",
+                        "CONFIRM_PERS_BUY_MARGIN_VS_THEORY",
+                    },
                 }
             connection.execute(
                 """
                 INSERT INTO assignments(
                     game_id,cohort_id,subcohort_id,family,structural_cell,exact_configuration,
-                    role,opponent_category,experiment_id,evidence_class,assigned_arm,
+                    role,opponent_category,opponent_identity,experiment_id,evidence_class,assigned_arm,
                     assignment_probability,incumbent,challenger,assigned_policy,
                     policy_version,payoff_transform_version,alpha_family,multiplicity,
                     alpha_test,delta_min,frozen_commit,assignment_algorithm,assigned_at,
                     assignment_reason,informative,informative_reason
-                ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
                 """,
                 (
                     game_id,
@@ -409,6 +474,7 @@ class CohortStore:
                     _json(config),
                     role,
                     opponent,
+                    opponent_identity,
                     fields["experiment_id"],
                     fields["evidence_class"],
                     fields["assigned_arm"],
@@ -447,6 +513,85 @@ class CohortStore:
                 "SELECT * FROM assignments WHERE game_id=?", (str(game_id),)
             ).fetchone()
         return None if row is None else self._row_to_assignment(row)
+
+    def start_family_run(
+        self, family: str, *, family_cap: int, stats: Mapping[str, Any]
+    ) -> None:
+        """Freeze the family start rating/count once; restarts reuse the same baseline."""
+        score = stats.get("scores", {}).get(str(family), {})
+        rating = score.get("rating") if isinstance(score, Mapping) else None
+        games = score.get("games_played") if isinstance(score, Mapping) else None
+        with self._connect() as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            existing = connection.execute(
+                "SELECT target_completed FROM family_runs WHERE family=?", (str(family),)
+            ).fetchone()
+            if existing is not None and int(existing["target_completed"]) != int(family_cap):
+                raise RuntimeError("family target changed after cohort launch")
+            connection.execute(
+                """
+                INSERT OR IGNORE INTO family_runs(
+                    family,subcohort_id,target_completed,started_at,start_rating,start_games_played
+                ) VALUES (?,?,?,?,?,?)
+                """,
+                (
+                    str(family),
+                    family_subcohort_id(str(family)),
+                    int(family_cap),
+                    _now(),
+                    None if rating is None else float(rating),
+                    None if games is None else int(games),
+                ),
+            )
+            connection.commit()
+
+    def record_family_checkpoint(
+        self, family: str, *, checkpoint: int, stats: Mapping[str, Any]
+    ) -> None:
+        """Persist reporting metadata without changing assignment or evidence state."""
+        with self._connect() as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            row = connection.execute(
+                "SELECT checkpoints_json FROM family_runs WHERE family=?", (str(family),)
+            ).fetchone()
+            if row is None:
+                raise RuntimeError("family run has not started")
+            checkpoints = json.loads(row["checkpoints_json"])
+            checkpoints.setdefault(str(int(checkpoint)), {"timestamp": _now(), "stats": dict(stats)})
+            connection.execute(
+                "UPDATE family_runs SET checkpoints_json=? WHERE family=?",
+                (_json(checkpoints), str(family)),
+            )
+            connection.commit()
+
+    def complete_family_run(
+        self, family: str, *, status: str, stats: Mapping[str, Any]
+    ) -> None:
+        score = stats.get("scores", {}).get(str(family), {})
+        rating = score.get("rating") if isinstance(score, Mapping) else None
+        with self._connect() as connection:
+            connection.execute(
+                """
+                UPDATE family_runs
+                SET ended_at=?,end_rating=?,final_status=?
+                WHERE family=?
+                """,
+                (
+                    _now(),
+                    None if rating is None else float(rating),
+                    str(status),
+                    str(family),
+                ),
+            )
+
+    def emitted_checkpoints(self, family: str) -> set[int]:
+        with self._connect() as connection:
+            row = connection.execute(
+                "SELECT checkpoints_json FROM family_runs WHERE family=?", (str(family),)
+            ).fetchone()
+        if row is None:
+            return set()
+        return {int(value) for value in json.loads(row["checkpoints_json"])}
 
     def record_tracked_game(self, game_id: str, *, family: str, family_cap: int) -> None:
         """Count an authoritative live match once, even before strategy execution."""
@@ -692,26 +837,43 @@ class CohortStore:
         spec = self.specs[experiment_id]
         status = str(state["status"])
         decision_reason = state["decision_reason"]
-        if status == "RUNNING" and n_challenger >= 3:
-            first_three = connection.execute(
+        if status == "RUNNING" and n_challenger >= SAFETY_FIRST_BAD_COUNT:
+            first_bad_window = connection.execute(
                 """
                 SELECT o.bad_outcome FROM outcomes o
                 JOIN assignments a ON a.game_id=o.game_id
                 WHERE a.experiment_id=? AND a.assigned_arm='challenger'
                   AND o.valid_for_eprocess=1
-                ORDER BY o.completed_at LIMIT 3
+                ORDER BY o.completed_at LIMIT ?
                 """,
-                (experiment_id,),
+                (experiment_id, SAFETY_FIRST_BAD_COUNT),
             ).fetchall()
-            if len(first_three) == 3 and all(bool(item["bad_outcome"]) for item in first_three):
+            if len(first_bad_window) == SAFETY_FIRST_BAD_COUNT and all(
+                bool(item["bad_outcome"]) for item in first_bad_window
+            ):
                 status = "SAFETY_PAUSED"
-                decision_reason = "FIRST_THREE_CHALLENGER_OUTCOMES_ALL_BAD"
-            elif challenger_bad / n_challenger > 0.5:
+                decision_reason = "FIRST_FIVE_CHALLENGER_OUTCOMES_ALL_BAD"
+            elif (
+                n_challenger >= SAFETY_RATE_MIN_CHALLENGER
+                and challenger_bad / n_challenger > SAFETY_BAD_RATE_LIMIT
+            ):
                 status = "SAFETY_PAUSED"
-                decision_reason = "CHALLENGER_BAD_OUTCOME_RATE_ABOVE_HALF"
+                decision_reason = "CHALLENGER_BAD_OUTCOME_RATE_ABOVE_0_75_AFTER_8"
         if status == "RUNNING" and E_t >= spec.promotion_threshold and transformed_effect > spec.delta_min:
-            status = "PROMOTE"
-            decision_reason = "MAIN_EPROCESS_CROSSED_THRESHOLD_WITH_MINIMUM_EFFECT"
+            if spec.stage == "exploration":
+                status = "PROMOTION_CANDIDATE"
+                decision_reason = "EXPLORATION_CROSSED_THRESHOLD_PENDING_FRESH_CONFIRMATION"
+                connection.execute(
+                    """
+                    UPDATE experiments
+                    SET status='RUNNING',decision_reason='ACTIVATED_BY_EXPLORATION_PROMOTION_CANDIDATE',updated_at=?
+                    WHERE experiment_id=? AND status='NOT_STARTED'
+                    """,
+                    (_now(), confirmation_experiment_id(experiment_id)),
+                )
+            else:
+                status = "PROMOTE"
+                decision_reason = "FRESH_CONFIRMATION_CROSSED_THRESHOLD_WITH_MINIMUM_EFFECT"
         elif status == "RUNNING" and E_t_prime >= spec.promotion_threshold:
             status = "RETAIN"
             decision_reason = "MIRROR_EPROCESS_CROSSED_THRESHOLD"
@@ -795,6 +957,14 @@ class CohortStore:
                 """,
                 (_now(), str(family)),
             )
+            connection.execute(
+                """
+                UPDATE experiments
+                SET decision_reason='PROMOTION_PENDING_CONFIRMATION_FAMILY_CAP_REACHED',updated_at=?
+                WHERE family=? AND status='PROMOTION_CANDIDATE'
+                """,
+                (_now(), str(family)),
+            )
 
     def experiment_status(self, experiment_id: str) -> str:
         with self._connect() as connection:
@@ -857,6 +1027,30 @@ class CohortStore:
                         "E_t_prime": _wealth(json.loads(row["mirror_components"])),
                         "n_control": row["n_control"],
                         "n_challenger": row["n_challenger"],
+                        "mean_y_control": (
+                            row["control_sum_y"] / row["n_control"]
+                            if row["n_control"] else None
+                        ),
+                        "mean_y_challenger": (
+                            row["challenger_sum_y"] / row["n_challenger"]
+                            if row["n_challenger"] else None
+                        ),
+                        "mean_raw_control": (
+                            row["control_sum_raw"] / row["n_control"]
+                            if row["n_control"] else None
+                        ),
+                        "mean_raw_challenger": (
+                            row["challenger_sum_raw"] / row["n_challenger"]
+                            if row["n_challenger"] else None
+                        ),
+                        "bad_outcome_rate_control": (
+                            row["control_bad"] / row["n_control"]
+                            if row["n_control"] else None
+                        ),
+                        "bad_outcome_rate_challenger": (
+                            row["challenger_bad"] / row["n_challenger"]
+                            if row["n_challenger"] else None
+                        ),
                         "transformed_effect": (
                             row["challenger_sum_y"] / row["n_challenger"]
                             - row["control_sum_y"] / row["n_control"]
@@ -880,4 +1074,46 @@ class CohortStore:
                     "SELECT family,COUNT(*) AS n FROM assignments GROUP BY family"
                 )
             }
-        return {"metadata": metadata, "family_assignment_counts": counts, "experiments": experiments}
+            family_runs = {
+                row["family"]: dict(row)
+                for row in connection.execute("SELECT * FROM family_runs ORDER BY family")
+            }
+        return {
+            "metadata": metadata,
+            "family_assignment_counts": counts,
+            "family_runs": family_runs,
+            "experiments": experiments,
+        }
+
+    def replay_experiment(self, experiment_id: str) -> dict[str, Any]:
+        """Independently replay the append-only SQL evidence rows for audit."""
+        main = _components()
+        mirror = _components()
+        n_control = 0
+        n_challenger = 0
+        with self._connect() as connection:
+            rows = connection.execute(
+                """
+                SELECT u.game_id,u.X_t,u.X_t_prime,a.assigned_arm
+                FROM eprocess_updates u
+                JOIN assignments a ON a.game_id=u.game_id
+                WHERE u.experiment_id=?
+                ORDER BY u.rowid
+                """,
+                (str(experiment_id),),
+            ).fetchall()
+        for row in rows:
+            main = _updated_components(main, float(row["X_t"]))
+            mirror = _updated_components(mirror, float(row["X_t_prime"]))
+            n_control += int(row["assigned_arm"] == "control")
+            n_challenger += int(row["assigned_arm"] == "challenger")
+        return {
+            "experiment_id": str(experiment_id),
+            "n_updates": len(rows),
+            "n_control": n_control,
+            "n_challenger": n_challenger,
+            "main_components": main,
+            "mirror_components": mirror,
+            "E_t": _wealth(main),
+            "E_t_prime": _wealth(mirror),
+        }

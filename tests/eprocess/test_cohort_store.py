@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import sqlite3
+import json
+import random
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
@@ -76,11 +78,14 @@ def store(tmp_path: Path) -> CohortStore:
 
 def test_registry_freezes_multiplicity_and_thresholds() -> None:
     specs = {item.experiment_id: item for item in experiment_registry()}
-    assert registry_hash() == "f3b89f5b9566b9d9e48663c1dbf5004f379131c73f525905106a3cd7cc8dff82"
+    assert registry_hash() == "fd045b13c86e9071bfd0ee1fbfb458e7d6594b0bca4053022a3169e4fb383a52"
     assert specs["NEG_INCOMPLETE_IBO_VS_ROBUST"].multiplicity == 2
     assert specs["BARG_COMPLETE_FAIRNESS_VS_THEORY"].multiplicity == 1
     assert specs["PERS_BUY_MARGIN_VS_THEORY"].alpha_test == pytest.approx(0.025)
     assert specs["PERS_BUY_MARGIN_VS_THEORY"].promotion_threshold == pytest.approx(40)
+    assert specs["CONFIRM_PERS_BUY_MARGIN_VS_THEORY"].multiplicity == 1
+    assert specs["CONFIRM_PERS_BUY_MARGIN_VS_THEORY"].promotion_threshold == pytest.approx(20)
+    assert specs["CONFIRM_PERS_BUY_MARGIN_VS_THEORY"].initial_status == "NOT_STARTED"
 
 
 def test_assignment_is_atomic_unique_and_has_frozen_subcohort(store: CohortStore) -> None:
@@ -122,6 +127,30 @@ def test_assignment_uses_one_fresh_half_probability_draw_per_new_game(
     assert value.assign_game(
         bargaining_game("control"), baseline_policy="changed"
     ) == control
+
+
+def test_seeded_test_draw_is_reproducible_without_changing_production_csprng(
+    tmp_path: Path,
+) -> None:
+    def sequence(seed: int, name: str) -> list[str]:
+        rng = random.Random(seed)
+        value = CohortStore(
+            tmp_path / f"{name}.sqlite3",
+            frozen_commit="abc123",
+            arm_draw=lambda spec, game_id, cell: (
+                "challenger" if rng.random() < spec.assignment_probability else "control"
+            ),
+        )
+        value.initialize()
+        return [
+            value.assign_game(
+                bargaining_game(f"{name}-{index}"),
+                baseline_policy="BARGAINING_COMPLETE_FINITE",
+            ).assigned_arm
+            for index in range(20)
+        ]
+
+    assert sequence(7301, "left") == sequence(7301, "right")
 
 
 def test_assignment_does_not_change_with_post_treatment_state(store: CohortStore) -> None:
@@ -238,3 +267,140 @@ def test_incomplete_t1_negotiation_and_incomplete_bargaining_are_observational()
     bargaining["game_state"]["complete_information"] = False
     assert eligible_experiment_ids(negotiation) == ()
     assert eligible_experiment_ids(bargaining) == ()
+
+
+def test_first_five_challenger_bad_outcomes_safety_pause(tmp_path: Path) -> None:
+    value = CohortStore(
+        tmp_path / "first-five.sqlite3",
+        frozen_commit="abc123",
+        arm_draw=lambda spec, game_id, cell: "challenger",
+    )
+    value.initialize()
+    for index in range(5):
+        assignment = value.assign_game(
+            bargaining_game(f"bad-{index}"), baseline_policy="BARGAINING_COMPLETE_FINITE"
+        )
+        value.record_outcome(
+            assignment.game_id,
+            raw_payoff=0,
+            bounded_payoff=0,
+            payoff_transform={"name": "test"},
+            terminal_outcome="no_deal",
+            valid_trace=True,
+        )
+        expected = "RUNNING" if index < 4 else "SAFETY_PAUSED"
+        assert value.experiment_status("BARG_COMPLETE_FAIRNESS_VS_THEORY") == expected
+
+
+def test_bad_rate_pause_waits_for_eight_and_requires_strictly_above_point_75(
+    tmp_path: Path,
+) -> None:
+    value = CohortStore(
+        tmp_path / "rate.sqlite3",
+        frozen_commit="abc123",
+        arm_draw=lambda spec, game_id, cell: "challenger",
+    )
+    value.initialize()
+    # One positive outcome prevents the first-five rule; seven of eight are bad.
+    raw_values = [0, 0, 1, 0, 0, 0, 0, 0]
+    for index, raw in enumerate(raw_values):
+        assignment = value.assign_game(
+            bargaining_game(f"rate-{index}"), baseline_policy="BARGAINING_COMPLETE_FINITE"
+        )
+        value.record_outcome(
+            assignment.game_id,
+            raw_payoff=raw,
+            bounded_payoff=min(1.0, raw),
+            payoff_transform={"name": "test"},
+            terminal_outcome="agreement" if raw else "no_deal",
+            valid_trace=True,
+        )
+        expected = "RUNNING" if index < 7 else "SAFETY_PAUSED"
+        assert value.experiment_status("BARG_COMPLETE_FAIRNESS_VS_THEORY") == expected
+
+
+def test_promotion_candidate_activates_fresh_confirmation_then_promotes(
+    tmp_path: Path,
+) -> None:
+    value = CohortStore(
+        tmp_path / "confirmation.sqlite3",
+        frozen_commit="abc123",
+        arm_draw=lambda spec, game_id, cell: "challenger",
+    )
+    value.initialize()
+    components = json.dumps({"0.1": 39.0, "0.25": 39.0, "0.5": 39.0, "0.75": 39.0})
+    with value._connect() as connection:
+        connection.execute(
+            """
+            UPDATE experiments SET main_components=?,n_control=1,control_sum_y=0
+            WHERE experiment_id='BARG_COMPLETE_FAIRNESS_VS_THEORY'
+            """,
+            (components,),
+        )
+    exploration = value.assign_game(
+        bargaining_game("exploration-cross"), baseline_policy="BARGAINING_COMPLETE_FINITE"
+    )
+    value.record_outcome(
+        exploration.game_id,
+        raw_payoff=100,
+        bounded_payoff=1,
+        payoff_transform={"name": "test"},
+        terminal_outcome="agreement",
+        valid_trace=True,
+    )
+    assert value.experiment_status("BARG_COMPLETE_FAIRNESS_VS_THEORY") == "PROMOTION_CANDIDATE"
+    assert value.experiment_status("CONFIRM_BARG_COMPLETE_FAIRNESS_VS_THEORY") == "RUNNING"
+
+    confirm_components = json.dumps(
+        {"0.1": 19.0, "0.25": 19.0, "0.5": 19.0, "0.75": 19.0}
+    )
+    with value._connect() as connection:
+        connection.execute(
+            """
+            UPDATE experiments SET main_components=?,n_control=1,control_sum_y=0
+            WHERE experiment_id='CONFIRM_BARG_COMPLETE_FAIRNESS_VS_THEORY'
+            """,
+            (confirm_components,),
+        )
+    confirmation = value.assign_game(
+        bargaining_game("confirmation-cross"), baseline_policy="BARGAINING_COMPLETE_FINITE"
+    )
+    assert confirmation.experiment_id == "CONFIRM_BARG_COMPLETE_FAIRNESS_VS_THEORY"
+    value.record_outcome(
+        confirmation.game_id,
+        raw_payoff=100,
+        bounded_payoff=1,
+        payoff_transform={"name": "test"},
+        terminal_outcome="agreement",
+        valid_trace=True,
+    )
+    assert value.experiment_status("CONFIRM_BARG_COMPLETE_FAIRNESS_VS_THEORY") == "PROMOTE"
+    future = value.assign_game(
+        bargaining_game("post-confirm"), baseline_policy="BARGAINING_COMPLETE_FINITE"
+    )
+    assert future.experiment_id is None
+    assert future.assigned_policy == "BARGAINING_FAIRNESS"
+
+
+def test_deterministic_replay_recreates_both_eprocesses(store: CohortStore) -> None:
+    assignment = store.assign_game(
+        bargaining_game("replay"), baseline_policy="BARGAINING_COMPLETE_FINITE"
+    )
+    update = store.record_outcome(
+        assignment.game_id,
+        raw_payoff=40,
+        bounded_payoff=0.4,
+        payoff_transform={"name": "test"},
+        terminal_outcome="agreement",
+        valid_trace=True,
+    )
+    replay = store.replay_experiment("BARG_COMPLETE_FAIRNESS_VS_THEORY")
+    assert replay["E_t"] == pytest.approx(update["E_t"])
+    assert replay["E_t_prime"] == pytest.approx(update["E_t_prime"])
+
+
+def test_cohort_metadata_cannot_mix_frozen_commits(tmp_path: Path) -> None:
+    path = tmp_path / "immutable.sqlite3"
+    CohortStore(path, frozen_commit="first").initialize()
+    with pytest.raises(RuntimeError, match="frozen_commit"):
+        CohortStore(path, frozen_commit="second").initialize()

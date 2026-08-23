@@ -20,6 +20,10 @@ DELTA_MIN = 0.01
 ASSIGNMENT_PROBABILITY = 0.5
 PAYOFF_TRANSFORM_VERSION = "family_bounded_payoff_v1"
 ASSIGNMENT_ALGORITHM = "system_csprng_bernoulli_half_atomic_sqlite_v1"
+SAFETY_FIRST_BAD_COUNT = 5
+SAFETY_RATE_MIN_CHALLENGER = 8
+SAFETY_BAD_RATE_LIMIT = 0.75
+REPORTING_CHECKPOINTS = (200, 500, 750)
 
 
 @dataclass(frozen=True, slots=True)
@@ -34,6 +38,9 @@ class ExperimentSpec:
     multiplicity: int
     delta_min: float = DELTA_MIN
     assignment_probability: float = ASSIGNMENT_PROBABILITY
+    stage: str = "exploration"
+    parent_experiment_id: str | None = None
+    initial_status: str = "RUNNING"
 
     @property
     def alpha_test(self) -> float:
@@ -110,8 +117,34 @@ EXPERIMENTS = (
 )
 
 
+def _confirmation_spec(exploration: ExperimentSpec) -> ExperimentSpec:
+    """Predeclare the fresh-data same-cell confirmation required by BUILD_SPEC §7.2."""
+    return ExperimentSpec(
+        experiment_id=f"CONFIRM_{exploration.experiment_id}",
+        family=exploration.family,
+        priority=exploration.priority,
+        control_policy=exploration.control_policy,
+        challenger_policy=exploration.challenger_policy,
+        policy_version=exploration.policy_version,
+        alpha_family=ALPHA_FAMILY,
+        multiplicity=1,
+        assignment_probability=ASSIGNMENT_PROBABILITY,
+        stage="confirmation",
+        parent_experiment_id=exploration.experiment_id,
+        initial_status="NOT_STARTED",
+    )
+
+
+CONFIRMATION_EXPERIMENTS = tuple(_confirmation_spec(item) for item in EXPERIMENTS)
+ALL_EXPERIMENTS = EXPERIMENTS + CONFIRMATION_EXPERIMENTS
+
+
 def experiment_registry() -> tuple[ExperimentSpec, ...]:
-    return EXPERIMENTS
+    return ALL_EXPERIMENTS
+
+
+def confirmation_experiment_id(experiment_id: str) -> str:
+    return f"CONFIRM_{experiment_id}"
 
 
 def registry_payload() -> dict[str, Any]:
@@ -125,7 +158,14 @@ def registry_payload() -> dict[str, Any]:
         "family_subcohort_ids": dict(FAMILY_SUBCOHORT_IDS),
         "assignment_algorithm": ASSIGNMENT_ALGORITHM,
         "payoff_transform_version": PAYOFF_TRANSFORM_VERSION,
-        "experiments": [item.structured() for item in EXPERIMENTS],
+        "experiments": [item.structured() for item in ALL_EXPERIMENTS],
+        "safety_stop": {
+            "first_challenger_observations_all_bad": SAFETY_FIRST_BAD_COUNT,
+            "bad_rate_min_challenger": SAFETY_RATE_MIN_CHALLENGER,
+            "bad_rate_strictly_above": SAFETY_BAD_RATE_LIMIT,
+            "immediate_integrity_failures": True,
+        },
+        "reporting_checkpoints": list(REPORTING_CHECKPOINTS),
         "inactive_policies": [
             "NEGOTIATION_POOLED_EMPIRICAL",
             "RISK_SENSITIVE_POOLED_EMPIRICAL",

@@ -65,7 +65,10 @@ class CohortOverrideRegistry:
         ):
             return None
 
-        if assignment.experiment_id == "PERS_BUY_MARGIN_VS_THEORY":
+        if assignment.experiment_id in {
+            "PERS_BUY_MARGIN_VS_THEORY",
+            "CONFIRM_PERS_BUY_MARGIN_VS_THEORY",
+        }:
             theory = persuasion_theory_buyer_action(dict(game))
             margin = persuasion_margin_buyer_action(dict(game))
             if theory != margin:
