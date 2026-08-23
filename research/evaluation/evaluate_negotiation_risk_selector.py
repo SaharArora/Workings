@@ -893,8 +893,8 @@ def evaluate(feature_table: Path, artifact: Path) -> dict[str, Any]:
                 "TERMINAL_NONAGREEMENT:remaining_probability,0"
             ),
             "optimization_distribution": "branch raw payoffs transformed to negotiation Y",
-            "loss": "L=-Y; CVaR_alpha is mean of largest losses over worst 1-alpha mass",
-            "chance_constraint": "P(Y<0.50)<=epsilon",
+            "loss": "L=1-Y; CVaR_alpha is mean of largest losses over worst 1-alpha mass",
+            "chance_constraint": "P(raw own payoff<=0)<=epsilon",
             "zero_constraint": "P(raw Q<=0)<=0.50",
             "dominance": (
                 f"remove A when B risk value >= A-{DOMINANCE_VALUE_TOLERANCE} and "

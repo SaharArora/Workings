@@ -11,12 +11,12 @@ from dataclasses import dataclass, replace
 from typing import Any, Iterable, Mapping, Sequence
 
 from glee.normalization import negotiation_clipped_utility_score
+from glee.payoffs import bad_outcome
 
 RISK_LAMBDA_GRID = (0.0, 0.10, 0.25, 0.50)
 CVAR_ALPHA_GRID = (0.80, 0.90, 0.95)
 EPSILON_GRID = (0.10, 0.20, 0.30)
 
-BAD_OUTCOME_Y_THRESHOLD = 0.50
 CONTINUATION_MATERIALIZATION_SHRINK = 0.25
 MAX_TERMINAL_ZERO_PROBABILITY = 0.50
 DOMINANCE_VALUE_TOLERANCE = 0.01
@@ -187,9 +187,9 @@ def cvar_upper_loss_tail(
 ) -> float:
     """Return CVaR_alpha(loss) over the worst ``1-alpha`` probability mass.
 
-    Larger loss values are worse.  The production convention uses
-    ``loss = -normalized_payoff``; losses can therefore be negative.  For discrete
-    atoms the boundary atom is fractionally included to fill the tail exactly.
+    Larger loss values are worse. For bounded utility ``Y``, callers use the genuine
+    nonnegative loss ``1 - Y``. For discrete atoms the boundary atom is fractionally
+    included to fill the tail exactly.
     """
     if not 0 < alpha < 1:
         raise ValueError("alpha must be in (0, 1)")
@@ -210,6 +210,14 @@ def cvar_upper_loss_tail(
         if remaining <= 1e-15:
             break
     return total / (1.0 - alpha)
+
+
+def bounded_score_loss(normalized_payoff: float) -> float:
+    """Return the locked bounded-score loss ``L = 1 - Y``."""
+    score = float(normalized_payoff)
+    if not math.isfinite(score) or not 0 <= score <= 1:
+        raise ValueError("normalized payoff must lie in [0, 1]")
+    return 1.0 - score
 
 
 def score_candidate(
@@ -240,13 +248,16 @@ def score_candidate(
         branch.probability * branch.normalized_payoff for branch in branches
     )
     cvar_loss = cvar_upper_loss_tail(
-        ((-branch.normalized_payoff, branch.probability) for branch in branches),
+        (
+            (bounded_score_loss(branch.normalized_payoff), branch.probability)
+            for branch in branches
+        ),
         alpha=parameters.cvar_alpha,
     )
     chance_bad = sum(
         branch.probability
         for branch in branches
-        if branch.normalized_payoff < BAD_OUTCOME_Y_THRESHOLD
+        if bad_outcome("negotiation", branch.raw_payoff, {}, None).bad
     )
     zero_probability = sum(
         branch.probability for branch in branches if branch.raw_payoff <= 0

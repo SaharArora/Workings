@@ -3,7 +3,7 @@ from __future__ import annotations
 import pytest
 
 from policies.negotiation.risk_sensitive_pooled import (
-    BAD_OUTCOME_Y_THRESHOLD,
+    bounded_score_loss,
     CONTINUATION_MATERIALIZATION_SHRINK,
     RiskParameters,
     apply_agreement_dominance,
@@ -58,12 +58,18 @@ def test_cvar_uses_worst_upper_loss_tail_with_fractional_atom() -> None:
     assert cvar_upper_loss_tail(((2, 0.1), (1, 0.2), (-1, 0.7)), alpha=0.8) == pytest.approx(1.5)
 
 
-def test_loss_convention_is_negative_normalized_payoff() -> None:
-    safe = cvar_upper_loss_tail(((-0.75, 1.0),), alpha=0.9)
-    bad = cvar_upper_loss_tail(((-0.40, 1.0),), alpha=0.9)
-    assert safe == pytest.approx(-0.75)
-    assert bad == pytest.approx(-0.40)
-    assert 0.75 - 0.25 * safe > 0.40 - 0.25 * bad
+@pytest.mark.parametrize("payoff, expected", ((1.0, 0.0), (0.5, 0.5), (0.0, 1.0)))
+def test_bounded_score_loss_is_one_minus_payoff(payoff: float, expected: float) -> None:
+    assert bounded_score_loss(payoff) == expected
+
+
+def test_cvar_is_nonnegative_for_valid_bounded_payoff_distribution() -> None:
+    losses = tuple(
+        (bounded_score_loss(payoff), probability)
+        for payoff, probability in ((1.0, 0.2), (0.5, 0.3), (0.0, 0.5))
+    )
+    for alpha in (0.8, 0.9, 0.95):
+        assert cvar_upper_loss_tail(losses, alpha=alpha) >= 0
 
 
 def test_chance_and_zero_constraints_are_separate() -> None:
@@ -79,11 +85,28 @@ def test_chance_and_zero_constraints_are_separate() -> None:
         terminal=False,
         parameters=parameters(),
     )
-    assert candidate.chance_bad_outcome == 0
-    assert candidate.chance_constraint_satisfied
+    assert candidate.chance_bad_outcome == candidate.terminal_zero_probability
+    assert not candidate.chance_constraint_satisfied
     assert candidate.terminal_zero_probability > 0.50
     assert not candidate.zero_constraint_satisfied
-    assert BAD_OUTCOME_Y_THRESHOLD == 0.50
+
+
+def test_increasing_lambda_cannot_raise_fixed_candidate_score() -> None:
+    arguments = dict(
+        price=150,
+        source=("ROBUST",),
+        own_value=100,
+        q_accept=0.8,
+        acceptance_payoff=50,
+        continuation_target=150,
+        continuation_target_payoff=50,
+        q_next_opportunity_accept=1.0,
+        terminal=False,
+    )
+    unpenalized = score_candidate(**arguments, parameters=parameters(risk_lambda=0.0))
+    penalized = score_candidate(**arguments, parameters=parameters(risk_lambda=0.5))
+    assert penalized.cvar_loss >= 0
+    assert penalized.risk_adjusted_value <= unpenalized.risk_adjusted_value
 
 
 def test_agreement_dominance_removes_near_value_long_shot() -> None:
@@ -117,9 +140,14 @@ def test_agreement_dominance_removes_near_value_long_shot() -> None:
     agreement = replace(
         agreement,
         risk_adjusted_value=long_shot.risk_adjusted_value - 0.005,
+        chance_constraint_satisfied=True,
         zero_constraint_satisfied=True,
     )
-    long_shot = replace(long_shot, zero_constraint_satisfied=True)
+    long_shot = replace(
+        long_shot,
+        chance_constraint_satisfied=True,
+        zero_constraint_satisfied=True,
+    )
     result = apply_agreement_dominance((long_shot, agreement))
     assert result[0].dominated_for_agreement
     assert select_risk_candidate(result, role="seller") == result[1]
