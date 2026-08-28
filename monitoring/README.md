@@ -20,7 +20,7 @@ Latest completed game: `2026-08-28T21:22:02.085758+00:00`. Fresh charted games: 
 
 ## YakuzaYoshi Phase B V24 validation
 
-Latest completed game: `2026-08-28T23:16:30.573742+00:00`. Charted games (excluded canaries plus ordinary validation): bargaining 24, negotiation 13, persuasion 9.
+Latest completed game: `2026-08-28T23:56:28.344905+00:00`. Charted games (excluded canaries plus ordinary validation): bargaining 88, negotiation 56, persuasion 41.
 
 The configuration-policy charts put games on the x-axis and the registered Appendix A.1 strategic configuration unit on the y-axis. Point color shows the exact whole-game arm used.
 
