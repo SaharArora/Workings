@@ -18,15 +18,15 @@ Latest completed game: `2026-08-28T21:22:02.085758+00:00`. Fresh charted games: 
 - [Persuasion payoff](gangsteryoshi-v16/persuasion-payoff.svg)
 - [Persuasion behavior](gangsteryoshi-v16/persuasion-behavior.svg)
 
-## YakuzaYoshi Phase B V23 validation
+## YakuzaYoshi Phase B V24 validation
 
-Latest completed game: `2026-08-28T22:13:18.410199+00:00`. Charted games (excluded canaries plus ordinary validation): bargaining 42, negotiation 28, persuasion 14.
+Latest completed game: `2026-08-28T23:16:30.573742+00:00`. Charted games (excluded canaries plus ordinary validation): bargaining 24, negotiation 13, persuasion 9.
 
 The configuration-policy charts put games on the x-axis and the registered Appendix A.1 strategic configuration unit on the y-axis. Point color shows the exact whole-game arm used.
 
-- [Bargaining rating and policy](yakuzayoshi-v23/bargaining-rating.svg)
-- [Bargaining configuration and policy](yakuzayoshi-v23/bargaining-configuration-policy.svg)
-- [Negotiation rating and policy](yakuzayoshi-v23/negotiation-rating.svg)
-- [Negotiation configuration and policy](yakuzayoshi-v23/negotiation-configuration-policy.svg)
-- [Persuasion rating and policy](yakuzayoshi-v23/persuasion-rating.svg)
-- [Persuasion configuration and policy](yakuzayoshi-v23/persuasion-configuration-policy.svg)
+- [Bargaining rating and policy](yakuzayoshi-v24/bargaining-rating.svg)
+- [Bargaining configuration and policy](yakuzayoshi-v24/bargaining-configuration-policy.svg)
+- [Negotiation rating and policy](yakuzayoshi-v24/negotiation-rating.svg)
+- [Negotiation configuration and policy](yakuzayoshi-v24/negotiation-configuration-policy.svg)
+- [Persuasion rating and policy](yakuzayoshi-v24/persuasion-rating.svg)
+- [Persuasion configuration and policy](yakuzayoshi-v24/persuasion-configuration-policy.svg)

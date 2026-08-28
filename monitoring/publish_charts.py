@@ -7,6 +7,7 @@ import argparse
 import csv
 import html
 import math
+import re
 import shutil
 import statistics
 from pathlib import Path
@@ -225,6 +226,18 @@ def _copy_if_changed(source: Path, destination: Path) -> bool:
     return True
 
 
+def _publish_sanitized_yakuza_svg(source: Path, destination: Path) -> bool:
+    """Remove operational identities while preserving chart meaning and policy labels."""
+    svg = source.read_text(encoding="utf-8")
+    svg = re.sub(r"\s*·\s*(?:unit|raw config) [^·<]+", "", svg)
+    svg = re.sub(
+        r" · [0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?=</title>)",
+        "",
+        svg,
+    )
+    return _write_if_changed(destination, svg)
+
+
 def _readme(gangster: Sequence[Mapping[str, str]], yakuza: Sequence[Mapping[str, str]]) -> str:
     g_counts = {family: sum(row["family"] == family for row in gangster) for family in FAMILIES}
     y_counts = {family: sum(row["family"] == family for row in yakuza) for family in FAMILIES}
@@ -251,7 +264,7 @@ def _readme(gangster: Sequence[Mapping[str, str]], yakuza: Sequence[Mapping[str,
         ]
     lines += [
         "",
-        "## YakuzaYoshi Phase B V23 validation",
+        "## YakuzaYoshi Phase B V24 validation",
         "",
         f"Latest completed game: `{y_latest}`. Charted games (excluded canaries plus ordinary validation): bargaining {y_counts['bargaining']}, negotiation {y_counts['negotiation']}, persuasion {y_counts['persuasion']}.",
         "",
@@ -261,8 +274,8 @@ def _readme(gangster: Sequence[Mapping[str, str]], yakuza: Sequence[Mapping[str,
     for family in FAMILIES:
         title = family.title()
         lines += [
-            f"- [{title} rating and policy](yakuzayoshi-v23/{family}-rating.svg)",
-            f"- [{title} configuration and policy](yakuzayoshi-v23/{family}-configuration-policy.svg)",
+            f"- [{title} rating and policy](yakuzayoshi-v24/{family}-rating.svg)",
+            f"- [{title} configuration and policy](yakuzayoshi-v24/{family}-configuration-policy.svg)",
         ]
     return "\n".join(lines) + "\n"
 
@@ -281,7 +294,9 @@ def publish(gangster_root: Path, yakuza_root: Path, output_root: Path) -> int:
         for suffix in ("rating.svg", "configuration-policy.svg"):
             source = yakuza_root / f"{family}-{suffix}"
             if source.is_file():
-                changed += _copy_if_changed(source, output_root / "yakuzayoshi-v23" / source.name)
+                changed += _publish_sanitized_yakuza_svg(
+                    source, output_root / "yakuzayoshi-v24" / source.name
+                )
     changed += _write_if_changed(output_root / "README.md", _readme(gangster, yakuza))
     return changed
 
