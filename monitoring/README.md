@@ -6,7 +6,7 @@ Orange points are whole-game **THEORY** and blue points are whole-game **EXPLOIT
 
 ## GangsterYoshi Phase B V28
 
-Latest completed game: `2026-08-29T22:35:55.980746+00:00`. Charted V28 ordinary live games: bargaining 16, negotiation 0, persuasion 2.
+Latest completed game: `2026-08-29T23:11:25.500888+00:00`. Charted V28 ordinary live games: bargaining 69, negotiation 50, persuasion 23.
 
 Bargaining, negotiation, and persuasion refill independently. Negotiation is a fixed observable-role-routed trial capped at 50 ordinary games; bargaining and persuasion continue after that cap.
 
