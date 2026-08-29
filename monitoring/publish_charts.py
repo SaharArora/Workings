@@ -226,10 +226,19 @@ def _copy_if_changed(source: Path, destination: Path) -> bool:
     return True
 
 
-def _publish_sanitized_yakuza_svg(source: Path, destination: Path) -> bool:
+def _publish_sanitized_svg(source: Path, destination: Path) -> bool:
     """Remove operational identities while preserving chart meaning and policy labels."""
     svg = source.read_text(encoding="utf-8")
     svg = re.sub(r"\s*·\s*(?:unit|raw config) [^·<]+", "", svg)
+    svg = re.sub(
+        r">([A-Z][A-Z0-9_]+)\s*·\s*[^<]+</text>",
+        r">\1</text>",
+        svg,
+    )
+    svg = svg.replace(
+        "Lane label = Appendix A.1 class · evidence-unit prefix; hover a point for the full frozen identities and policy.",
+        "Lane label = Appendix A.1 class; hover a point for the whole-game arm and policy.",
+    )
     svg = re.sub(
         r" · [0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?=</title>)",
         "",
@@ -250,17 +259,19 @@ def _readme(gangster: Sequence[Mapping[str, str]], yakuza: Sequence[Mapping[str,
         "",
         "Orange points are whole-game **THEORY** and blue points are whole-game **EXPLOIT**. Rating and payoff charts have numeric axes; payoff charts mark `0.00` explicitly. Public files are replaced on a 30-minute cadence when their source data changes.",
         "",
-        "## GangsterYoshi Phase A V16",
+        "## GangsterYoshi Phase B V26",
         "",
-        f"Latest completed game: `{g_latest}`. Fresh charted games: bargaining {g_counts['bargaining']}, negotiation {g_counts['negotiation']}, persuasion {g_counts['persuasion']}.",
+        f"Latest completed game: `{g_latest}`. Charted V26 games (excluded canaries plus ordinary live volume): bargaining {g_counts['bargaining']}, negotiation {g_counts['negotiation']}, persuasion {g_counts['persuasion']}.",
+        "",
+        "The configuration-policy charts put games on the x-axis and the registered Appendix A.1 strategic configuration class on the y-axis. Point color shows the exact whole-game arm used. Bargaining and negotiation refill independently instead of waiting for the slower persuasion family.",
         "",
     ]
     for family in FAMILIES:
         title = family.title()
         lines += [
-            f"- [{title} rating](gangsteryoshi-v16/{family}-rating.svg)",
-            f"- [{title} payoff](gangsteryoshi-v16/{family}-payoff.svg)",
-            f"- [{title} behavior](gangsteryoshi-v16/{family}-behavior.svg)",
+            f"- [{title} rating](gangsteryoshi-v26/{family}-rating.svg)",
+            f"- [{title} payoff](gangsteryoshi-v26/{family}-payoff.svg)",
+            f"- [{title} configuration and policy](gangsteryoshi-v26/{family}-configuration-policy.svg)",
         ]
     lines += [
         "",
@@ -298,16 +309,19 @@ def publish(gangster_root: Path, yakuza_root: Path | None, output_root: Path) ->
     changed = 0
     for family in FAMILIES:
         rows = [row for row in gangster if row["family"] == family]
-        changed += _write_if_changed(output_root / "gangsteryoshi-v16" / f"{family}-rating.svg", _rating_svg(family, rows))
-        changed += _write_if_changed(output_root / "gangsteryoshi-v16" / f"{family}-payoff.svg", _payoff_svg(family, rows))
-        behavior = gangster_root / f"{family}-behavior.svg"
-        if behavior.is_file():
-            changed += _copy_if_changed(behavior, output_root / "gangsteryoshi-v16" / behavior.name)
+        changed += _write_if_changed(output_root / "gangsteryoshi-v26" / f"{family}-rating.svg", _rating_svg(family, rows))
+        changed += _write_if_changed(output_root / "gangsteryoshi-v26" / f"{family}-payoff.svg", _payoff_svg(family, rows))
+        configuration = gangster_root / f"{family}-configuration-policy.svg"
+        if configuration.is_file():
+            changed += _publish_sanitized_svg(
+                configuration,
+                output_root / "gangsteryoshi-v26" / configuration.name,
+            )
         if yakuza_root is not None:
             for suffix in ("rating.svg", "configuration-policy.svg"):
                 source = yakuza_root / f"{family}-{suffix}"
                 if source.is_file():
-                    changed += _publish_sanitized_yakuza_svg(
+                    changed += _publish_sanitized_svg(
                         source, output_root / "yakuzayoshi-v24" / source.name
                     )
     readme = (
