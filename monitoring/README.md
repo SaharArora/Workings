@@ -6,7 +6,7 @@ Orange points are whole-game **THEORY** and blue points are whole-game **EXPLOIT
 
 ## GangsterYoshi Phase B V26
 
-Latest completed game: `2026-08-29T17:21:08.398496+00:00`. Charted V26 games (excluded canaries plus ordinary live volume): bargaining 613, negotiation 542, persuasion 276.
+Latest completed game: `2026-08-29T17:52:48.672557+00:00`. Charted V26 games (excluded canaries plus ordinary live volume): bargaining 635, negotiation 572, persuasion 299.
 
 The configuration-policy charts put games on the x-axis and the registered Appendix A.1 strategic configuration class on the y-axis. Point color shows the exact whole-game arm used. Bargaining and negotiation refill independently instead of waiting for the slower persuasion family.
 
