@@ -247,7 +247,12 @@ def _publish_sanitized_svg(source: Path, destination: Path) -> bool:
     return _write_if_changed(destination, svg)
 
 
-def _readme(gangster: Sequence[Mapping[str, str]], yakuza: Sequence[Mapping[str, str]]) -> str:
+def _readme(
+    gangster: Sequence[Mapping[str, str]],
+    yakuza: Sequence[Mapping[str, str]],
+    *,
+    yakuza_version: str = "v24",
+) -> str:
     g_counts = {family: sum(row["family"] == family for row in gangster) for family in FAMILIES}
     y_counts = {family: sum(row["family"] == family for row in yakuza) for family in FAMILIES}
     g_latest = max((row["completed_at"] for row in gangster), default="not yet available")
@@ -275,7 +280,7 @@ def _readme(gangster: Sequence[Mapping[str, str]], yakuza: Sequence[Mapping[str,
         ]
     lines += [
         "",
-        "## YakuzaYoshi Phase B V24 validation",
+        f"## YakuzaYoshi Phase B {yakuza_version.upper()} validation",
         "",
         f"Latest completed game: `{y_latest}`. Charted games (excluded canaries plus ordinary validation): bargaining {y_counts['bargaining']}, negotiation {y_counts['negotiation']}, persuasion {y_counts['persuasion']}.",
         "",
@@ -285,15 +290,15 @@ def _readme(gangster: Sequence[Mapping[str, str]], yakuza: Sequence[Mapping[str,
     for family in FAMILIES:
         title = family.title()
         lines += [
-            f"- [{title} rating and policy](yakuzayoshi-v24/{family}-rating.svg)",
-            f"- [{title} configuration and policy](yakuzayoshi-v24/{family}-configuration-policy.svg)",
+            f"- [{title} rating and policy](yakuzayoshi-{yakuza_version}/{family}-rating.svg)",
+            f"- [{title} configuration and policy](yakuzayoshi-{yakuza_version}/{family}-configuration-policy.svg)",
         ]
     return "\n".join(lines) + "\n"
 
 
 def _preserve_yakuza_readme(output_root: Path, gangster: Sequence[Mapping[str, str]]) -> str:
     current = output_root / "README.md"
-    marker = "## YakuzaYoshi Phase B V24 validation"
+    marker = "## YakuzaYoshi Phase B "
     if not current.is_file():
         raise RuntimeError("gangster-only publication requires the existing sanitized Yakuza README section")
     previous = current.read_text(encoding="utf-8")
@@ -303,7 +308,13 @@ def _preserve_yakuza_readme(output_root: Path, gangster: Sequence[Mapping[str, s
     return _readme(gangster, []).split(marker, 1)[0] + preserved
 
 
-def publish(gangster_root: Path, yakuza_root: Path | None, output_root: Path) -> int:
+def publish(
+    gangster_root: Path,
+    yakuza_root: Path | None,
+    output_root: Path,
+    *,
+    yakuza_version: str = "v24",
+) -> int:
     gangster = _read_csv(gangster_root / "games.csv")
     yakuza = _read_csv(yakuza_root / "games.csv") if yakuza_root is not None else []
     changed = 0
@@ -322,10 +333,11 @@ def publish(gangster_root: Path, yakuza_root: Path | None, output_root: Path) ->
                 source = yakuza_root / f"{family}-{suffix}"
                 if source.is_file():
                     changed += _publish_sanitized_svg(
-                        source, output_root / "yakuzayoshi-v24" / source.name
+                        source,
+                        output_root / f"yakuzayoshi-{yakuza_version}" / source.name,
                     )
     readme = (
-        _readme(gangster, yakuza)
+        _readme(gangster, yakuza, yakuza_version=yakuza_version)
         if yakuza_root is not None
         else _preserve_yakuza_readme(output_root, gangster)
     )
@@ -339,11 +351,22 @@ def main() -> int:
     parser.add_argument(
         "--yakuza-root",
         type=Path,
-        help="Optional stopped-campaign export; omit to preserve the existing sanitized V24 snapshot.",
+        help="Optional read-only campaign export; omit to preserve the existing sanitized Yakuza snapshot.",
+    )
+    parser.add_argument(
+        "--yakuza-version",
+        choices=("v24", "v25"),
+        default="v24",
+        help="Version label and destination for the optional sanitized Yakuza export.",
     )
     parser.add_argument("--output-root", type=Path, default=Path(__file__).resolve().parent)
     args = parser.parse_args()
-    changed = publish(args.gangster_root, args.yakuza_root, args.output_root)
+    changed = publish(
+        args.gangster_root,
+        args.yakuza_root,
+        args.output_root,
+        yakuza_version=args.yakuza_version,
+    )
     print(f"published_changes={changed}")
     return 0
 

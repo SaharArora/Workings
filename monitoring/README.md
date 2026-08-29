@@ -6,7 +6,7 @@ Orange points are whole-game **THEORY** and blue points are whole-game **EXPLOIT
 
 ## GangsterYoshi Phase B V26
 
-Latest completed game: `2026-08-29T17:52:48.672557+00:00`. Charted V26 games (excluded canaries plus ordinary live volume): bargaining 635, negotiation 572, persuasion 299.
+Latest completed game: `2026-08-29T18:27:07.769672+00:00`. Charted V26 games (excluded canaries plus ordinary live volume): bargaining 681, negotiation 612, persuasion 322.
 
 The configuration-policy charts put games on the x-axis and the registered Appendix A.1 strategic configuration class on the y-axis. Point color shows the exact whole-game arm used. Bargaining and negotiation refill independently instead of waiting for the slower persuasion family.
 
@@ -20,15 +20,15 @@ The configuration-policy charts put games on the x-axis and the registered Appen
 - [Persuasion payoff](gangsteryoshi-v26/persuasion-payoff.svg)
 - [Persuasion configuration and policy](gangsteryoshi-v26/persuasion-configuration-policy.svg)
 
-## YakuzaYoshi Phase B V24 validation
+## YakuzaYoshi Phase B V25 validation
 
-Latest completed game: `2026-08-29T00:32:25.706679+00:00`. Charted games (excluded canaries plus ordinary validation): bargaining 124, negotiation 93, persuasion 66.
+Latest completed game: `2026-08-29T18:26:47.186118+00:00`. Charted games (excluded canaries plus ordinary validation): bargaining 494, negotiation 747, persuasion 487.
 
 The configuration-policy charts put games on the x-axis and the registered Appendix A.1 strategic configuration unit on the y-axis. Point color shows the exact whole-game arm used.
 
-- [Bargaining rating and policy](yakuzayoshi-v24/bargaining-rating.svg)
-- [Bargaining configuration and policy](yakuzayoshi-v24/bargaining-configuration-policy.svg)
-- [Negotiation rating and policy](yakuzayoshi-v24/negotiation-rating.svg)
-- [Negotiation configuration and policy](yakuzayoshi-v24/negotiation-configuration-policy.svg)
-- [Persuasion rating and policy](yakuzayoshi-v24/persuasion-rating.svg)
-- [Persuasion configuration and policy](yakuzayoshi-v24/persuasion-configuration-policy.svg)
+- [Bargaining rating and policy](yakuzayoshi-v25/bargaining-rating.svg)
+- [Bargaining configuration and policy](yakuzayoshi-v25/bargaining-configuration-policy.svg)
+- [Negotiation rating and policy](yakuzayoshi-v25/negotiation-rating.svg)
+- [Negotiation configuration and policy](yakuzayoshi-v25/negotiation-configuration-policy.svg)
+- [Persuasion rating and policy](yakuzayoshi-v25/persuasion-rating.svg)
+- [Persuasion configuration and policy](yakuzayoshi-v25/persuasion-configuration-policy.svg)
