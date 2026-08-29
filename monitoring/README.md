@@ -6,7 +6,7 @@ Orange points are whole-game **THEORY** and blue points are whole-game **EXPLOIT
 
 ## GangsterYoshi Phase B V27
 
-Latest completed game: `2026-08-29T20:22:06.516211+00:00`. Charted V27 ordinary live games: bargaining 40, negotiation 0, persuasion 26.
+Latest completed game: `2026-08-29T20:53:09.964342+00:00`. Charted V27 ordinary live games: bargaining 96, negotiation 0, persuasion 47.
 
 Negotiation is intentionally paused. Bargaining and persuasion refill independently; persuasion uses the frozen observable-role router.
 
