@@ -251,6 +251,7 @@ def _readme(
     gangster: Sequence[Mapping[str, str]],
     yakuza: Sequence[Mapping[str, str]],
     *,
+    gangster_version: str = "v26",
     yakuza_version: str = "v24",
 ) -> str:
     g_counts = {family: sum(row["family"] == family for row in gangster) for family in FAMILIES}
@@ -264,19 +265,23 @@ def _readme(
         "",
         "Orange points are whole-game **THEORY** and blue points are whole-game **EXPLOIT**. Rating and payoff charts have numeric axes; payoff charts mark `0.00` explicitly. Public files are replaced on a 30-minute cadence when their source data changes.",
         "",
-        "## GangsterYoshi Phase B V26",
+        f"## GangsterYoshi Phase B {gangster_version.upper()}",
         "",
-        f"Latest completed game: `{g_latest}`. Charted V26 games (excluded canaries plus ordinary live volume): bargaining {g_counts['bargaining']}, negotiation {g_counts['negotiation']}, persuasion {g_counts['persuasion']}.",
+        f"Latest completed game: `{g_latest}`. Charted {gangster_version.upper()} ordinary live games: bargaining {g_counts['bargaining']}, negotiation {g_counts['negotiation']}, persuasion {g_counts['persuasion']}.",
         "",
-        "The configuration-policy charts put games on the x-axis and the registered Appendix A.1 strategic configuration class on the y-axis. Point color shows the exact whole-game arm used. Bargaining and negotiation refill independently instead of waiting for the slower persuasion family.",
+        (
+            "Negotiation is intentionally paused. Bargaining and persuasion refill independently; persuasion uses the frozen observable-role router."
+            if gangster_version == "v27"
+            else "The configuration-policy charts put games on the x-axis and the registered Appendix A.1 strategic configuration class on the y-axis. Point color shows the exact whole-game arm used. Bargaining and negotiation refill independently instead of waiting for the slower persuasion family."
+        ),
         "",
     ]
     for family in FAMILIES:
         title = family.title()
         lines += [
-            f"- [{title} rating](gangsteryoshi-v26/{family}-rating.svg)",
-            f"- [{title} payoff](gangsteryoshi-v26/{family}-payoff.svg)",
-            f"- [{title} configuration and policy](gangsteryoshi-v26/{family}-configuration-policy.svg)",
+            f"- [{title} rating](gangsteryoshi-{gangster_version}/{family}-rating.svg)",
+            f"- [{title} payoff](gangsteryoshi-{gangster_version}/{family}-payoff.svg)",
+            f"- [{title} configuration and policy](gangsteryoshi-{gangster_version}/{family}-configuration-policy.svg)",
         ]
     lines += [
         "",
@@ -296,7 +301,12 @@ def _readme(
     return "\n".join(lines) + "\n"
 
 
-def _preserve_yakuza_readme(output_root: Path, gangster: Sequence[Mapping[str, str]]) -> str:
+def _preserve_yakuza_readme(
+    output_root: Path,
+    gangster: Sequence[Mapping[str, str]],
+    *,
+    gangster_version: str,
+) -> str:
     current = output_root / "README.md"
     marker = "## YakuzaYoshi Phase B "
     if not current.is_file():
@@ -305,7 +315,10 @@ def _preserve_yakuza_readme(output_root: Path, gangster: Sequence[Mapping[str, s
     if marker not in previous:
         raise RuntimeError("existing sanitized Yakuza README section is missing")
     preserved = marker + previous.split(marker, 1)[1]
-    return _readme(gangster, []).split(marker, 1)[0] + preserved
+    return (
+        _readme(gangster, [], gangster_version=gangster_version).split(marker, 1)[0]
+        + preserved
+    )
 
 
 def publish(
@@ -313,6 +326,7 @@ def publish(
     yakuza_root: Path | None,
     output_root: Path,
     *,
+    gangster_version: str = "v26",
     yakuza_version: str = "v24",
 ) -> int:
     gangster = _read_csv(gangster_root / "games.csv")
@@ -320,13 +334,13 @@ def publish(
     changed = 0
     for family in FAMILIES:
         rows = [row for row in gangster if row["family"] == family]
-        changed += _write_if_changed(output_root / "gangsteryoshi-v26" / f"{family}-rating.svg", _rating_svg(family, rows))
-        changed += _write_if_changed(output_root / "gangsteryoshi-v26" / f"{family}-payoff.svg", _payoff_svg(family, rows))
+        changed += _write_if_changed(output_root / f"gangsteryoshi-{gangster_version}" / f"{family}-rating.svg", _rating_svg(family, rows))
+        changed += _write_if_changed(output_root / f"gangsteryoshi-{gangster_version}" / f"{family}-payoff.svg", _payoff_svg(family, rows))
         configuration = gangster_root / f"{family}-configuration-policy.svg"
         if configuration.is_file():
             changed += _publish_sanitized_svg(
                 configuration,
-                output_root / "gangsteryoshi-v26" / configuration.name,
+                output_root / f"gangsteryoshi-{gangster_version}" / configuration.name,
             )
         if yakuza_root is not None:
             for suffix in ("rating.svg", "configuration-policy.svg"):
@@ -337,9 +351,16 @@ def publish(
                         output_root / f"yakuzayoshi-{yakuza_version}" / source.name,
                     )
     readme = (
-        _readme(gangster, yakuza, yakuza_version=yakuza_version)
+        _readme(
+            gangster,
+            yakuza,
+            gangster_version=gangster_version,
+            yakuza_version=yakuza_version,
+        )
         if yakuza_root is not None
-        else _preserve_yakuza_readme(output_root, gangster)
+        else _preserve_yakuza_readme(
+            output_root, gangster, gangster_version=gangster_version
+        )
     )
     changed += _write_if_changed(output_root / "README.md", readme)
     return changed
@@ -348,6 +369,12 @@ def publish(
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--gangster-root", type=Path, required=True)
+    parser.add_argument(
+        "--gangster-version",
+        choices=("v26", "v27"),
+        default="v26",
+        help="Version label and destination for the sanitized Gangster export.",
+    )
     parser.add_argument(
         "--yakuza-root",
         type=Path,
@@ -365,6 +392,7 @@ def main() -> int:
         args.gangster_root,
         args.yakuza_root,
         args.output_root,
+        gangster_version=args.gangster_version,
         yakuza_version=args.yakuza_version,
     )
     print(f"published_changes={changed}")
