@@ -273,9 +273,13 @@ def _readme(
             "Negotiation is intentionally paused. Bargaining and persuasion refill independently; persuasion uses the frozen observable-role router."
             if gangster_version == "v27"
             else (
-                "Bargaining, negotiation, and persuasion refill independently. Negotiation is a fixed observable-role-routed trial capped at 50 ordinary games; bargaining and persuasion continue after that cap."
-                if gangster_version == "v28"
-                else "The configuration-policy charts put games on the x-axis and the registered Appendix A.1 strategic configuration class on the y-axis. Point color shows the exact whole-game arm used. Bargaining and negotiation refill independently instead of waiting for the slower persuasion family."
+                "Bargaining and persuasion refill independently. Negotiation uses the byte-identical V28 role route under a durable 25+25 positive-rating checkpoint, a 15-point drawdown floor, and a 50-game hard maximum."
+                if gangster_version == "v29"
+                else (
+                    "Bargaining, negotiation, and persuasion refill independently. Negotiation is a fixed observable-role-routed trial capped at 50 ordinary games; bargaining and persuasion continue after that cap."
+                    if gangster_version == "v28"
+                    else "The configuration-policy charts put games on the x-axis and the registered Appendix A.1 strategic configuration class on the y-axis. Point color shows the exact whole-game arm used. Bargaining and negotiation refill independently instead of waiting for the slower persuasion family."
+                )
             )
         ),
         "",
@@ -375,7 +379,7 @@ def main() -> int:
     parser.add_argument("--gangster-root", type=Path, required=True)
     parser.add_argument(
         "--gangster-version",
-        choices=("v26", "v27", "v28"),
+        choices=("v26", "v27", "v28", "v29"),
         default="v26",
         help="Version label and destination for the sanitized Gangster export.",
     )
