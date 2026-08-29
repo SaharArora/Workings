@@ -6,7 +6,7 @@ Orange points are whole-game **THEORY** and blue points are whole-game **EXPLOIT
 
 ## GangsterYoshi Phase A V16
 
-Latest completed game: `2026-08-29T02:42:26.936402+00:00`. Fresh charted games: bargaining 544, negotiation 544, persuasion 543.
+Latest completed game: `2026-08-29T03:09:11.419282+00:00`. Fresh charted games: bargaining 558, negotiation 559, persuasion 559.
 
 - [Bargaining rating](gangsteryoshi-v16/bargaining-rating.svg)
 - [Bargaining payoff](gangsteryoshi-v16/bargaining-payoff.svg)
