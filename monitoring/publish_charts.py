@@ -273,24 +273,28 @@ def _readme(
             "Negotiation is intentionally paused. Bargaining and persuasion refill independently; persuasion uses the frozen observable-role router."
             if gangster_version == "v27"
             else (
-                "All eligible families refill independently. Bargaining stops only below 2,005 and persuasion only below 1,750. Negotiation is capped at 50, stops at or below 1,625, and enters its second tranche only if its 25-game rating is strictly above the V33 baseline."
-                if gangster_version == "v33"
+                "Bargaining and persuasion refill independently and stop only below 2,005 and 1,750, respectively. Negotiation stops at or below 1,625 and is capped at three rated ordinary games, with at most three excluded unrated invalid-move terminals."
+                if gangster_version == "v34"
                 else (
-                    "All eligible families refill independently. Bargaining stops only below 1,970 and persuasion only below 1,760. Negotiation is capped at 50, stops at or below 1,625, and enters its second tranche only if its 25-game rating is strictly above the V32 baseline."
-                    if gangster_version == "v32"
+                    "All eligible families refill independently. Bargaining stops only below 2,005 and persuasion only below 1,750. Negotiation is capped at 50, stops at or below 1,625, and enters its second tranche only if its 25-game rating is strictly above the V33 baseline."
+                    if gangster_version == "v33"
                     else (
-                        "All eligible families refill independently. Bargaining stops only below 1,925 and persuasion only below 1,700. Negotiation is capped at 50, stops at or below 1,625, and enters its second tranche only after a strictly positive 25-game checkpoint."
-                        if gangster_version == "v31"
+                        "All eligible families refill independently. Bargaining stops only below 1,970 and persuasion only below 1,760. Negotiation is capped at 50, stops at or below 1,625, and enters its second tranche only if its 25-game rating is strictly above the V32 baseline."
+                        if gangster_version == "v32"
                         else (
-                            "Negotiation is permanently stopped. Bargaining and persuasion refill independently; bargaining stops only below 1,850 and persuasion stops only below 1,700, while equality remains eligible."
-                            if gangster_version == "v30"
+                            "All eligible families refill independently. Bargaining stops only below 1,925 and persuasion only below 1,700. Negotiation is capped at 50, stops at or below 1,625, and enters its second tranche only after a strictly positive 25-game checkpoint."
+                            if gangster_version == "v31"
                             else (
-                                "Bargaining and persuasion refill independently. Negotiation uses the byte-identical V28 role route under a durable 25+25 positive-rating checkpoint, a 15-point drawdown floor, and a 50-game hard maximum."
-                                if gangster_version == "v29"
+                                "Negotiation is permanently stopped. Bargaining and persuasion refill independently; bargaining stops only below 1,850 and persuasion stops only below 1,700, while equality remains eligible."
+                                if gangster_version == "v30"
                                 else (
-                                    "Bargaining, negotiation, and persuasion refill independently. Negotiation is a fixed observable-role-routed trial capped at 50 ordinary games; bargaining and persuasion continue after that cap."
-                                    if gangster_version == "v28"
-                                    else "The configuration-policy charts put games on the x-axis and the registered Appendix A.1 strategic configuration class on the y-axis. Point color shows the exact whole-game arm used. Bargaining and negotiation refill independently instead of waiting for the slower persuasion family."
+                                    "Bargaining and persuasion refill independently. Negotiation uses the byte-identical V28 role route under a durable 25+25 positive-rating checkpoint, a 15-point drawdown floor, and a 50-game hard maximum."
+                                    if gangster_version == "v29"
+                                    else (
+                                        "Bargaining, negotiation, and persuasion refill independently. Negotiation is a fixed observable-role-routed trial capped at 50 ordinary games; bargaining and persuasion continue after that cap."
+                                        if gangster_version == "v28"
+                                        else "The configuration-policy charts put games on the x-axis and the registered Appendix A.1 strategic configuration class on the y-axis. Point color shows the exact whole-game arm used. Bargaining and negotiation refill independently instead of waiting for the slower persuasion family."
+                                    )
                                 )
                             )
                         )
@@ -395,7 +399,7 @@ def main() -> int:
     parser.add_argument("--gangster-root", type=Path, required=True)
     parser.add_argument(
         "--gangster-version",
-        choices=("v26", "v27", "v28", "v29", "v30", "v31", "v32", "v33"),
+        choices=("v26", "v27", "v28", "v29", "v30", "v31", "v32", "v33", "v34"),
         default="v26",
         help="Version label and destination for the sanitized Gangster export.",
     )

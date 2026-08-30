@@ -4,21 +4,21 @@ Read-only, sanitized chart snapshots. Credentials, assignment secrets, game IDs,
 
 Orange points are whole-game **THEORY** and blue points are whole-game **EXPLOIT**. Rating and payoff charts have numeric axes; payoff charts mark `0.00` explicitly. Public files are replaced on a 30-minute cadence when their source data changes.
 
-## GangsterYoshi Phase B V33
+## GangsterYoshi Phase B V34
 
-Latest completed game: `2026-08-30T06:43:02.034992+00:00`. Charted V33 ordinary live games: bargaining 72, negotiation 44, persuasion 22.
+Latest completed game: `2026-08-30T07:30:47.447986+00:00`. Charted V34 ordinary live games: bargaining 16, negotiation 3, persuasion 3.
 
-All eligible families refill independently. Bargaining stops only below 2,005 and persuasion only below 1,750. Negotiation is capped at 50, stops at or below 1,625, and enters its second tranche only if its 25-game rating is strictly above the V33 baseline.
+Bargaining and persuasion refill independently and stop only below 2,005 and 1,750, respectively. Negotiation stops at or below 1,625 and is capped at three rated ordinary games, with at most three excluded unrated invalid-move terminals.
 
-- [Bargaining rating](gangsteryoshi-v33/bargaining-rating.svg)
-- [Bargaining payoff](gangsteryoshi-v33/bargaining-payoff.svg)
-- [Bargaining configuration and policy](gangsteryoshi-v33/bargaining-configuration-policy.svg)
-- [Negotiation rating](gangsteryoshi-v33/negotiation-rating.svg)
-- [Negotiation payoff](gangsteryoshi-v33/negotiation-payoff.svg)
-- [Negotiation configuration and policy](gangsteryoshi-v33/negotiation-configuration-policy.svg)
-- [Persuasion rating](gangsteryoshi-v33/persuasion-rating.svg)
-- [Persuasion payoff](gangsteryoshi-v33/persuasion-payoff.svg)
-- [Persuasion configuration and policy](gangsteryoshi-v33/persuasion-configuration-policy.svg)
+- [Bargaining rating](gangsteryoshi-v34/bargaining-rating.svg)
+- [Bargaining payoff](gangsteryoshi-v34/bargaining-payoff.svg)
+- [Bargaining configuration and policy](gangsteryoshi-v34/bargaining-configuration-policy.svg)
+- [Negotiation rating](gangsteryoshi-v34/negotiation-rating.svg)
+- [Negotiation payoff](gangsteryoshi-v34/negotiation-payoff.svg)
+- [Negotiation configuration and policy](gangsteryoshi-v34/negotiation-configuration-policy.svg)
+- [Persuasion rating](gangsteryoshi-v34/persuasion-rating.svg)
+- [Persuasion payoff](gangsteryoshi-v34/persuasion-payoff.svg)
+- [Persuasion configuration and policy](gangsteryoshi-v34/persuasion-configuration-policy.svg)
 
 ## YakuzaYoshi Phase B V25 validation
 
