@@ -6,7 +6,7 @@ Orange points are whole-game **THEORY** and blue points are whole-game **EXPLOIT
 
 ## GangsterYoshi Phase B V34
 
-Latest completed game: `2026-08-30T07:30:47.447986+00:00`. Charted V34 ordinary live games: bargaining 16, negotiation 3, persuasion 3.
+Latest completed game: `2026-08-30T08:02:39.083686+00:00`. Charted V34 ordinary live games: bargaining 47, negotiation 3, persuasion 16.
 
 Bargaining and persuasion refill independently and stop only below 2,005 and 1,750, respectively. Negotiation stops at or below 1,625 and is capped at three rated ordinary games, with at most three excluded unrated invalid-move terminals.
 
