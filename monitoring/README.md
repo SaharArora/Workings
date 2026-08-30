@@ -6,7 +6,7 @@ Orange points are whole-game **THEORY** and blue points are whole-game **EXPLOIT
 
 ## GangsterYoshi Phase B V30
 
-Latest completed game: `2026-08-30T01:15:35.098831+00:00`. Charted V30 ordinary live games: bargaining 75, negotiation 0, persuasion 26.
+Latest completed game: `2026-08-30T01:46:29.010726+00:00`. Charted V30 ordinary live games: bargaining 107, negotiation 0, persuasion 47.
 
 Negotiation is permanently stopped. Bargaining and persuasion refill independently; bargaining stops only below 1,850 and persuasion stops only below 1,700, while equality remains eligible.
 
